@@ -1,6 +1,6 @@
 // server.js — Deadline Defenders (Cloud & Production Ready Server)
 // Features: Auth, Push Notifications, Auto-Refresh Reminders, Dynamic DB SSL,
-//           Key Rotation, Forgot Password, Zero-Cost Cloud Deployment Ready
+//           Auto Database Table Initialization, Key Rotation, Zero-Cost Cloud Ready
 
 require('dotenv').config();
 
@@ -39,7 +39,7 @@ if (EMAIL_USER && EMAIL_PASS) {
 
 async function sendResetEmail(toEmail, username, resetLink) {
   if (!mailer) {
-    console.warn('⚠️  Email service not configured (EMAIL_USER/EMAIL_PASS missing). Reset link:', resetLink);
+    console.warn('⚠️  Email service not configured. Reset link:', resetLink);
     return;
   }
 
@@ -103,7 +103,6 @@ function buildDbConfig() {
     keepAliveInitialDelay: 0
   };
 
-  // Enable SSL if specified in ENV or when host is not localhost
   const useSsl = process.env.DB_SSL === 'true' ||
                  (process.env.DB_HOST && !['localhost', '127.0.0.1'].includes(process.env.DB_HOST));
 
@@ -117,22 +116,139 @@ function buildDbConfig() {
 const dbConfig = buildDbConfig();
 const pool = mysql.createPool(dbConfig);
 
+// ── AUTO INITIALIZE ALL DATABASE TABLES ───────────────────────
+async function autoInitDatabaseTables() {
+  const queries = [
+    `CREATE TABLE IF NOT EXISTS users (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      username VARCHAR(50) NOT NULL,
+      email VARCHAR(100) NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      reset_token VARCHAR(255) DEFAULT NULL,
+      reset_token_expires DATETIME DEFAULT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_users_username (username),
+      UNIQUE KEY idx_users_email (email)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS sessions (
+      session_id VARCHAR(128) NOT NULL,
+      expires INT(11) UNSIGNED NOT NULL,
+      data MEDIUMTEXT DEFAULT NULL,
+      PRIMARY KEY (session_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS user_interests (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      user_id INT(11) NOT NULL,
+      interest VARCHAR(100) NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_user_interest_unique (user_id, interest),
+      KEY idx_user_interests_user (user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS interests_reminders (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      interest VARCHAR(100) NOT NULL,
+      type VARCHAR(50) NOT NULL DEFAULT 'Exam',
+      application_start DATE DEFAULT NULL,
+      application_end DATE DEFAULT NULL,
+      event_date DATE DEFAULT NULL,
+      location VARCHAR(255) DEFAULT 'India',
+      short_note VARCHAR(255) NOT NULL,
+      source VARCHAR(500) DEFAULT NULL,
+      confidence ENUM('high','medium','low') DEFAULT 'medium',
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_unique_cache_reminder (interest, type, short_note),
+      KEY idx_cache_interest (interest),
+      KEY idx_cache_event_date (event_date),
+      KEY idx_cache_app_end (application_end)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS interests_cache_meta (
+      interest VARCHAR(100) NOT NULL,
+      last_fetched TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      reminder_count INT(11) DEFAULT 0,
+      fetch_status ENUM('success','failed','pending') DEFAULT 'pending',
+      error_message TEXT DEFAULT NULL,
+      PRIMARY KEY (interest)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS user_reminders (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      user_id INT(11) NOT NULL,
+      interest VARCHAR(100) NOT NULL,
+      type VARCHAR(50) NOT NULL DEFAULT 'Exam',
+      application_start DATE DEFAULT NULL,
+      application_end DATE DEFAULT NULL,
+      event_date DATE DEFAULT NULL,
+      location VARCHAR(255) DEFAULT 'India',
+      short_note VARCHAR(255) NOT NULL,
+      source VARCHAR(500) DEFAULT NULL,
+      confidence ENUM('high','medium','low') DEFAULT 'medium',
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_unique_user_reminder (user_id, interest, type, short_note),
+      KEY idx_ur_user_dates (user_id, application_end, event_date)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS push_subscriptions (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      user_id INT(11) NOT NULL,
+      endpoint TEXT NOT NULL,
+      p256dh VARCHAR(255) NOT NULL,
+      auth VARCHAR(255) NOT NULL,
+      subscription_json TEXT NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_unique_user_push (user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS notification_logs (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      user_id INT(11) NOT NULL,
+      title VARCHAR(255) NOT NULL,
+      body TEXT NOT NULL,
+      sent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      KEY idx_nl_user_sent (user_id, sent_at),
+      KEY idx_nl_sent_at (sent_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
+  ];
+
+  try {
+    for (const q of queries) {
+      await pool.query(q);
+    }
+    console.log('✅ All 8 database tables verified and auto-created successfully!');
+  } catch (err) {
+    console.error('⚠️  Auto table creation notice:', err.message);
+  }
+}
+
 pool.getConnection()
-  .then(c => {
+  .then(async c => {
     console.log(`✅ Database connected successfully (${dbConfig.host}:${dbConfig.port}/${dbConfig.database})`);
     c.release();
+    // Auto-create all tables on startup
+    await autoInitDatabaseTables();
   })
   .catch(err => {
     console.error('❌ Database connection failed:', err.message);
-    console.warn('👉 Make sure MySQL is running and schema.sql has been imported.');
   });
 
 // ── SESSION STORE ────────────────────────────────────────────
 const sessionStore = new MySQLStore({
   ...dbConfig,
   clearExpired: true,
-  checkExpirationInterval: 900000, // 15 min
-  expiration: 7 * 24 * 60 * 60 * 1000, // 7 days
+  checkExpirationInterval: 900000,
+  expiration: 7 * 24 * 60 * 60 * 1000,
   createDatabaseTable: true,
   schema: {
     tableName: 'sessions',
@@ -142,10 +258,7 @@ const sessionStore = new MySQLStore({
 
 // ── MIDDLEWARE ───────────────────────────────────────────────
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, postman) or any origin in dev
-    callback(null, true);
-  },
+  origin: (origin, callback) => callback(null, true),
   credentials: true
 }));
 
@@ -218,7 +331,6 @@ async function autoRefreshAllUsersReminders() {
 
           for (const interest of interests) {
             try {
-              // Check global cache (within last 6 hours)
               const [cached] = await pool.query(
                 `SELECT ir.*
                  FROM interests_reminders ir
@@ -368,7 +480,6 @@ async function checkAndSendNotifications() {
         const notifyThresholds = [30, 14, 7, 3, 1, 0];
         if (!notifyThresholds.includes(daysUntil)) continue;
 
-        // Dedup: skip if already notified in last 12h
         const [exists] = await pool.query(
           `SELECT id FROM notification_logs
            WHERE user_id = ? AND title LIKE ? AND sent_at > DATE_SUB(NOW(), INTERVAL 12 HOUR)`,
@@ -397,17 +508,13 @@ async function checkAndSendNotifications() {
       }
     }
 
-    // Clean old logs (older than 30 days)
     await pool.query('DELETE FROM notification_logs WHERE sent_at < DATE_SUB(NOW(), INTERVAL 30 DAY)');
   } catch (err) {
     console.error('Notification checker error:', err.message);
   }
 }
 
-// Notification cron: check every hour
 cron.schedule('0 * * * *', checkAndSendNotifications);
-
-// Initial checks after server start
 setTimeout(() => { checkAndSendNotifications(); }, 30000);
 
 // ── PUSH ROUTES ──────────────────────────────────────────────
