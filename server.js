@@ -25,51 +25,63 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 app.set('trust proxy', 1);
 
 // ── EMAIL CONFIGURATION ──────────────────────────────────────
-const EMAIL_USER = process.env.EMAIL_USER || '';
-const EMAIL_PASS = process.env.EMAIL_PASS || '';
-const APP_URL    = process.env.APP_URL    || '';
+const EMAIL_USER = (process.env.EMAIL_USER || '').trim();
+const EMAIL_PASS = (process.env.EMAIL_PASS || '').replace(/\s+/g, '');
+const APP_URL    = (process.env.APP_URL || '').trim();
 
 let mailer = null;
 if (EMAIL_USER && EMAIL_PASS) {
   mailer = nodemailer.createTransport({
     service: 'gmail',
-    auth: { user: EMAIL_USER, pass: EMAIL_PASS }
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user: EMAIL_USER,
+      pass: EMAIL_PASS
+    }
   });
 }
 
 async function sendResetEmail(toEmail, username, resetLink) {
   if (!mailer) {
-    console.warn('⚠️  Email service not configured. Reset link:', resetLink);
+    console.warn(`⚠️  Email service not configured (EMAIL_USER / EMAIL_PASS missing on Render).`);
+    console.log(`🔗 Password Reset Link for ${username} (${toEmail}):\n👉 ${resetLink}`);
     return;
   }
 
-  await mailer.sendMail({
-    from: `"Deadline Defender" <${EMAIL_USER}>`,
-    to: toEmail,
-    subject: '⚡ Reset Your Deadline Defender Password',
-    html: `
-      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;background:#0b0c10;color:#e8eaf2;border-radius:16px;overflow:hidden">
-        <div style="background:linear-gradient(135deg,#f5a623,#e8601c);padding:32px">
-          <div style="font-size:26px;font-weight:800;color:#fff">⚡ Deadline Defender</div>
-        </div>
-        <div style="padding:32px">
-          <h2 style="font-size:20px;font-weight:700;margin:0 0 10px;color:#fff">Hi ${username},</h2>
-          <p style="color:#8a8fa8;line-height:1.6;margin:0 0 28px">
-            We received a request to reset your password.
-            This link expires in <strong style="color:#f5a623">1 hour</strong>.
-          </p>
-          <a href="${resetLink}"
-             style="display:inline-block;padding:16px 32px;background:#f5a623;color:#0b0c10;font-weight:700;font-size:14px;text-decoration:none;border-radius:12px;text-transform:uppercase;letter-spacing:0.06em">
-            Reset My Password →
-          </a>
-          <p style="margin:28px 0 0;font-size:12px;color:#5a5f73;line-height:1.6">
-            If you did not request this, ignore this email.<br>
-            Link: <a href="${resetLink}" style="color:#f5a623">${resetLink}</a>
-          </p>
-        </div>
-      </div>`
-  });
-  console.log(`✉️  Reset email sent to ${toEmail}`);
+  try {
+    await mailer.sendMail({
+      from: `"Deadline Defender" <${EMAIL_USER}>`,
+      to: toEmail,
+      subject: '⚡ Reset Your Deadline Defender Password',
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;background:#0b0c10;color:#e8eaf2;border-radius:16px;overflow:hidden">
+          <div style="background:linear-gradient(135deg,#f5a623,#e8601c);padding:32px">
+            <div style="font-size:26px;font-weight:800;color:#fff">⚡ Deadline Defender</div>
+          </div>
+          <div style="padding:32px">
+            <h2 style="font-size:20px;font-weight:700;margin:0 0 10px;color:#fff">Hi ${username},</h2>
+            <p style="color:#8a8fa8;line-height:1.6;margin:0 0 28px">
+              We received a request to reset your password.
+              This link expires in <strong style="color:#f5a623">1 hour</strong>.
+            </p>
+            <a href="${resetLink}"
+               style="display:inline-block;padding:16px 32px;background:#f5a623;color:#0b0c10;font-weight:700;font-size:14px;text-decoration:none;border-radius:12px;text-transform:uppercase;letter-spacing:0.06em">
+              Reset My Password →
+            </a>
+            <p style="margin:28px 0 0;font-size:12px;color:#5a5f73;line-height:1.6">
+              If you did not request this, ignore this email.<br>
+              Link: <a href="${resetLink}" style="color:#f5a623">${resetLink}</a>
+            </p>
+          </div>
+        </div>`
+    });
+    console.log(`✉️  Reset email sent successfully to ${toEmail}`);
+  } catch (err) {
+    console.error('❌ Failed to send email via SMTP:', err.message);
+    console.log(`🔗 Fallback Reset Link for ${username} (${toEmail}):\n👉 ${resetLink}`);
+  }
 }
 
 // ── VAPID WEB PUSH CONFIGURATION ─────────────────────────────
@@ -236,7 +248,6 @@ pool.getConnection()
   .then(async c => {
     console.log(`✅ Database connected successfully (${dbConfig.host}:${dbConfig.port}/${dbConfig.database})`);
     c.release();
-    // Auto-create all tables on startup
     await autoInitDatabaseTables();
   })
   .catch(err => {
@@ -681,11 +692,7 @@ app.post('/auth/forgot-password', async (req, res) => {
     const baseUrl = APP_URL || `${proto}://${host}`;
     const resetLink = `${baseUrl}/mobile.html?token=${token}`;
 
-    try {
-      await sendResetEmail(email.trim().toLowerCase(), user.username, resetLink);
-    } catch (mailErr) {
-      console.error('Email send failed:', mailErr.message);
-    }
+    await sendResetEmail(email.trim().toLowerCase(), user.username, resetLink);
 
     res.json({ success: true, message: 'If that email exists, a reset link has been sent.' });
   } catch (err) {
