@@ -1332,11 +1332,27 @@ document.getElementById('iInp').addEventListener('keydown',e=>{
 });
 function rmInt(i){ints.splice(i,1);renderIntList();}
 async function saveInts(){
+  const btn=document.querySelector('#intPage .abtn-amber');
+  const origText=btn?btn.innerHTML:'Save Changes →';
+  if(btn){btn.disabled=true;btn.innerHTML='⚡ &nbsp;Saving & Searching Deadlines…';}
   try{
-    await fetch('/user/interests',{method:'POST',credentials:'include',
-      headers:{'Content-Type':'application/json'},body:JSON.stringify({interests:ints})});
-    showPage('dashPage');await loadData();
-  }catch(_){alert('Failed to save interests');}
+    const res=await fetch('/user/interests',{
+      method:'POST',
+      credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({interests:ints})
+    });
+    if(res.ok){
+      showPage('dashPage');
+      await loadData();
+    } else {
+      alert('Failed to save interests');
+    }
+  }catch(_){
+    alert('Failed to save interests');
+  } finally {
+    if(btn){btn.disabled=false;btn.innerHTML=origText;}
+  }
 }
 
 /* PROFILE */

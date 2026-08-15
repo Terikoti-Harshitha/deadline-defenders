@@ -1,6 +1,6 @@
 // server.js — Deadline Defenders (Cloud & Production Ready Server)
 // Features: Auth, Push Notifications, Auto-Refresh Reminders, Dynamic DB SSL,
-//           Auto Database Table Initialization, Key Rotation, IPv4 SMTP, Zero-Cost Cloud Ready
+//           Auto Database Table Initialization, Auto-Sync on Interest Add, Key Rotation, IPv4 SMTP
 
 require('dotenv').config();
 
@@ -31,12 +31,11 @@ const APP_URL    = (process.env.APP_URL || '').trim().replace(/\/+$/, '');
 
 let mailer = null;
 if (EMAIL_USER && EMAIL_PASS) {
-  // Use port 587 + IPv4 (family: 4) to prevent ENETUNREACH IPv6 timeout errors on Render
   mailer = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
-    secure: false, // true for 465, false for 587
-    family: 4,     // Force IPv4
+    secure: false,
+    family: 4,
     auth: {
       user: EMAIL_USER,
       pass: EMAIL_PASS
@@ -320,112 +319,129 @@ function getClosestDate(reminder) {
   return candidates[0];
 }
 
-// ── AUTO REMINDER REFRESH (3x / day) ─────────────────────────
+// ── CORE REMINDER SYNC FUNCTION (Shared across auto-refresh, manual refresh & interest add) ──
+async function syncRemindersForUser(userId, customInterests = null) {
+  let interests = customInterests;
+  if (!interests) {
+    const [interestRows] = await pool.query(
+      'SELECT interest FROM user_interests WHERE user_id = ?', [userId]
+    );
+    interests = interestRows.map(r => r.interest);
+  }
+
+  if (!interests || interests.length === 0) {
+    await pool.query('DELETE FROM user_reminders WHERE user_id = ?', [userId]);
+    return { count: 0, reminders: [] };
+  }
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    await connection.query('DELETE FROM user_reminders WHERE user_id = ?', [userId]);
+
+    let totalInserted = 0;
+    const newReminders = [];
+
+    for (const interest of interests) {
+      try {
+        // Check global cache first (valid for 6 hours)
+        const [cached] = await connection.query(
+          `SELECT ir.*
+           FROM interests_reminders ir
+           JOIN interests_cache_meta icm ON icm.interest = ir.interest
+           WHERE ir.interest = ?
+             AND icm.fetch_status = 'success'
+             AND icm.last_fetched > DATE_SUB(NOW(), INTERVAL 6 HOUR)`,
+          [interest]
+        );
+
+        let reminders = [];
+
+        if (cached.length > 0) {
+          reminders = cached;
+        } else {
+          const raw = await fetchRemindersForInterest(interest);
+          reminders = raw.filter(isFutureReminder);
+
+          if (reminders.length > 0) {
+            await connection.query('DELETE FROM interests_reminders WHERE interest = ?', [interest]);
+            const vals = reminders.map(r => [
+              interest,
+              r.type || 'Exam',
+              r.application_start || null,
+              r.application_end || null,
+              r.event_date || null,
+              r.location || 'India',
+              (r.short_note || '').substring(0, 255),
+              r.source || '',
+              r.confidence || 'medium'
+            ]);
+            await connection.query(
+              `INSERT IGNORE INTO interests_reminders
+               (interest, type, application_start, application_end, event_date, location, short_note, source, confidence)
+               VALUES ?`, [vals]
+            );
+            await connection.query(
+              `INSERT INTO interests_cache_meta (interest, last_fetched, reminder_count, fetch_status)
+               VALUES (?, NOW(), ?, 'success')
+               ON DUPLICATE KEY UPDATE last_fetched=NOW(), reminder_count=?, fetch_status='success', error_message=NULL`,
+              [interest, reminders.length, reminders.length]
+            );
+          }
+        }
+
+        for (const r of reminders) {
+          try {
+            const [ins] = await connection.query(
+              `INSERT IGNORE INTO user_reminders
+               (user_id, interest, type, application_start, application_end, event_date, location, short_note, source, confidence)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                userId, interest,
+                r.type || 'Exam',
+                r.application_start || null,
+                r.application_end   || null,
+                r.event_date        || null,
+                r.location          || 'India',
+                (r.short_note || '').substring(0, 255),
+                r.source            || '',
+                r.confidence        || 'medium'
+              ]
+            );
+            if (ins.insertId) {
+              totalInserted++;
+              newReminders.push({ id: ins.insertId, ...r, interest });
+            }
+          } catch (_) {}
+        }
+      } catch (err) {
+        console.error(`Failed to fetch for "${interest}":`, err.message);
+      }
+    }
+
+    await connection.commit();
+    return { count: totalInserted, reminders: newReminders };
+  } catch (err) {
+    await connection.rollback();
+    throw err;
+  } finally {
+    connection.release();
+  }
+}
+
+// ── AUTO REMINDER REFRESH (3x / day: 6 AM, 2 PM, 10 PM) ──────
 async function autoRefreshAllUsersReminders() {
-  console.log('\n🔄 [AUTO-REFRESH] Starting reminder refresh...');
+  console.log('\n🔄 [AUTO-REFRESH] Starting automatic reminder refresh for all users...');
   try {
     const [users] = await pool.query('SELECT id, username FROM users');
     console.log(`   Found ${users.length} users`);
 
     for (const user of users) {
       try {
-        const [interestRows] = await pool.query(
-          'SELECT interest FROM user_interests WHERE user_id = ?', [user.id]
-        );
-        const interests = interestRows.map(r => r.interest);
-
-        if (interests.length === 0) continue;
-
-        const connection = await pool.getConnection();
-        try {
-          await connection.beginTransaction();
-          await connection.query('DELETE FROM user_reminders WHERE user_id = ?', [user.id]);
-
-          let totalInserted = 0;
-
-          for (const interest of interests) {
-            try {
-              const [cached] = await pool.query(
-                `SELECT ir.*
-                 FROM interests_reminders ir
-                 JOIN interests_cache_meta icm ON icm.interest = ir.interest
-                 WHERE ir.interest = ?
-                   AND icm.fetch_status = 'success'
-                   AND icm.last_fetched > DATE_SUB(NOW(), INTERVAL 6 HOUR)`,
-                [interest]
-              );
-
-              let reminders = [];
-
-              if (cached.length > 0) {
-                reminders = cached;
-              } else {
-                const raw = await fetchRemindersForInterest(interest);
-                reminders = raw.filter(isFutureReminder);
-
-                if (reminders.length > 0) {
-                  await connection.query('DELETE FROM interests_reminders WHERE interest = ?', [interest]);
-                  const vals = reminders.map(r => [
-                    interest,
-                    r.type || 'Exam',
-                    r.application_start || null,
-                    r.application_end || null,
-                    r.event_date || null,
-                    r.location || 'India',
-                    (r.short_note || '').substring(0, 255),
-                    r.source || '',
-                    r.confidence || 'medium'
-                  ]);
-                  await connection.query(
-                    `INSERT IGNORE INTO interests_reminders
-                     (interest, type, application_start, application_end, event_date, location, short_note, source, confidence)
-                     VALUES ?`, [vals]
-                  );
-                  await connection.query(
-                    `INSERT INTO interests_cache_meta (interest, last_fetched, reminder_count, fetch_status)
-                     VALUES (?, NOW(), ?, 'success')
-                     ON DUPLICATE KEY UPDATE last_fetched=NOW(), reminder_count=?, fetch_status='success', error_message=NULL`,
-                    [interest, reminders.length, reminders.length]
-                  );
-                }
-              }
-
-              for (const r of reminders) {
-                try {
-                  await connection.query(
-                    `INSERT IGNORE INTO user_reminders
-                     (user_id, interest, type, application_start, application_end, event_date, location, short_note, source, confidence)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                      user.id, interest,
-                      r.type || 'Exam',
-                      r.application_start || null,
-                      r.application_end || null,
-                      r.event_date || null,
-                      r.location || 'India',
-                      (r.short_note || '').substring(0, 255),
-                      r.source || '',
-                      r.confidence || 'medium'
-                    ]
-                  );
-                  totalInserted++;
-                } catch (_) {}
-              }
-            } catch (err) {
-              console.error(`   ❌ Failed for interest "${interest}":`, err.message);
-            }
-          }
-
-          await connection.commit();
-          console.log(`   ✅ Synced ${totalInserted} reminders for ${user.username}`);
-        } catch (err) {
-          await connection.rollback();
-          console.error(`   ❌ Transaction failed for ${user.username}:`, err.message);
-        } finally {
-          connection.release();
-        }
+        const result = await syncRemindersForUser(user.id);
+        console.log(`   ✅ Synced ${result.count} reminders for ${user.username}`);
       } catch (err) {
-        console.error(`   ❌ Failed user ${user.username}:`, err.message);
+        console.error(`   ❌ Failed to sync user ${user.username}:`, err.message);
       }
     }
     console.log('✅ [AUTO-REFRESH] Finished successfully\n');
@@ -780,7 +796,7 @@ app.post('/user/update-profile', requireLogin, async (req, res) => {
   }
 });
 
-// ── INTERESTS ROUTES ─────────────────────────────────────────
+// ── INTERESTS ROUTES (Automatically fetches & updates reminders!) ──
 app.get('/user/interests', requireLogin, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -805,13 +821,26 @@ app.post('/user/interests', requireLogin, async (req, res) => {
       await conn.query('INSERT IGNORE INTO user_interests (user_id, interest) VALUES ?', [vals]);
     }
     await conn.commit();
-    res.json({ success: true });
   } catch (err) {
     await conn.rollback();
     console.error('Save interests error:', err);
-    res.status(500).json({ error: 'Server error' });
+    return res.status(500).json({ error: 'Server error while saving interests' });
   } finally {
     conn.release();
+  }
+
+  // Automatically fetch & update deadlines for the user immediately!
+  try {
+    const syncResult = await syncRemindersForUser(req.session.userId, interests);
+    res.json({
+      success: true,
+      message: `Interests saved and ${syncResult.count} deadlines synced automatically!`,
+      count: syncResult.count,
+      reminders: syncResult.reminders
+    });
+  } catch (syncErr) {
+    console.error('Auto sync after save error:', syncErr.message);
+    res.json({ success: true, message: 'Interests saved.', count: 0, reminders: [] });
   }
 });
 
@@ -831,68 +860,19 @@ app.get('/user/reminders', requireLogin, async (req, res) => {
   }
 });
 
+// Manual refresh (when user clicks "Refresh Deadlines" button)
 app.post('/user/update-reminders', requireLogin, async (req, res) => {
-  const conn = await pool.getConnection();
   try {
-    await conn.beginTransaction();
-
-    const [interestRows] = await conn.query(
-      'SELECT interest FROM user_interests WHERE user_id = ?', [req.session.userId]
-    );
-    const interests = interestRows.map(r => r.interest);
-
-    if (!interests.length) {
-      await conn.commit();
-      return res.json({ success: true, message: 'No interests found. Add interests first.', reminders: [] });
-    }
-
-    await conn.query('DELETE FROM user_reminders WHERE user_id = ?', [req.session.userId]);
-
-    let totalInserted = 0;
-    const newReminders = [];
-
-    for (const interest of interests) {
-      try {
-        const raw = await fetchRemindersForInterest(interest);
-        const valid = raw.filter(isFutureReminder);
-
-        for (const r of valid) {
-          try {
-            const [ins] = await conn.query(
-              `INSERT IGNORE INTO user_reminders
-               (user_id, interest, type, application_start, application_end, event_date, location, short_note, source, confidence)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-              [
-                req.session.userId, interest,
-                r.type || 'Exam',
-                r.application_start || null,
-                r.application_end   || null,
-                r.event_date        || null,
-                r.location          || 'India',
-                (r.short_note || '').substring(0, 255),
-                r.source            || '',
-                r.confidence        || 'medium'
-              ]
-            );
-            if (ins.insertId) {
-              totalInserted++;
-              newReminders.push({ id: ins.insertId, ...r, interest });
-            }
-          } catch (_) {}
-        }
-      } catch (err) {
-        console.error(`Failed to fetch for ${interest}:`, err.message);
-      }
-    }
-
-    await conn.commit();
-    res.json({ success: true, message: `Fetched ${totalInserted} reminders.`, count: totalInserted, reminders: newReminders });
+    const syncResult = await syncRemindersForUser(req.session.userId);
+    res.json({
+      success: true,
+      message: `Refreshed ${syncResult.count} deadlines.`,
+      count: syncResult.count,
+      reminders: syncResult.reminders
+    });
   } catch (err) {
-    await conn.rollback();
     console.error('Update reminders error:', err);
     res.status(500).json({ error: 'Failed to update reminders' });
-  } finally {
-    conn.release();
   }
 });
 
