@@ -1,6 +1,6 @@
 // server.js — Deadline Defenders (Cloud & Production Ready Server)
 // Features: Auth, Push Notifications, Auto-Refresh Reminders, Dynamic DB SSL,
-//           Auto Database Table Initialization, Key Rotation, Zero-Cost Cloud Ready
+//           Auto Database Table Initialization, Key Rotation, IPv4 SMTP, Zero-Cost Cloud Ready
 
 require('dotenv').config();
 
@@ -27,18 +27,22 @@ app.set('trust proxy', 1);
 // ── EMAIL CONFIGURATION ──────────────────────────────────────
 const EMAIL_USER = (process.env.EMAIL_USER || '').trim();
 const EMAIL_PASS = (process.env.EMAIL_PASS || '').replace(/\s+/g, '');
-const APP_URL    = (process.env.APP_URL || '').trim();
+const APP_URL    = (process.env.APP_URL || '').trim().replace(/\/+$/, '');
 
 let mailer = null;
 if (EMAIL_USER && EMAIL_PASS) {
+  // Use port 587 + IPv4 (family: 4) to prevent ENETUNREACH IPv6 timeout errors on Render
   mailer = nodemailer.createTransport({
-    service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false, // true for 465, false for 587
+    family: 4,     // Force IPv4
     auth: {
       user: EMAIL_USER,
       pass: EMAIL_PASS
+    },
+    tls: {
+      rejectUnauthorized: false
     }
   });
 }
@@ -690,7 +694,8 @@ app.post('/auth/forgot-password', async (req, res) => {
     const proto = req.headers['x-forwarded-proto'] || req.protocol;
     const host  = req.headers['x-forwarded-host']  || req.headers['host'];
     const baseUrl = APP_URL || `${proto}://${host}`;
-    const resetLink = `${baseUrl}/mobile.html?token=${token}`;
+    const cleanBaseUrl = baseUrl.replace(/\/+$/, '');
+    const resetLink = `${cleanBaseUrl}/mobile.html?token=${token}`;
 
     await sendResetEmail(email.trim().toLowerCase(), user.username, resetLink);
 
