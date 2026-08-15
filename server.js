@@ -107,7 +107,7 @@ function buildDbConfig() {
                  (process.env.DB_HOST && !['localhost', '127.0.0.1'].includes(process.env.DB_HOST));
 
   if (useSsl) {
-    config.ssl = { rejectUnauthorized: false };
+    config.ssl = { minVersion: 'TLSv1.2', rejectUnauthorized: false };
   }
 
   return config;
@@ -243,18 +243,17 @@ pool.getConnection()
     console.error('❌ Database connection failed:', err.message);
   });
 
-// ── SESSION STORE ────────────────────────────────────────────
+// ── SESSION STORE (Reuses SSL Pool to prevent insecure transport error) ────
 const sessionStore = new MySQLStore({
-  ...dbConfig,
   clearExpired: true,
   checkExpirationInterval: 900000,
   expiration: 7 * 24 * 60 * 60 * 1000,
-  createDatabaseTable: true,
+  createDatabaseTable: false,
   schema: {
     tableName: 'sessions',
     columnNames: { session_id: 'session_id', expires: 'expires', data: 'data' }
   }
-});
+}, pool);
 
 // ── MIDDLEWARE ───────────────────────────────────────────────
 app.use(cors({
@@ -909,7 +908,9 @@ app.get('/', (req, res) => {
 // ── ERROR HANDLING ───────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error' });
+  if (!res.headersSent) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 app.use((req, res) => {
