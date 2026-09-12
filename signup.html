@@ -250,9 +250,22 @@
     <div class="divider">OR</div>
 
     <p class="footer-text">Already have an account? <a href="login.html">Sign in here</a></p>
+    <p style="margin-top: 1rem; text-align: center;"><a href="#" onclick="promptResetAllUsers();return false" style="font-size: 0.8rem; color: #8a99b5; text-decoration: underline;">🧹 Reset Test Users &amp; Start Fresh</a></p>
   </div>
 
   <script>
+    async function promptResetAllUsers(){
+      if(!confirm('⚠️ Are you sure you want to delete ALL existing users, profiles, and reminders to start 100% fresh?')) return;
+      try {
+        const res = await fetch('/api/dev/reset-all-users', { method: 'POST' });
+        const d = await res.json();
+        alert(d.message || 'Database reset successfully!');
+        window.location.reload();
+      } catch(err) {
+        alert('Reset failed: ' + err.message);
+      }
+    }
+
     const form = document.getElementById('signupForm');
     const errorDiv = document.getElementById('error');
     const signupBtn = document.getElementById('signupBtn');

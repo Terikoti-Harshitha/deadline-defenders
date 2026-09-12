@@ -423,6 +423,7 @@ nav#nav.on{display:flex}
       <button type="submit" id="lBtn" class="abtn abtn-amber">Sign In →</button>
     </form>
     <div class="afoot">New to Deadline Defender? <a href="#" onclick="showPage('signupPage');return false">Create an account</a></div>
+    <div style="text-align:center;margin-top:18px"><a href="#" onclick="promptResetAllUsers();return false" style="font-size:11px;color:var(--ash);text-decoration:underline">🧹 Reset Test Users &amp; Start Fresh</a></div>
   </div>
 </div>
 
@@ -829,6 +830,7 @@ nav#nav.on{display:flex}
 
     <button class="abtn abtn-ghost" style="margin-top:10px" onclick="openProfileEdit()">Edit Profile Criteria &amp; Interests →</button>
     <button class="abtn abtn-ghost" style="margin-top:10px;color:var(--coral)" onclick="logout()">Sign Out</button>
+    <button class="abtn abtn-ghost" style="margin-top:10px;color:var(--crimson);border-color:rgba(255,71,87,0.3)" onclick="promptResetAllUsers()">🧹 Delete All Test Users &amp; Start Fresh</button>
   </div>
 </div>
 
@@ -1744,6 +1746,19 @@ async function logout(){
   await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
   uData = null;
   showPage('loginPage');
+}
+
+async function promptResetAllUsers(){
+  if(!confirm('⚠️ Are you sure you want to delete ALL existing users, profiles, and reminders to start 100% freshly?')) return;
+  try {
+    const res = await fetch('/api/dev/reset-all-users', { method: 'POST' });
+    const d = await res.json();
+    alert(d.message || 'Database reset successfully!');
+    uData = null;
+    showPage('signupPage');
+  } catch(err) {
+    alert('Reset failed: ' + err.message);
+  }
 }
 
 /* ════ INITIALIZATION ON LOAD ════ */

@@ -682,21 +682,30 @@ app.post('/api/user/onboarding', requireLogin, async (req, res) => {
     conn.release();
   }
 
-  // 4. Trigger discovery & reconcile in background for user's selected interests
+  // 4. Instant local reminder reconciliation & quick response
   try {
-    if (Array.isArray(interests) && interests.length > 0) {
-      for (const i of interests) {
-        await pipeline.runDiscovery(i);
-      }
-    } else {
-      await pipeline.runDiscovery('Government Exams & Scholarships');
-    }
     await reconciler.reconcileUserReminders(req.session.userId);
   } catch (syncErr) {
-    console.warn('Initial sync notice:', syncErr.message);
+    console.warn('Initial reconciliation notice:', syncErr.message);
   }
 
   res.json({ success: true, message: 'Onboarding completed successfully!' });
+
+  // 5. Run external background discovery asynchronously (non-blocking)
+  setImmediate(async () => {
+    try {
+      if (Array.isArray(interests) && interests.length > 0) {
+        for (const i of interests) {
+          await pipeline.runDiscovery(i);
+        }
+      } else {
+        await pipeline.runDiscovery('Government Exams & Scholarships');
+      }
+      await reconciler.reconcileUserReminders(req.session.userId);
+    } catch (bgErr) {
+      console.warn('Background discovery notice:', bgErr.message);
+    }
+  });
 });
 
 // ── USER PROFILE & INTERESTS API ─────────────────────────────
@@ -827,15 +836,70 @@ app.post('/api/user/profile', requireLogin, async (req, res) => {
     conn.release();
   }
 
-  // Trigger discovery for any new interests
-  if (Array.isArray(interests)) {
-    for (const i of interests) {
-      await pipeline.runDiscovery(i);
-    }
+  // Reconcile user reminders immediately
+  try {
+    await reconciler.reconcileUserReminders(req.session.userId);
+  } catch (err) {
+    console.warn('Reconcile notice:', err.message);
   }
-  await reconciler.reconcileUserReminders(req.session.userId);
 
   res.json({ success: true, message: 'Profile updated successfully' });
+
+  // Background discovery
+  if (Array.isArray(interests) && interests.length > 0) {
+    setImmediate(async () => {
+      try {
+        for (const i of interests) {
+          await pipeline.runDiscovery(i);
+        }
+        await reconciler.reconcileUserReminders(req.session.userId);
+      } catch (bgErr) {
+        console.warn('Background discovery notice:', bgErr.message);
+      }
+    });
+  }
+});
+
+// ── DEV / ADMIN: RESET ALL TEST USERS (CLEAN SLATE) ─────────
+app.post('/api/dev/reset-all-users', async (req, res) => {
+  try {
+    const conn = await pool.getConnection();
+    try {
+      await conn.query('SET FOREIGN_KEY_CHECKS = 0');
+      await conn.query('TRUNCATE TABLE user_interests');
+      await conn.query('TRUNCATE TABLE user_profiles');
+      await conn.query('TRUNCATE TABLE user_reminders');
+      await conn.query('TRUNCATE TABLE user_opportunity_actions');
+      await conn.query('TRUNCATE TABLE push_subscriptions');
+      await conn.query('TRUNCATE TABLE notification_logs');
+      await conn.query('TRUNCATE TABLE sessions');
+      await conn.query('TRUNCATE TABLE users');
+      await conn.query('SET FOREIGN_KEY_CHECKS = 1');
+    } finally {
+      conn.release();
+    }
+    if (req.session) {
+      req.session.destroy(() => {});
+    }
+    res.clearCookie('deadline_defenders_session');
+    console.log('🧹 [ADMIN RESET] All user accounts and profiles have been completely reset.');
+    res.json({ success: true, message: 'All users and profile data have been deleted successfully. You can now create a fresh account!' });
+  } catch (err) {
+    console.error('Reset all users error:', err);
+    res.status(500).json({ error: 'Failed to reset users: ' + err.message });
+  }
+});
+
+app.post('/api/user/delete-account', requireLogin, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    await pool.query('DELETE FROM users WHERE id = ?', [userId]);
+    req.session.destroy(() => {});
+    res.clearCookie('deadline_defenders_session');
+    res.json({ success: true, message: 'Your account and profile have been completely deleted.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete account' });
+  }
 });
 
 // ── OPPORTUNITIES FEED & TRACKING ────────────────────────────
