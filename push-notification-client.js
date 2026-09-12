@@ -23,11 +23,9 @@ async function getPublicVapidKey() {
       }
     }
   } catch (e) {
-    console.warn('Could not fetch VAPID key from server, using fallback');
+    console.warn('Could not fetch the VAPID key from the server');
   }
-  // Fallback default
-  cachedPublicKey = 'BFs84GA9gHYEAhB2ehAKYu-45kQQu-ddolDbTkHBn_NN7Yic7jT9rUj-2fgyhboeq37g7TsGfFwzjA_4VX0mNMY';
-  return cachedPublicKey;
+  return null;
 }
 
 // Check if browser supports Web Push & Service Worker
@@ -85,6 +83,10 @@ async function subscribeToPushNotifications() {
 
     const registration = await navigator.serviceWorker.ready;
     const publicKey = await getPublicVapidKey();
+    if (!publicKey) {
+      showNotificationBanner('Push notifications are not configured on this server.', 'warning');
+      return false;
+    }
 
     let subscription = await registration.pushManager.getSubscription();
 

@@ -17,7 +17,7 @@ Your project has been cleaned and organized. Here are the essential files:
 | File | Purpose |
 | :--- | :--- |
 | **`server.js`** | Express backend server, auth, sessions, push & reminder scheduler |
-| **`hybrid_fetcher.js`** | Smart exam deadline scraper with Indian exam expansion & key rotation |
+| **`opportunity_pipeline.js`** | Shared search, extraction, deduplication, and opportunity storage pipeline |
 | **`service-worker.js`** | Browser Service Worker for push alerts and offline reliability |
 | **`push-notification-client.js`** | Client push helper that communicates with the server |
 | **`mobile.html`** | Main web application UI (Dashboard, Calendar, Reminders, Profile) |
@@ -40,7 +40,7 @@ We need a 24/7 cloud database that connects to your deployed server. Both option
 4. Set a root password (save this password!).
 5. Once created, click **Chat2Query** or **SQL Editor** in the left menu.
 6. Open your local file `schema.sql`, copy all text, paste it into the TiDB SQL Editor, and click **Run**.
-   - *This creates all 8 tables instantly!*
+   - *This creates all 15 tables instantly!*
 7. Click the **Connect** button on the TiDB dashboard and note your connection details:
    - **Host**: `gateway01.ap-southeast-1.prod.aws.tidbcloud.com` (example)
    - **Port**: `4000`
@@ -92,12 +92,10 @@ We need a 24/7 cloud database that connects to your deployed server. Both option
 | `DB_SSL` | `true` |
 | `SESSION_SECRET` | *(Type any long random string)* |
 | `APP_URL` | `https://your-app-name.onrender.com` *(Fill after creating or leave blank initially)* |
-| `VAPID_PUBLIC_KEY` | `BFs84GA9gHYEAhB2ehAKYu-45kQQu-ddolDbTkHBn_NN7Yic7jT9rUj-2fgyhboeq37g7TsGfFwzjA_4VX0mNMY` |
-| `VAPID_PRIVATE_KEY` | `1MhGDGSRASuEW9P-7OWnzSWrKbXJi36bPSe0VxKFxJc` |
+| `VAPID_PUBLIC_KEY` | *(Generate a VAPID key pair for this deployment)* |
+| `VAPID_PRIVATE_KEY` | *(The matching private VAPID key; keep it secret)* |
 | `VAPID_SUBJECT` | `mailto:your_email@gmail.com` |
-| `SERPAPI_KEY_1` | `8877edfa91429db93cf7cbfc10b5d330c8970755009d64b6beac56153ec24627` |
-| `SERPAPI_KEY_2` | `be65caf3e8c02ce5b357d27d1b7865d9288b37adae7beaed25075d135f3a3e9b` |
-| `SERPAPI_KEY_3` | `6c32c4a0f9c579a94a0f3ece2ebdcaf603bbebcdafb4f92ffaaacafe4ba8e38c` |
+| `SERPAPI_KEYS` | *(Optional: comma-separated SerpAPI keys; never commit them)* |
 
 *(Optional: Add `EMAIL_USER` and `EMAIL_PASS` with your Gmail App Password if you want live password reset emails).*
 

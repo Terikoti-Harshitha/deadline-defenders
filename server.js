@@ -85,11 +85,8 @@ async function sendResetEmail(toEmail, username, resetLink) {
 }
 
 // ── VAPID WEB PUSH CONFIGURATION ─────────────────────────────
-const publicVapidKey = process.env.VAPID_PUBLIC_KEY || process.env.VAPID_PUBLIC ||
-  'BFs84GA9gHYEAhB2ehAKYu-45kQQu-ddolDbTkHBn_NN7Yic7jT9rUj-2fgyhboeq37g7TsGfFwzjA_4VX0mNMY';
-
-const privateVapidKey = process.env.VAPID_PRIVATE_KEY || process.env.VAPID_PRIVATE ||
-  '1MhGDGSRASuEW9P-7OWnzSWrKbXJi36bPSe0VxKFxJc';
+const publicVapidKey = process.env.VAPID_PUBLIC_KEY || process.env.VAPID_PUBLIC || '';
+const privateVapidKey = process.env.VAPID_PRIVATE_KEY || process.env.VAPID_PRIVATE || '';
 
 const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@deadlinedefenders.com';
 
@@ -1008,18 +1005,24 @@ app.post('/user/update-reminders', requireLogin, async (req, res) => {
   try {
     const [intRows] = await pool.query('SELECT interest FROM user_interests WHERE user_id = ?', [req.session.userId]);
     const interests = intRows.map(r => r.interest);
-    for (const i of interests) {
-      await pipeline.runDiscovery(i);
+    const topics = interests.length ? interests : ['Government Exams & Scholarships'];
+    const discoveries = [];
+    for (const i of topics) {
+      discoveries.push(await pipeline.runDiscovery(i));
     }
     await reconciler.reconcileUserReminders(req.session.userId);
-    res.json({ success: true, message: 'Deadlines refreshed and reconciled.' });
+    res.json({ success: true, message: 'Deadlines refreshed and reconciled.', discoveries });
   } catch (err) {
+    console.error('Deadline refresh error:', err);
     res.status(500).json({ error: 'Failed to update reminders' });
   }
 });
 
 // ── PUSH NOTIFICATION ROUTES ─────────────────────────────────
 app.get('/push/vapid-public-key', (req, res) => {
+  if (!publicVapidKey || !privateVapidKey) {
+    return res.status(503).json({ error: 'Push notifications are not configured.' });
+  }
   res.json({ publicKey: publicVapidKey });
 });
 
@@ -1065,6 +1068,17 @@ app.get('/push/status', requireLogin, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Failed to get status' });
   }
+});
+
+app.post('/push/test', requireLogin, async (req, res) => {
+  const sent = await sendPushToUser(
+    req.session.userId,
+    'Deadline Defender test',
+    'Push notifications are working correctly.',
+    { type: 'test' }
+  );
+  if (!sent) return res.status(400).json({ error: 'No active push subscription was found.' });
+  res.json({ success: true });
 });
 
 // ── HEALTH & ROOT ROUTES ─────────────────────────────────────

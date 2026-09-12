@@ -6,6 +6,7 @@ const SourceCollector = require('./source_collector');
 const Extractor = require('./extractor');
 const Deduplicator = require('./deduplicator');
 const EligibilityMatcher = require('./eligibility_matcher');
+const crypto = require('crypto');
 
 class OpportunityPipeline {
   constructor(pool, sendPushFn) {
@@ -23,13 +24,132 @@ class OpportunityPipeline {
     await this.seedInitialOpportunitiesIfEmpty();
   }
 
+  // Discover opportunities once per topic, then store canonical records for every user.
+  // This is deliberately shared: a user's refresh must never create a separate feed.
+  async runDiscovery(topic) {
+    const runId = crypto.randomUUID();
+    const startedAt = new Date();
+    const summary = { runId, topic, found: 0, inserted: 0, updated: 0, duplicates: 0, failed: 0 };
+
+    await this.pool.query(
+      'INSERT INTO pipeline_runs (run_id, source_name, started_at) VALUES (?, ?, ?)',
+      [runId, String(topic || 'General').slice(0, 100), startedAt]
+    );
+
+    try {
+      const discovery = await this.searchManager.discoverOpportunities(topic);
+      summary.found = discovery.results.length;
+      const extracted = [];
+      let fetchedPages = 0;
+
+      for (const item of discovery.results) {
+        let enrichedItem = item;
+
+        // Search snippets are often incomplete. For a small number of official sources,
+        // retain a change-detected page snapshot as additional extraction evidence.
+        if (
+          fetchedPages < 3 &&
+          !this.extractor.extractExplicitDeadlines(`${item.title || ''}. ${item.snippet || ''}`) &&
+          this.sourceCollector.evaluateTrustLevel(item.link) === 'OFFICIAL'
+        ) {
+          fetchedPages += 1;
+          const page = await this.sourceCollector.fetchWithChangeDetection(item.link);
+          if (page.changed && page.text) {
+            enrichedItem = { ...item, snippet: `${item.snippet || ''} ${page.text.slice(0, 4000)}` };
+          }
+        }
+
+        const opportunity = await this.extractor.processItem(enrichedItem, discovery.topic);
+        if (opportunity) extracted.push(opportunity);
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+      const canonical = this.deduplicator
+        .deduplicateList(extracted)
+        .filter(opportunity => opportunity.deadline >= today);
+
+      summary.duplicates = extracted.length - canonical.length;
+      for (const opportunity of canonical) {
+        const outcome = await this.upsertOpportunity(opportunity);
+        summary[outcome] += 1;
+      }
+
+      await this.pool.query(
+        `UPDATE topic_registry
+         SET last_discovered = NOW(), next_discovery = DATE_ADD(NOW(), INTERVAL 24 HOUR)
+         WHERE canonical_topic = ?`,
+        [discovery.topic]
+      );
+      return summary;
+    } catch (err) {
+      summary.failed += 1;
+      throw err;
+    } finally {
+      await this.pool.query(
+        `UPDATE pipeline_runs
+         SET completed_at = NOW(), items_found = ?, items_new = ?, items_updated = ?,
+             items_duplicate = ?, api_calls = ?, llm_calls = 0
+         WHERE run_id = ?`,
+        [summary.found, summary.inserted, summary.updated, summary.duplicates, 0, runId]
+      ).catch(logErr => console.warn('Pipeline metrics warning:', logErr.message));
+    }
+  }
+
+  async upsertOpportunity(opportunity) {
+    const [candidates] = await this.pool.query(
+      `SELECT * FROM opportunities
+       WHERE organization = ? AND deadline >= DATE_SUB(CURDATE(), INTERVAL 365 DAY)`,
+      [opportunity.organization]
+    );
+    const normalizedTitle = this.deduplicator.normalizeTitle(opportunity.title);
+    const existing = candidates.find(candidate => {
+      const candidateTitle = this.deduplicator.normalizeTitle(candidate.title);
+      return this.deduplicator.isDuplicate(candidate, opportunity) ||
+        (candidateTitle && normalizedTitle &&
+          (candidateTitle === normalizedTitle || candidateTitle.includes(normalizedTitle) || normalizedTitle.includes(candidateTitle)));
+    });
+    const columns = [
+      'title', 'organization', 'category', 'deadline', 'deadline_source_text',
+      'qualification_req', 'branch_req', 'graduation_year_req', 'location',
+      'application_url', 'source_url', 'trust_level', 'confidence', 'raw_evidence'
+    ];
+    const values = columns.map(column => opportunity[column]);
+
+    if (!existing) {
+      await this.pool.query(
+        `INSERT INTO opportunities (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`,
+        values
+      );
+      return 'inserted';
+    }
+
+    if (String(existing.deadline).slice(0, 10) !== opportunity.deadline) {
+      await this.pool.query(
+        `INSERT INTO opportunity_versions (opportunity_id, old_deadline, new_deadline, change_reason)
+         VALUES (?, ?, ?, 'Discovery refresh')`,
+        [existing.id, existing.deadline, opportunity.deadline]
+      );
+    }
+    await this.pool.query(
+      `UPDATE opportunities SET ${columns.map(column => `${column} = ?`).join(', ')}, is_active = 1
+       WHERE id = ?`,
+      [...values, existing.id]
+    );
+    return 'updated';
+  }
+
   // Seed verified multi-tier opportunities (10th, 12th, Diploma, UG, PG, Scholarships, Hackathons)
   async seedInitialOpportunitiesIfEmpty() {
     try {
-      const [rows] = await this.pool.query('SELECT COUNT(*) as cnt FROM opportunities');
+      const [rows] = await this.pool.query(
+        'SELECT COUNT(*) as cnt FROM opportunities WHERE is_active = 1 AND deadline >= CURDATE()'
+      );
       if (rows[0].cnt >= 8) return;
 
-      const year = new Date().getFullYear();
+      const now = new Date();
+      // The seed calendar is autumn-heavy. Once it becomes sparse late in the year,
+      // create the following cycle instead of repeatedly restoring expired records.
+      const year = now.getMonth() >= 9 ? now.getFullYear() + 1 : now.getFullYear();
       const nextYear = year + 1;
 
       const seedOpps = [
