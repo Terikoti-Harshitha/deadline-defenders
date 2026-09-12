@@ -18,7 +18,6 @@ const nodemailer = require('nodemailer');
 
 const OpportunityPipeline = require('./opportunity_pipeline');
 const ReminderReconciler = require('./reminder_reconciliation');
-const { fetchRemindersForInterest, isFutureReminder, deduplicateReminders } = require('./hybrid_fetcher');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -173,6 +172,7 @@ async function autoInitDatabaseTables() {
       password_hash VARCHAR(255) NOT NULL,
       reset_token VARCHAR(255) DEFAULT NULL,
       reset_token_expires DATETIME DEFAULT NULL,
+      onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (id),
       UNIQUE KEY idx_users_username (username),
@@ -181,10 +181,17 @@ async function autoInitDatabaseTables() {
 
     `CREATE TABLE IF NOT EXISTS user_profiles (
       user_id INT(11) NOT NULL,
-      qualification VARCHAR(100) NOT NULL DEFAULT 'B.Tech',
-      branch VARCHAR(100) NOT NULL DEFAULT 'Computer Science',
-      graduation_year INT(11) NOT NULL DEFAULT 2026,
-      state_location VARCHAR(100) NOT NULL DEFAULT 'Andhra Pradesh',
+      education_level VARCHAR(50) DEFAULT NULL,
+      qualification VARCHAR(100) DEFAULT NULL,
+      branch VARCHAR(100) DEFAULT NULL,
+      study_status VARCHAR(50) DEFAULT NULL,
+      graduation_year INT(11) DEFAULT NULL,
+      state_location VARCHAR(100) DEFAULT NULL,
+      city VARCHAR(100) DEFAULT NULL,
+      age INT(11) DEFAULT NULL,
+      gender VARCHAR(50) DEFAULT NULL,
+      skills TEXT DEFAULT NULL,
+      career_goal VARCHAR(100) DEFAULT NULL,
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (user_id),
       CONSTRAINT fk_up_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -340,7 +347,7 @@ async function autoInitDatabaseTables() {
       items_duplicate INT(11) DEFAULT 0,
       api_calls INT(11) DEFAULT 0,
       llm_calls INT(11) DEFAULT 0,
-      PRIMARY KEY (id),
+      PRIMARY KEY (`id`),
       KEY idx_pr_run_id (run_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 
@@ -394,7 +401,6 @@ async function autoInitDatabaseTables() {
       await pool.query(q);
     }
     console.log('✅ All 15 database tables verified and auto-created successfully!');
-    // Initialize pipeline seeds
     await pipeline.initialize();
   } catch (err) {
     console.error('⚠️  Auto table creation notice:', err.message);
@@ -456,7 +462,6 @@ function requireLogin(req, res, next) {
 }
 
 // ── CRON SCHEDULER: Periodic Discovery & Idempotent Reminder Dispatch ──
-// Auto-refresh cron schedule: 6:00 AM, 2:00 PM, 10:00 PM
 cron.schedule('0 6 * * *', async () => {
   console.log('⏰ [CRON] Running 6:00 AM Discovery & Reminder Dispatch...');
   await reconciler.dispatchDueNotifications();
@@ -472,220 +477,11 @@ cron.schedule('0 22 * * *', async () => {
   await reconciler.dispatchDueNotifications();
 });
 
-// Hourly check for any urgent due reminders
 cron.schedule('0 * * * *', async () => {
   await reconciler.dispatchDueNotifications();
 });
 
-// ── ACADEMIC & RESEARCH OPPORTUNITY API ENDPOINTS ────────────
-
-// 1. Get Personalized Opportunities Feed (with Match Score & Explainability)
-app.get('/api/opportunities', requireLogin, async (req, res) => {
-  try {
-    const category = req.query.category || 'all';
-    const feed = await pipeline.getPersonalizedFeed(req.session.userId, category);
-    res.json({ opportunities: feed });
-  } catch (err) {
-    console.error('API opportunities error:', err);
-    res.status(500).json({ error: 'Failed to fetch opportunities' });
-  }
-});
-
-// 2. Track Opportunity Status (Saved / Applied / Completed / Dismissed)
-app.post('/api/opportunities/track', requireLogin, async (req, res) => {
-  const { opportunityId, status } = req.body;
-  if (!opportunityId || !status) {
-    return res.status(400).json({ error: 'Opportunity ID and status required' });
-  }
-
-  try {
-    await pool.query(
-      `INSERT INTO user_opportunity_actions (user_id, opportunity_id, status)
-       VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE status = VALUES(status), updated_at = NOW()`,
-      [req.session.userId, opportunityId, status]
-    );
-
-    // Reconcile reminders immediately (silences alerts if applied or completed)
-    await reconciler.reconcileUserReminders(req.session.userId);
-
-    res.json({ success: true, message: `Opportunity marked as ${status}` });
-  } catch (err) {
-    console.error('Track opportunity error:', err);
-    res.status(500).json({ error: 'Failed to update status' });
-  }
-});
-
-// 3. User Academic Profile (Qualification, Branch, Batch, State)
-app.get('/api/user/profile', requireLogin, async (req, res) => {
-  try {
-    const [profRows] = await pool.query('SELECT * FROM user_profiles WHERE user_id = ?', [req.session.userId]);
-    const [userRows] = await pool.query('SELECT id, username, email, created_at FROM users WHERE id = ?', [req.session.userId]);
-
-    const profile = profRows.length > 0 ? profRows[0] : {
-      qualification: 'B.Tech',
-      branch: 'Computer Science',
-      graduation_year: 2026,
-      state_location: 'Andhra Pradesh'
-    };
-
-    res.json({ ...userRows[0], profile });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch profile' });
-  }
-});
-
-app.post('/api/user/profile', requireLogin, async (req, res) => {
-  const { qualification, branch, graduation_year, state_location } = req.body;
-
-  try {
-    await pool.query(
-      `INSERT INTO user_profiles (user_id, qualification, branch, graduation_year, state_location)
-       VALUES (?, ?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE
-         qualification = VALUES(qualification),
-         branch = VALUES(branch),
-         graduation_year = VALUES(graduation_year),
-         state_location = VALUES(state_location)`,
-      [
-        req.session.userId,
-        qualification || 'B.Tech',
-        branch || 'Computer Science',
-        parseInt(graduation_year || 2026, 10),
-        state_location || 'Andhra Pradesh'
-      ]
-    );
-
-    res.json({ success: true, message: 'Academic profile updated successfully' });
-  } catch (err) {
-    console.error('Update profile error:', err);
-    res.status(500).json({ error: 'Failed to save profile' });
-  }
-});
-
-// 4. Source Registry
-app.get('/api/sources', requireLogin, async (req, res) => {
-  try {
-    const [sources] = await pool.query('SELECT * FROM sources WHERE enabled = 1 ORDER BY trust_level ASC, organization ASC');
-    res.json({ sources });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch sources' });
-  }
-});
-
-// 5. Trigger Pipeline Discovery Run
-app.post('/api/pipeline/run', requireLogin, async (req, res) => {
-  const { topic } = req.body;
-  if (!topic) return res.status(400).json({ error: 'Topic query required' });
-
-  try {
-    const result = await pipeline.runDiscovery(topic);
-    await reconciler.reconcileUserReminders(req.session.userId);
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: 'Discovery run failed' });
-  }
-});
-
-// 6. Pipeline Performance Metrics (Evaluation)
-app.get('/api/pipeline/stats', requireLogin, async (req, res) => {
-  try {
-    const [runs] = await pool.query('SELECT * FROM pipeline_runs ORDER BY started_at DESC LIMIT 20');
-    const [oppCount] = await pool.query('SELECT COUNT(*) as total, category, trust_level FROM opportunities GROUP BY category, trust_level');
-    const [cacheCount] = await pool.query('SELECT COUNT(*) as cached_queries FROM search_cache');
-
-    res.json({
-      recentRuns: runs,
-      opportunityDistribution: oppCount,
-      totalCachedQueries: cacheCount[0]?.cached_queries || 0
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch stats' });
-  }
-});
-
-// ── PUSH ROUTES ──────────────────────────────────────────────
-app.get('/push/vapid-public-key', (req, res) => {
-  res.json({ publicKey: publicVapidKey });
-});
-
-app.post('/push/subscribe', requireLogin, async (req, res) => {
-  const sub = req.body;
-  const userId = req.session.userId;
-  if (!sub || !sub.endpoint || !sub.keys) {
-    return res.status(400).json({ error: 'Invalid subscription object' });
-  }
-
-  try {
-    await pool.query(
-      `INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth, subscription_json)
-       VALUES (?, ?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE
-         endpoint=VALUES(endpoint),
-         p256dh=VALUES(p256dh), auth=VALUES(auth),
-         subscription_json=VALUES(subscription_json), updated_at=NOW()`,
-      [userId, sub.endpoint, sub.keys.p256dh, sub.keys.auth, JSON.stringify(sub)]
-    );
-    res.status(201).json({ success: true });
-  } catch (err) {
-    console.error('Subscribe error:', err);
-    res.status(500).json({ error: 'Failed to subscribe' });
-  }
-});
-
-app.post('/push/unsubscribe', requireLogin, async (req, res) => {
-  try {
-    await pool.query('DELETE FROM push_subscriptions WHERE user_id = ?', [req.session.userId]);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to unsubscribe' });
-  }
-});
-
-app.get('/push/status', requireLogin, async (req, res) => {
-  try {
-    const [rows] = await pool.query(
-      'SELECT id FROM push_subscriptions WHERE user_id = ?', [req.session.userId]
-    );
-    res.json({ subscribed: rows.length > 0 });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to get status' });
-  }
-});
-
-app.post('/push/test', requireLogin, async (req, res) => {
-  try {
-    const [rows] = await pool.query(
-      'SELECT subscription_json FROM push_subscriptions WHERE user_id = ?', [req.session.userId]
-    );
-    if (!rows.length) {
-      return res.status(404).json({ error: 'No subscription found. Enable notifications first.' });
-    }
-
-    const sub = JSON.parse(rows[0].subscription_json);
-    await webpush.sendNotification(sub, JSON.stringify({
-      title: '🔔 Test Notification',
-      body: 'Push notifications are working! You will receive timely deadline alerts.',
-      icon: 'https://cdn-icons-png.flaticon.com/512/1827/1827349.png',
-      data: { url: '/mobile.html' }
-    }));
-
-    await pool.query(
-      'INSERT INTO notification_logs (user_id, title, body) VALUES (?, ?, ?)',
-      [req.session.userId, '🔔 Test Notification', 'Test notification sent successfully']
-    );
-    res.json({ success: true });
-  } catch (err) {
-    if (err.statusCode === 410 || err.statusCode === 404) {
-      await pool.query('DELETE FROM push_subscriptions WHERE user_id = ?', [req.session.userId]);
-      return res.status(410).json({ error: 'Subscription expired. Please re-subscribe.' });
-    }
-    console.error('Test notification error:', err);
-    res.status(500).json({ error: 'Failed to send test notification' });
-  }
-});
-
-// ── AUTH ROUTES ──────────────────────────────────────────────
+// ── AUTH & ONBOARDING ROUTES ─────────────────────────────────
 app.post('/auth/signup', async (req, res) => {
   const { username, email, password } = req.body;
   if (!username || !email || !password)
@@ -696,18 +492,11 @@ app.post('/auth/signup', async (req, res) => {
   try {
     const hash = await bcrypt.hash(password, 10);
     const [result] = await pool.query(
-      'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
+      'INSERT INTO users (username, email, password_hash, onboarding_completed) VALUES (?, ?, ?, 0)',
       [username.trim(), email.trim().toLowerCase(), hash]
     );
     req.session.userId = result.insertId;
-
-    // Create default profile
-    await pool.query(
-      'INSERT IGNORE INTO user_profiles (user_id, qualification, branch, graduation_year, state_location) VALUES (?, ?, ?, ?, ?)',
-      [result.insertId, 'B.Tech', 'Computer Science', 2026, 'Andhra Pradesh']
-    );
-
-    res.json({ success: true, userId: result.insertId });
+    res.json({ success: true, userId: result.insertId, needsOnboarding: true });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY')
       return res.status(409).json({ error: 'Username or email already exists' });
@@ -734,7 +523,11 @@ app.post('/auth/login', async (req, res) => {
     if (!match) return res.status(401).json({ error: 'Invalid credentials' });
 
     req.session.userId = user.id;
-    res.json({ success: true, userId: user.id });
+    res.json({
+      success: true,
+      userId: user.id,
+      needsOnboarding: !Boolean(user.onboarding_completed)
+    });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Server error' });
@@ -813,94 +606,271 @@ app.post('/auth/reset-password', async (req, res) => {
   }
 });
 
-// ── USER PROFILE & INTERESTS COMPATIBILITY ROUTES ─────────────
-app.get('/user/profile', requireLogin, async (req, res) => {
-  try {
-    const [rows] = await pool.query(
-      'SELECT id, username, email, created_at FROM users WHERE id = ?', [req.session.userId]
-    );
-    if (!rows.length) return res.status(404).json({ error: 'User not found' });
-    res.json(rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.post('/user/update-profile', requireLogin, async (req, res) => {
-  const { username, email, password } = req.body;
-  try {
-    if (username) {
-      const [ex] = await pool.query(
-        'SELECT id FROM users WHERE username = ? AND id != ?', [username.trim(), req.session.userId]
-      );
-      if (ex.length) return res.status(409).json({ error: 'Username already taken' });
-    }
-    if (email) {
-      const [ex] = await pool.query(
-        'SELECT id FROM users WHERE email = ? AND id != ?', [email.trim().toLowerCase(), req.session.userId]
-      );
-      if (ex.length) return res.status(409).json({ error: 'Email already in use' });
-    }
-
-    const updates = [], values = [];
-    if (username) { updates.push('username = ?'); values.push(username.trim()); }
-    if (email)    { updates.push('email = ?');    values.push(email.trim().toLowerCase()); }
-    if (password) {
-      updates.push('password_hash = ?');
-      values.push(await bcrypt.hash(password, 10));
-    }
-    if (!updates.length) return res.status(400).json({ error: 'No updates provided' });
-
-    values.push(req.session.userId);
-    await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, values);
-    res.json({ success: true, message: 'Profile updated successfully' });
-  } catch (err) {
-    console.error('Update profile error:', err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.get('/user/interests', requireLogin, async (req, res) => {
-  try {
-    const [rows] = await pool.query(
-      'SELECT interest FROM user_interests WHERE user_id = ? ORDER BY id ASC', [req.session.userId]
-    );
-    res.json({ interests: rows.map(r => r.interest) });
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.post('/user/interests', requireLogin, async (req, res) => {
-  const { interests } = req.body;
-  if (!Array.isArray(interests)) return res.status(400).json({ error: 'Interests must be an array' });
+// ── ONBOARDING: ACADEMIC PROFILE + INTERESTS SETUP ──────────
+app.post('/api/user/onboarding', requireLogin, async (req, res) => {
+  const {
+    education_level,
+    qualification,
+    branch,
+    study_status,
+    graduation_year,
+    state_location,
+    city,
+    age,
+    gender,
+    skills,
+    career_goal,
+    interests
+  } = req.body;
 
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
+
+    // 1. Save Profile (Nullable, no fake defaults!)
+    await conn.query(
+      `INSERT INTO user_profiles
+       (user_id, education_level, qualification, branch, study_status, graduation_year, state_location, city, age, gender, skills, career_goal)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         education_level = VALUES(education_level),
+         qualification = VALUES(qualification),
+         branch = VALUES(branch),
+         study_status = VALUES(study_status),
+         graduation_year = VALUES(graduation_year),
+         state_location = VALUES(state_location),
+         city = VALUES(city),
+         age = VALUES(age),
+         gender = VALUES(gender),
+         skills = VALUES(skills),
+         career_goal = VALUES(career_goal)`,
+      [
+        req.session.userId,
+        education_level || null,
+        qualification || null,
+        branch || null,
+        study_status || null,
+        graduation_year ? parseInt(graduation_year, 10) : null,
+        state_location || null,
+        city || null,
+        age ? parseInt(age, 10) : null,
+        gender || null,
+        skills ? (Array.isArray(skills) ? JSON.stringify(skills) : String(skills)) : null,
+        career_goal || null
+      ]
+    );
+
+    // 2. Save Interests
     await conn.query('DELETE FROM user_interests WHERE user_id = ?', [req.session.userId]);
-    if (interests.length > 0) {
-      const vals = interests.map(i => [req.session.userId, i.trim()]);
-      await conn.query('INSERT IGNORE INTO user_interests (user_id, interest) VALUES ?', [vals]);
+    if (Array.isArray(interests) && interests.length > 0) {
+      const validInts = interests.filter(i => i && String(i).trim());
+      if (validInts.length > 0) {
+        const vals = validInts.map(i => [req.session.userId, String(i).trim()]);
+        await conn.query('INSERT IGNORE INTO user_interests (user_id, interest) VALUES ?', [vals]);
+      }
     }
+
+    // 3. Mark Onboarding as Completed
+    await conn.query('UPDATE users SET onboarding_completed = 1 WHERE id = ?', [req.session.userId]);
+
     await conn.commit();
   } catch (err) {
     await conn.rollback();
-    console.error('Save interests error:', err);
-    return res.status(500).json({ error: 'Server error while saving interests' });
+    console.error('Onboarding save error:', err);
+    return res.status(500).json({ error: 'Failed to complete onboarding' });
   } finally {
     conn.release();
   }
 
-  // Trigger global discovery for new interests in background
+  // 4. Trigger discovery & reconcile in background for user's selected interests
   try {
+    if (Array.isArray(interests) && interests.length > 0) {
+      for (const i of interests) {
+        await pipeline.runDiscovery(i);
+      }
+    } else {
+      await pipeline.runDiscovery('Government Exams & Scholarships');
+    }
+    await reconciler.reconcileUserReminders(req.session.userId);
+  } catch (syncErr) {
+    console.warn('Initial sync notice:', syncErr.message);
+  }
+
+  res.json({ success: true, message: 'Onboarding completed successfully!' });
+});
+
+// ── USER PROFILE & INTERESTS API ─────────────────────────────
+app.get('/api/user/profile', requireLogin, async (req, res) => {
+  try {
+    const [userRows] = await pool.query('SELECT id, username, email, onboarding_completed, created_at FROM users WHERE id = ?', [req.session.userId]);
+    if (!userRows.length) return res.status(404).json({ error: 'User not found' });
+
+    const [profRows] = await pool.query('SELECT * FROM user_profiles WHERE user_id = ?', [req.session.userId]);
+    const [intRows] = await pool.query('SELECT interest FROM user_interests WHERE user_id = ? ORDER BY id ASC', [req.session.userId]);
+
+    const profile = profRows.length > 0 ? profRows[0] : null;
+    const interests = intRows.map(r => r.interest);
+
+    // Calculate profile completeness score (0 - 100%)
+    let points = 0;
+    const totalPoints = 6;
+    if (interests.length > 0) points++;
+    if (profile?.education_level || profile?.qualification) points++;
+    if (profile?.branch || profile?.study_status) points++;
+    if (profile?.state_location || profile?.city) points++;
+    if (profile?.age || profile?.gender) points++;
+    if (profile?.skills || profile?.career_goal) points++;
+
+    const completeness = Math.round((points / totalPoints) * 100);
+
+    // Determine matching confidence
+    let matchingConfidence = 'DISCOVERY';
+    if ((profile?.education_level || profile?.qualification) && (profile?.state_location || profile?.city) && interests.length > 0) {
+      matchingConfidence = 'FULL_MATCH';
+    } else if (profile?.education_level || profile?.qualification || profile?.state_location) {
+      matchingConfidence = 'PARTIAL_MATCH';
+    } else if (interests.length > 0) {
+      matchingConfidence = 'INTEREST_DISCOVERY';
+    } else {
+      matchingConfidence = 'EXPLORE_ALL';
+    }
+
+    const checklist = {
+      interests: interests.length > 0,
+      education: Boolean(profile?.education_level || profile?.qualification),
+      location: Boolean(profile?.state_location || profile?.city),
+      age: Boolean(profile?.age),
+      skills: Boolean(profile?.skills)
+    };
+
+    res.json({
+      ...userRows[0],
+      profile,
+      interests,
+      completeness,
+      matchingConfidence,
+      checklist,
+      needsOnboarding: !Boolean(userRows[0].onboarding_completed)
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
+
+app.post('/api/user/profile', requireLogin, async (req, res) => {
+  const {
+    education_level,
+    qualification,
+    branch,
+    study_status,
+    graduation_year,
+    state_location,
+    city,
+    age,
+    gender,
+    skills,
+    career_goal,
+    interests
+  } = req.body;
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    await conn.query(
+      `INSERT INTO user_profiles
+       (user_id, education_level, qualification, branch, study_status, graduation_year, state_location, city, age, gender, skills, career_goal)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         education_level = VALUES(education_level),
+         qualification = VALUES(qualification),
+         branch = VALUES(branch),
+         study_status = VALUES(study_status),
+         graduation_year = VALUES(graduation_year),
+         state_location = VALUES(state_location),
+         city = VALUES(city),
+         age = VALUES(age),
+         gender = VALUES(gender),
+         skills = VALUES(skills),
+         career_goal = VALUES(career_goal)`,
+      [
+        req.session.userId,
+        education_level !== undefined ? (education_level || null) : null,
+        qualification !== undefined ? (qualification || null) : null,
+        branch !== undefined ? (branch || null) : null,
+        study_status !== undefined ? (study_status || null) : null,
+        graduation_year ? parseInt(graduation_year, 10) : null,
+        state_location !== undefined ? (state_location || null) : null,
+        city !== undefined ? (city || null) : null,
+        age ? parseInt(age, 10) : null,
+        gender !== undefined ? (gender || null) : null,
+        skills ? (Array.isArray(skills) ? JSON.stringify(skills) : String(skills)) : null,
+        career_goal !== undefined ? (career_goal || null) : null
+      ]
+    );
+
+    if (Array.isArray(interests)) {
+      await conn.query('DELETE FROM user_interests WHERE user_id = ?', [req.session.userId]);
+      const validInts = interests.filter(i => i && String(i).trim());
+      if (validInts.length > 0) {
+        const vals = validInts.map(i => [req.session.userId, String(i).trim()]);
+        await conn.query('INSERT IGNORE INTO user_interests (user_id, interest) VALUES ?', [vals]);
+      }
+    }
+
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    console.error('Update profile error:', err);
+    return res.status(500).json({ error: 'Failed to save profile' });
+  } finally {
+    conn.release();
+  }
+
+  // Trigger discovery for any new interests
+  if (Array.isArray(interests)) {
     for (const i of interests) {
       await pipeline.runDiscovery(i);
     }
+  }
+  await reconciler.reconcileUserReminders(req.session.userId);
+
+  res.json({ success: true, message: 'Profile updated successfully' });
+});
+
+// ── OPPORTUNITIES FEED & TRACKING ────────────────────────────
+app.get('/api/opportunities', requireLogin, async (req, res) => {
+  try {
+    const category = req.query.category || 'all';
+    const feed = await pipeline.getPersonalizedFeed(req.session.userId, category);
+    res.json({ opportunities: feed });
+  } catch (err) {
+    console.error('API opportunities error:', err);
+    res.status(500).json({ error: 'Failed to fetch opportunities' });
+  }
+});
+
+app.post('/api/opportunities/track', requireLogin, async (req, res) => {
+  const { opportunityId, status } = req.body;
+  if (!opportunityId || !status) {
+    return res.status(400).json({ error: 'Opportunity ID and status required' });
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO user_opportunity_actions (user_id, opportunity_id, status)
+       VALUES (?, ?, ?)
+       ON DUPLICATE KEY UPDATE status = VALUES(status), updated_at = NOW()`,
+      [req.session.userId, opportunityId, status]
+    );
+
+    // Reconcile reminders immediately (silences alerts if applied or completed)
     await reconciler.reconcileUserReminders(req.session.userId);
-    res.json({ success: true, message: 'Interests saved & opportunities discovered!' });
-  } catch (syncErr) {
-    res.json({ success: true, message: 'Interests saved.' });
+
+    res.json({ success: true, message: `Opportunity marked as ${status}` });
+  } catch (err) {
+    console.error('Track opportunity error:', err);
+    res.status(500).json({ error: 'Failed to update status' });
   }
 });
 
@@ -930,6 +900,55 @@ app.post('/user/update-reminders', requireLogin, async (req, res) => {
     res.json({ success: true, message: 'Deadlines refreshed and reconciled.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update reminders' });
+  }
+});
+
+// ── PUSH NOTIFICATION ROUTES ─────────────────────────────────
+app.get('/push/vapid-public-key', (req, res) => {
+  res.json({ publicKey: publicVapidKey });
+});
+
+app.post('/push/subscribe', requireLogin, async (req, res) => {
+  const sub = req.body;
+  const userId = req.session.userId;
+  if (!sub || !sub.endpoint || !sub.keys) {
+    return res.status(400).json({ error: 'Invalid subscription object' });
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth, subscription_json)
+       VALUES (?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         endpoint=VALUES(endpoint),
+         p256dh=VALUES(p256dh), auth=VALUES(auth),
+         subscription_json=VALUES(subscription_json), updated_at=NOW()`,
+      [userId, sub.endpoint, sub.keys.p256dh, sub.keys.auth, JSON.stringify(sub)]
+    );
+    res.status(201).json({ success: true });
+  } catch (err) {
+    console.error('Subscribe error:', err);
+    res.status(500).json({ error: 'Failed to subscribe' });
+  }
+});
+
+app.post('/push/unsubscribe', requireLogin, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM push_subscriptions WHERE user_id = ?', [req.session.userId]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to unsubscribe' });
+  }
+});
+
+app.get('/push/status', requireLogin, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id FROM push_subscriptions WHERE user_id = ?', [req.session.userId]
+    );
+    res.json({ subscribed: rows.length > 0 });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get status' });
   }
 });
 

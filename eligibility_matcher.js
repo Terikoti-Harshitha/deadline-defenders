@@ -1,94 +1,179 @@
-// eligibility_matcher.js — Explainable Student Eligibility & Personalization Engine
-// Architecture: Multi-Attribute Matching (Qualification, Branch, Year, Location, Interests)
-// Principle: "Match locally, explain transparently."
+// eligibility_matcher.js — Explainable Multi-Profile Eligibility & Personalization Engine
+// Philosophy: "Minimum info -> useful recommendations. More info -> accurate personalization."
+// Golden Rule: "Missing information must never be assumed as eligibility."
 
 class EligibilityMatcher {
-  // Compute match score and explainable reasons between an opportunity and student profile
+  // Compute match score, matching mode, and explainable reasons for any profile (10th, 12th, Diploma, UG, PG, or Interest-only)
   evaluateEligibility(opportunity, profile, userInterests = []) {
-    let score = 50; // baseline score for any valid opportunity
-    const reasons = [];
+    let score = 50; // baseline score
+    const verifiedReasons = [];
+    const unverifiedNotices = [];
     const mismatches = [];
 
     const oppQual = (opportunity.qualification_req || 'Any').toLowerCase();
-    const userQual = (profile?.qualification || 'B.Tech').toLowerCase();
-
     const oppBranch = (opportunity.branch_req || 'Any').toLowerCase();
-    const userBranch = (profile?.branch || 'Computer Science').toLowerCase();
-
     const oppYear = (opportunity.graduation_year_req || 'Any').toLowerCase();
-    const userYear = String(profile?.graduation_year || '2026');
-
     const oppLoc = (opportunity.location || 'India').toLowerCase();
-    const userLoc = (profile?.state_location || 'Andhra Pradesh').toLowerCase();
+    const oppTitle = (opportunity.title || '').toLowerCase();
+    const oppOrg = (opportunity.organization || '').toLowerCase();
+    const oppCat = (opportunity.category || '').toLowerCase();
 
-    // 1. Qualification Matching
-    if (oppQual.includes('any') || oppQual.includes('graduate')) {
-      score += 15;
-      reasons.push('✓ Open to All Graduates');
-    } else if (
-      (userQual.includes('b.tech') && (oppQual.includes('b.tech') || oppQual.includes('btech') || oppQual.includes('b.e'))) ||
-      (userQual.includes('diploma') && oppQual.includes('diploma')) ||
-      (userQual.includes('12th') && (oppQual.includes('12th') || oppQual.includes('intermediate')))
-    ) {
-      score += 20;
-      reasons.push(`✓ Matches Qualification (${profile.qualification})`);
-    } else {
-      score -= 10;
-      mismatches.push(`Required: ${opportunity.qualification_req}`);
+    // Check what profile information is actually provided by user (NULL = skipped)
+    const hasEducation = Boolean(profile && (profile.education_level || profile.qualification));
+    const hasLocation = Boolean(profile && (profile.state_location || profile.city));
+    const hasSkills = Boolean(profile && profile.skills);
+    const hasInterests = Array.isArray(userInterests) && userInterests.length > 0;
+
+    const userEduLevel = (profile?.education_level || '').toLowerCase();
+    const userQual = (profile?.qualification || '').toLowerCase();
+    const userBranch = (profile?.branch || '').toLowerCase();
+    const userYear = profile?.graduation_year ? String(profile.graduation_year) : null;
+    const userLoc = (profile?.state_location || '').toLowerCase();
+
+    // ── 1. INTEREST ALIGNMENT (Primary for all users) ─────────────
+    let isInterestMatch = false;
+    let matchedInterestName = '';
+
+    if (hasInterests) {
+      for (const i of userInterests) {
+        const iLow = i.toLowerCase().trim();
+        if (oppTitle.includes(iLow) || oppOrg.includes(iLow) || oppCat.includes(iLow) || oppBranch.includes(iLow)) {
+          isInterestMatch = true;
+          matchedInterestName = i;
+          break;
+        }
+      }
     }
-
-    // 2. Branch Matching
-    if (oppBranch.includes('any') || oppBranch.includes('all')) {
-      score += 10;
-      reasons.push('✓ Open to All Branches');
-    } else if (
-      (userBranch.includes('computer') || userBranch.includes('cse') || userBranch.includes('it')) &&
-      (oppBranch.includes('cse') || oppBranch.includes('it') || oppBranch.includes('computer'))
-    ) {
-      score += 15;
-      reasons.push(`✓ Matches Branch (${profile.branch})`);
-    } else if (
-      (userBranch.includes('electronics') || userBranch.includes('ece')) &&
-      (oppBranch.includes('ece') || oppBranch.includes('electronics'))
-    ) {
-      score += 15;
-      reasons.push(`✓ Matches Branch (${profile.branch})`);
-    }
-
-    // 3. Batch / Graduation Year Matching
-    if (oppYear.includes('any') || oppYear.includes(userYear)) {
-      score += 10;
-      reasons.push(`✓ Eligible Batch (${userYear})`);
-    }
-
-    // 4. Location Matching
-    if (oppLoc.includes('india') || oppLoc.includes('all india') || oppLoc.includes(userLoc)) {
-      score += 10;
-      reasons.push(`✓ Location Applicable (${opportunity.location})`);
-    }
-
-    // 5. Interest Alignment
-    const titleLower = opportunity.title.toLowerCase();
-    const orgLower = opportunity.organization.toLowerCase();
-    const isInterestMatch = userInterests.some(i => {
-      const iLow = i.toLowerCase();
-      return titleLower.includes(iLow) || orgLower.includes(iLow) || (opportunity.category && opportunity.category.toLowerCase().includes(iLow));
-    });
 
     if (isInterestMatch) {
-      score += 15;
-      reasons.push('⭐ Aligns with Your Chosen Interests');
+      score += 25;
+      verifiedReasons.push(`⭐ Aligns with Tracked Interest (${matchedInterestName})`);
+    } else if (hasInterests) {
+      // General match in opportunity pool
+      score += 5;
     }
 
-    // Normalize final score between 10% and 99%
+    // ── 2. EDUCATION MATCHING (Progressive & Inclusive) ────────────
+    if (!hasEducation) {
+      if (oppQual.includes('any') || oppQual.includes('open') || oppCat.includes('hackathon') || oppCat.includes('competition')) {
+        score += 15;
+        verifiedReasons.push('✓ Open to All Educational Backgrounds');
+      } else {
+        unverifiedNotices.push(`⚠️ Education not provided (Requires: ${opportunity.qualification_req || 'Specific qualification'})`);
+      }
+    } else {
+      // User has provided education info (10th, 12th, Diploma, ITI, UG, PG, etc.)
+      const is10th = userEduLevel.includes('10th') || userQual.includes('10th') || userQual.includes('matric');
+      const is12th = userEduLevel.includes('12th') || userQual.includes('12th') || userQual.includes('inter') || userQual.includes('mpc') || userQual.includes('bipc');
+      const isDiploma = userEduLevel.includes('diploma') || userEduLevel.includes('iti') || userQual.includes('diploma') || userQual.includes('iti');
+      const isUG = userEduLevel.includes('undergraduate') || userQual.includes('b.tech') || userQual.includes('btech') || userQual.includes('b.sc') || userQual.includes('b.com') || userQual.includes('bca') || userQual.includes('bba') || userQual.includes('degree');
+      const isPG = userEduLevel.includes('postgraduate') || userQual.includes('m.tech') || userQual.includes('mca') || userQual.includes('mba') || userQual.includes('m.sc');
+
+      if (oppQual.includes('any') || oppQual.includes('open') || oppQual.includes('all')) {
+        score += 20;
+        verifiedReasons.push('✓ Open to All Students & Applicants');
+      } else if (is10th && (oppQual.includes('10th') || oppQual.includes('matric') || oppQual.includes('secondary') || oppTitle.includes('olympiad') || oppTitle.includes('scholarship'))) {
+        score += 25;
+        verifiedReasons.push(`✓ Matches 10th Standard Level`);
+      } else if (is12th && (oppQual.includes('12th') || oppQual.includes('intermediate') || oppQual.includes('higher secondary') || oppQual.includes('10+2'))) {
+        score += 25;
+        verifiedReasons.push(`✓ Matches 12th / Intermediate Level`);
+      } else if (isDiploma && (oppQual.includes('diploma') || oppQual.includes('iti') || oppQual.includes('polytechnic'))) {
+        score += 25;
+        verifiedReasons.push(`✓ Matches Diploma / ITI Qualification`);
+      } else if (isUG && (oppQual.includes('graduate') || oppQual.includes('degree') || oppQual.includes('b.tech') || oppQual.includes('b.e') || oppQual.includes('b.sc') || oppQual.includes('b.com') || oppQual.includes('bca') || oppQual.includes('bba') || oppQual.includes('ug'))) {
+        score += 25;
+        verifiedReasons.push(`✓ Matches Degree / Undergraduate Level (${profile.qualification || profile.education_level})`);
+      } else if (isPG && (oppQual.includes('postgraduate') || oppQual.includes('pg') || oppQual.includes('masters') || oppQual.includes('m.tech') || oppQual.includes('mca') || oppQual.includes('mba') || oppQual.includes('m.sc'))) {
+        score += 25;
+        verifiedReasons.push(`✓ Matches Postgraduate Level (${profile.qualification || profile.education_level})`);
+      } else if (oppQual.includes(userQual) || (userQual && userQual.includes(oppQual))) {
+        score += 20;
+        verifiedReasons.push(`✓ Matches Qualification (${profile.qualification})`);
+      } else {
+        score -= 10;
+        mismatches.push(`Required: ${opportunity.qualification_req}`);
+      }
+
+      // Branch / Specialization / Trade Matching
+      if (userBranch) {
+        if (oppBranch.includes('any') || oppBranch.includes('all')) {
+          score += 10;
+          verifiedReasons.push('✓ Open to All Streams / Branches');
+        } else if (oppBranch.includes(userBranch) || userBranch.includes(oppBranch)) {
+          score += 15;
+          verifiedReasons.push(`✓ Matches Stream / Specialization (${profile.branch})`);
+        }
+      }
+    }
+
+    // ── 3. BATCH & GRADUATION YEAR MATCHING ──────────────────────
+    if (userYear && userYear !== 'null') {
+      if (oppYear.includes('any') || oppYear.includes(userYear)) {
+        score += 10;
+        verifiedReasons.push(`✓ Eligible Batch (${userYear})`);
+      }
+    }
+
+    // ── 4. LOCATION MATCHING ─────────────────────────────────────
+    if (!hasLocation) {
+      if (oppLoc.includes('online') || oppLoc.includes('remote') || oppLoc.includes('india') || oppLoc.includes('national')) {
+        score += 10;
+        verifiedReasons.push('✓ Online / National Opportunity');
+      } else {
+        unverifiedNotices.push(`⚠️ Location not provided (Notice: ${opportunity.location || 'Specific State'})`);
+      }
+    } else {
+      if (oppLoc.includes('india') || oppLoc.includes('all india') || oppLoc.includes('remote') || oppLoc.includes('online') || (userLoc && oppLoc.includes(userLoc))) {
+        score += 15;
+        verifiedReasons.push(`✓ Location Applicable (${opportunity.location || 'India'})`);
+      } else {
+        score -= 5;
+        mismatches.push(`Location: ${opportunity.location}`);
+      }
+    }
+
+    // ── 5. SKILLS MATCHING ───────────────────────────────────────
+    if (hasSkills) {
+      try {
+        const skillsList = Array.isArray(profile.skills) ? profile.skills : JSON.parse(profile.skills || '[]');
+        for (const sk of skillsList) {
+          if (oppTitle.includes(sk.toLowerCase()) || oppCat.includes(sk.toLowerCase())) {
+            score += 10;
+            verifiedReasons.push(`✓ Matches Skill (${sk})`);
+            break;
+          }
+        }
+      } catch (_) {}
+    }
+
+    // ── 6. DETERMINE MATCHING MODE & CONFIDENCE ─────────────────
+    let matchType = 'INTEREST_DISCOVERY';
+    let matchConfidence = 'DISCOVERY';
+
+    if (hasEducation && hasLocation && hasInterests) {
+      matchType = 'FULL_MATCH';
+      matchConfidence = 'HIGH';
+    } else if (hasEducation || hasLocation) {
+      matchType = 'PARTIAL_MATCH';
+      matchConfidence = 'MEDIUM';
+    } else {
+      matchType = 'INTEREST_DISCOVERY';
+      matchConfidence = 'DISCOVERY';
+    }
+
+    // Normalize final score
     const finalScore = Math.min(99, Math.max(15, score));
 
     return {
       matchScore: finalScore,
+      matchType,
+      matchConfidence,
       isEligible: finalScore >= 60,
-      reasons,
+      reasons: verifiedReasons,
+      unverifiedNotices,
       mismatches,
-      summaryText: reasons.slice(0, 3).join(' · ')
+      summaryText: verifiedReasons.slice(0, 3).join(' · ') || (unverifiedNotices[0] || 'Interest-based recommendation')
     };
   }
 
@@ -99,8 +184,11 @@ class EligibilityMatcher {
       return {
         ...opp,
         matchScore: evaluation.matchScore,
+        matchType: evaluation.matchType,
+        matchConfidence: evaluation.matchConfidence,
         isEligible: evaluation.isEligible,
         matchReasons: evaluation.reasons,
+        unverifiedNotices: evaluation.unverifiedNotices,
         matchSummary: evaluation.summaryText
       };
     }).sort((a, b) => b.matchScore - a.matchScore);
@@ -108,3 +196,4 @@ class EligibilityMatcher {
 }
 
 module.exports = EligibilityMatcher;
+

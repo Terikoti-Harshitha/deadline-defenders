@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password_hash` VARCHAR(255) NOT NULL,
   `reset_token` VARCHAR(255) DEFAULT NULL,
   `reset_token_expires` DATETIME DEFAULT NULL,
+  `onboarding_completed` BOOLEAN NOT NULL DEFAULT FALSE,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_users_username` (`username`),
@@ -23,14 +24,21 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
--- 2. User Academic Profiles (For Eligibility Matching)
+-- 2. User Academic & Personal Profiles (Progressive & Optional)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `user_profiles` (
   `user_id` INT(11) NOT NULL,
-  `qualification` VARCHAR(100) NOT NULL DEFAULT 'B.Tech',
-  `branch` VARCHAR(100) NOT NULL DEFAULT 'Computer Science',
-  `graduation_year` INT(11) NOT NULL DEFAULT 2026,
-  `state_location` VARCHAR(100) NOT NULL DEFAULT 'Andhra Pradesh',
+  `education_level` VARCHAR(50) DEFAULT NULL,
+  `qualification` VARCHAR(100) DEFAULT NULL,
+  `branch` VARCHAR(100) DEFAULT NULL,
+  `study_status` VARCHAR(50) DEFAULT NULL,
+  `graduation_year` INT(11) DEFAULT NULL,
+  `state_location` VARCHAR(100) DEFAULT NULL,
+  `city` VARCHAR(100) DEFAULT NULL,
+  `age` INT(11) DEFAULT NULL,
+  `gender` VARCHAR(50) DEFAULT NULL,
+  `skills` TEXT DEFAULT NULL,
+  `career_goal` VARCHAR(100) DEFAULT NULL,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`),
   CONSTRAINT `fk_up_user_id` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
