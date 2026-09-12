@@ -3,1827 +3,1902 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Deadline Defender — Opportunity Radar</title>
+  <title>Deadline Defender — Academic & Opportunity Intelligence</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  
-  <!-- React 18 & ReactDOM -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- Lucide Icons CDN -->
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-
   <style>
-    /* Base reset & fonts */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body, #root { width: 100%; min-height: 100vh; background: #0A121D; color: #E9EEF5; }
-    body { font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
+    /* ═══════════════════════════════════════════════════════════════════
+       DESIGN SYSTEM: DARK CYBER-RADAR THEME (CLASH DISPLAY & CABINET)
+    ═══════════════════════════════════════════════════════════════════ */
+    :root {
+      --void: #080a0e;
+      --deep: #0d1117;
+      --well: #131720;
+      --pit: #1a2030;
+      --card: #151b27;
+      --card-hover: #1c2434;
+      --ridge: #242c3d;
+      --line: rgba(255, 255, 255, 0.08);
+      --line-high: rgba(255, 255, 255, 0.16);
+
+      --snow: #dce4f5;
+      --white: #ffffff;
+      --ash: #8a99b5;
+      --fog: #505f7c;
+
+      --amber: #f5a623;
+      --amber2: #ffca6b;
+      --amber-g: linear-gradient(135deg, #f5a623, #e8601c);
+      --ember: #e8601c;
+      --coral: #ff7a5c;
+      --jade: #00c48c;
+      --jade2: #4dffc4;
+      --ice: #4fc3f7;
+      --purple: #9c88ff;
+
+      --r1: 12px;
+      --r2: 18px;
+      --r3: 24px;
+      --r-full: 9999px;
+
+      --fd: 'Clash Display', -apple-system, BlinkMacSystemFont, sans-serif;
+      --fb: 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      --fm: 'JetBrains Mono', monospace;
+
+      --silk: cubic-bezier(0.16, 1, 0.3, 1);
+      --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      width: 100%; min-height: 100vh;
+      background: var(--void);
+      color: var(--snow);
+      font-family: var(--fb);
+      font-size: 15px;
+      line-height: 1.5;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient background glow */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: -50%;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(245, 166, 35, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(232, 96, 28, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(0, 196, 140, 0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       APP CONTAINER & LAYOUT
+    ═══════════════════════════════════════════════════════════════════ */
+    .app-wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      margin: 0 auto;
+      background: var(--deep);
+      border-left: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Header */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(13, 17, 23, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--line);
+      padding: 16px 20px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--amber-g);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--void);
+      box-shadow: 0 4px 14px rgba(245, 166, 35, 0.3);
+    }
+    .brand-title {
+      font-family: var(--fd);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--white);
+    }
+    .brand-title span { color: var(--amber); }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-icon-hdr {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--well);
+      border: 1px solid var(--line);
+      color: var(--snow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .btn-icon-hdr:hover { background: var(--pit); border-color: var(--line-high); }
+    .badge-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--coral);
+      border: 2px solid var(--deep);
+    }
+
+    /* Main Scroll Body */
+    .app-main {
+      flex: 1;
+      padding: 18px 18px 110px;
+      overflow-y: auto;
+    }
+
+    /* Tab Switcher Content */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.25s ease; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       BOTTOM NAVIGATION BAR (4 CORE TABS)
+    ═══════════════════════════════════════════════════════════════════ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: 72px;
+      background: rgba(13, 17, 23, 0.94);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 6px 8px env(safe-area-inset-bottom, 8px);
+      z-index: 50;
+    }
+    .nav-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      border: none;
+      background: none;
+      color: var(--ash);
+      cursor: pointer;
+      border-radius: 14px;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .nav-tab:hover { color: var(--snow); }
+    .nav-tab.active { color: var(--amber); }
+    .nav-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      width: 16px;
+      height: 2px;
+      background: var(--amber);
+      border-radius: 2px;
+      box-shadow: 0 0 8px var(--amber);
+    }
+    .nav-tab span {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       DASHBOARD: HERO, STATS & COMPLETION
+    ═══════════════════════════════════════════════════════════════════ */
+    .user-greeting {
+      margin-bottom: 20px;
+    }
+    .user-greeting h1 {
+      font-family: var(--fd);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.01em;
+    }
+    .user-greeting p {
+      font-size: 13px;
+      color: var(--ash);
+      margin-top: 2px;
+    }
+
+    /* Profile Completeness Bar */
+    .profile-meter {
+      background: var(--well);
+      border: 1px solid var(--line);
+      border-radius: var(--r2);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .pm-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .pm-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ash);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pm-pct {
+      font-family: var(--fm);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--amber);
+    }
+    .pm-track {
+      width: 100%;
+      height: 6px;
+      background: var(--pit);
+      border-radius: var(--r-full);
+      overflow: hidden;
+    }
+    .pm-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--amber-g);
+      border-radius: var(--r-full);
+      transition: width 0.6s var(--silk);
+    }
+    .pm-sub {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--fog);
+    }
+    .pm-btn {
+      color: var(--amber);
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* Stats 3-Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .stat-box {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r1);
+      padding: 12px 10px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+    .stat-box:hover { transform: translateY(-2px); border-color: var(--line-high); }
+    .stat-val {
+      font-family: var(--fd);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .stat-box:nth-child(1) .stat-val { color: var(--coral); }
+    .stat-box:nth-child(2) .stat-val { color: var(--amber); }
+    .stat-box:nth-child(3) .stat-val { color: var(--jade); }
+    .stat-lbl {
+      font-size: 11px;
+      color: var(--ash);
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    /* Section Headers */
+    .sec-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 24px 0 14px;
+    }
+    .sec-title {
+      font-family: var(--fd);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sec-link {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--amber);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       URGENT CAROUSEL & OPPORTUNITY CARDS
+    ═══════════════════════════════════════════════════════════════════ */
+    .urgent-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      margin: 0 -18px 20px;
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+    .urgent-scroll::-webkit-scrollbar { display: none; }
+    .urgent-card {
+      flex: 0 0 280px;
+      scroll-snap-align: start;
+      background: linear-gradient(135deg, rgba(232, 96, 28, 0.12), rgba(21, 27, 39, 0.95));
+      border: 1px solid rgba(232, 96, 28, 0.3);
+      border-radius: var(--r2);
+      padding: 16px;
+      cursor: pointer;
+      position: relative;
+    }
+    .urgent-card:hover { border-color: var(--coral); }
+    .urg-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--fm);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: var(--r-full);
+      background: rgba(255, 122, 92, 0.2);
+      color: var(--coral);
+      margin-bottom: 10px;
+    }
+    .urg-title {
+      font-family: var(--fd);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+    .urg-org { font-size: 12px; color: var(--ash); margin-bottom: 12px; }
+    .urg-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 10px;
+      font-size: 12px;
+    }
+    .urg-days { font-weight: 700; color: var(--amber); }
+
+    /* Feed Opportunity Cards with SVG Match Ring */
+    .opp-list { display: flex; flex-direction: column; gap: 14px; }
+    .opp-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r2);
+      padding: 16px;
+      transition: all 0.2s;
+      cursor: pointer;
+      position: relative;
+    }
+    .opp-card:hover {
+      background: var(--card-hover);
+      border-color: var(--line-high);
+      transform: translateY(-2px);
+    }
+    .opp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .opp-main-info { flex: 1; }
+    .opp-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--well);
+      color: var(--ash);
+      border: 1px solid var(--line);
+    }
+    .tag-exam { background: rgba(156, 136, 255, 0.12); color: var(--purple); border-color: rgba(156, 136, 255, 0.3); }
+    .tag-intern { background: rgba(79, 195, 247, 0.12); color: var(--ice); border-color: rgba(79, 195, 247, 0.3); }
+    .tag-schol { background: rgba(0, 196, 140, 0.12); color: var(--jade); border-color: rgba(0, 196, 140, 0.3); }
+    .tag-hack { background: rgba(245, 166, 35, 0.12); color: var(--amber); border-color: rgba(245, 166, 35, 0.3); }
+
+    .opp-title {
+      font-family: var(--fd);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.35;
+      margin-bottom: 4px;
+    }
+    .opp-org { font-size: 13px; color: var(--ash); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+    /* SVG Match Ring */
+    .match-ring-wrap {
+      width: 46px;
+      height: 46px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .match-ring-svg { transform: rotate(-90deg); }
+    .match-ring-val {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fm);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .opp-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--ash);
+    }
+    .opp-deadline {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--fm);
+      color: var(--amber2);
+    }
+    .opp-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-act {
+      background: var(--well);
+      border: 1px solid var(--line);
+      color: var(--snow);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .btn-act:hover { background: var(--pit); border-color: var(--amber); color: var(--amber); }
+    .btn-act.applied { background: rgba(0, 196, 140, 0.15); border-color: var(--jade); color: var(--jade); }
+
+    /* AI Match Explain Bar */
+    .ai-explain-bar {
+      margin-top: 8px;
+      background: rgba(245, 166, 35, 0.05);
+      border-left: 2px solid var(--amber);
+      padding: 6px 10px;
+      border-radius: 0 6px 6px 0;
+      font-size: 11px;
+      color: var(--ash);
+    }
+    .ai-explain-bar strong { color: var(--amber); font-weight: 600; }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       NEWS FEED TAB
+    ═══════════════════════════════════════════════════════════════════ */
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+    .filter-chips::-webkit-scrollbar { display: none; }
+    .chip {
+      background: var(--well);
+      border: 1px solid var(--line);
+      color: var(--ash);
+      padding: 6px 14px;
+      border-radius: var(--r-full);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .chip:hover { border-color: var(--line-high); color: var(--snow); }
+    .chip.active {
+      background: var(--amber-g);
+      border-color: transparent;
+      color: var(--void);
+      font-weight: 700;
+    }
+
+    .news-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r2);
+      padding: 16px;
+      margin-bottom: 14px;
+      transition: all 0.2s;
+    }
+    .news-card:hover { border-color: var(--line-high); background: var(--card-hover); }
+    .news-cat {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--amber);
+      margin-bottom: 6px;
+    }
+    .news-title {
+      font-family: var(--fd);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+    .news-summary { font-size: 13px; color: var(--ash); line-height: 1.45; margin-bottom: 12px; }
+    .news-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--fog);
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }
+    .news-src { font-weight: 600; color: var(--ash); }
+    .news-link {
+      color: var(--amber);
+      text-decoration: none;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       CALENDAR & DEADLINES TAB
+    ═══════════════════════════════════════════════════════════════════ */
+    .cal-box {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r2);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .cal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .cal-month {
+      font-family: var(--fd);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .cal-nav {
+      display: flex;
+      gap: 6px;
+    }
+    .cal-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: var(--well);
+      border: 1px solid var(--line);
+      color: var(--snow);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      text-align: center;
+    }
+    .cal-day-lbl { font-size: 10px; font-weight: 700; color: var(--fog); text-transform: uppercase; }
+    .cal-date {
+      height: 34px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: var(--fm);
+      color: var(--snow);
+      position: relative;
+    }
+    .cal-date.has-deadline::after {
+      content: '';
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--amber);
+      margin-top: 2px;
+    }
+    .cal-date.urgent::after { background: var(--coral); box-shadow: 0 0 6px var(--coral); }
+    .cal-date.today { background: rgba(245, 166, 35, 0.15); border: 1px solid var(--amber); color: var(--amber); }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       PROFILE TAB & ACADEMIC CRITERIA
+    ═══════════════════════════════════════════════════════════════════ */
+    .profile-hero {
+      background: linear-gradient(135deg, rgba(245, 166, 35, 0.08), rgba(19, 23, 32, 0.9));
+      border: 1px solid var(--line);
+      border-radius: var(--r3);
+      padding: 24px 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .avatar-wrap {
+      width: 68px;
+      height: 68px;
+      border-radius: 20px;
+      background: var(--amber-g);
+      color: var(--void);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fd);
+      font-size: 26px;
+      font-weight: 700;
+      margin: 0 auto 12px;
+      box-shadow: 0 8px 24px rgba(245, 166, 35, 0.25);
+    }
+    .prof-name { font-family: var(--fd); font-size: 20px; font-weight: 700; color: var(--white); }
+    .prof-email { font-size: 13px; color: var(--ash); margin-top: 2px; }
+    .prof-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: var(--r-full);
+      background: rgba(0, 196, 140, 0.15);
+      color: var(--jade);
+      margin-top: 10px;
+    }
+
+    .form-box {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r2);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .form-box-title {
+      font-family: var(--fd);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ash);
+      margin-bottom: 6px;
+    }
+    .form-input, .form-select {
+      width: 100%;
+      background: var(--well);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: var(--fb);
+      font-size: 14px;
+      color: var(--white);
+      outline: none;
+      transition: all 0.2s;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--amber);
+      box-shadow: 0 0 0 2px rgba(245, 166, 35, 0.2);
+    }
+
+    /* Tag Adder Chips */
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--well);
+      border: 1px solid var(--line);
+      color: var(--snow);
+      padding: 6px 12px;
+      border-radius: var(--r-full);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tag-chip.active {
+      background: rgba(245, 166, 35, 0.15);
+      border-color: var(--amber);
+      color: var(--amber);
+      font-weight: 600;
+    }
+    .tag-remove { font-size: 14px; line-height: 1; cursor: pointer; color: var(--fog); }
+    .tag-remove:hover { color: var(--coral); }
+
+    .tag-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Buttons */
+    .btn-main {
+      width: 100%;
+      background: var(--amber-g);
+      border: none;
+      border-radius: 12px;
+      color: var(--void);
+      font-family: var(--fb);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(245, 166, 35, 0.3);
+    }
+    .btn-main:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245, 166, 35, 0.4); }
+
+    .btn-danger-outline {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255, 71, 87, 0.3);
+      border-radius: 12px;
+      color: #ff4757;
+      font-family: var(--fb);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+    .btn-danger-outline:hover { background: rgba(255, 71, 87, 0.1); border-color: #ff4757; }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODALS & OVERLAYS: ONBOARDING, EVIDENCE, SEARCH
+    ═══════════════════════════════════════════════════════════════════ */
+    .modal-scrim {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    .modal-scrim.active { display: flex; animation: fadeIn 0.2s ease; }
+    .modal-card {
+      background: var(--deep);
+      border: 1px solid var(--line-high);
+      border-radius: var(--r3);
+      width: 100%;
+      max-width: 440px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+    }
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: var(--well);
+      border: 1px solid var(--line);
+      color: var(--snow);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-title {
+      font-family: var(--fd);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+    .modal-sub { font-size: 13px; color: var(--ash); margin-bottom: 18px; line-height: 1.4; }
+
+    /* Evidence Box */
+    .quote-box {
+      background: var(--well);
+      border-left: 3px solid var(--amber);
+      border-radius: 0 10px 10px 0;
+      padding: 12px 14px;
+      font-style: italic;
+      color: var(--snow);
+      font-size: 13px;
+      margin: 12px 0 16px;
+    }
+    .trust-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--r-full);
+      background: rgba(0, 196, 140, 0.15);
+      color: var(--jade);
+      margin-bottom: 12px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 84px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--well);
+      border: 1px solid var(--amber);
+      color: var(--white);
+      padding: 10px 18px;
+      border-radius: var(--r-full);
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 99;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s var(--silk);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div class="app-wrap">
 
-  <script type="text/babel">
-    const { useState, useEffect, useMemo, useCallback, useRef } = React;
+    <!-- ── TOPBAR HEADER ────────────────────────────────────────────── -->
+    <header class="app-header">
+      <a href="javascript:void(0)" onclick="switchTab('tab-home')" class="brand">
+        <div class="brand-icon">
+          <i data-lucide="shield-check" style="width:20px;height:20px;"></i>
+        </div>
+        <div class="brand-title">Deadline <span>Defender</span></div>
+      </a>
+      <div class="header-actions">
+        <button class="btn-icon-hdr" onclick="openSearchModal()" title="Search">
+          <i data-lucide="search" style="width:18px;height:18px;"></i>
+        </button>
+        <button class="btn-icon-hdr" onclick="openNotificationsModal()" title="Alerts">
+          <i data-lucide="bell" style="width:18px;height:18px;"></i>
+          <span class="badge-dot" id="headerAlertDot"></span>
+        </button>
+      </div>
+    </header>
 
-    /* ------------------------------------------------------------------ */
-    /*  Icon helper                                                       */
-    /* ------------------------------------------------------------------ */
-    const ICONS_SVG_PATH = {
-      Home: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
-      Star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
-      Sparkles: '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>',
-      Flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z"/>',
-      Bookmark: '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>',
-      CheckCircle2: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
-      Bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
-      User: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
-      Menu: '<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',
-      X: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
-      ChevronRight: '<path d="m9 18 6-6-6-6"/>',
-      ShieldCheck: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
-      ShieldQuestion: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
-      ShieldAlert: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
-      ExternalLink: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
-      Info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
-      Search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
-      MapPin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
-      GraduationCap: '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
-      Radar: '<path d="M19.07 4.93a10 10 0 0 0-14.14 0"/><path d="M16.24 7.76a6 6 0 0 0-8.49 0"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/>',
-      Clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
-      ArrowUpRight: '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
-      Check: '<path d="M20 6 9 17l-5-5"/>',
-      Circle: '<circle cx="12" cy="12" r="10"/>'
+    <!-- ── MAIN CONTENT CONTAINER ───────────────────────────────────── -->
+    <main class="app-main">
+
+      <!-- ═════════════════════════════════════════════════════════════
+           TAB 1: HOME DASHBOARD
+      ═════════════════════════════════════════════════════════════ -->
+      <section id="tab-home" class="tab-content active">
+        <!-- Greeting -->
+        <div class="user-greeting">
+          <h1 id="homeUserGreeting">Welcome back! 👋</h1>
+          <p id="homeUserSub">Here are your personalized academic & career opportunities.</p>
+        </div>
+
+        <!-- Profile Completeness -->
+        <div class="profile-meter">
+          <div class="pm-header">
+            <div class="pm-title">
+              <i data-lucide="sparkles" style="width:14px;height:14px;color:var(--amber);"></i>
+              Profile Personalization
+            </div>
+            <div class="pm-pct" id="homeProfilePct">60%</div>
+          </div>
+          <div class="pm-track">
+            <div class="pm-fill" id="homeProfileFill" style="width: 60%;"></div>
+          </div>
+          <div class="pm-sub">
+            <span id="homeProfileMsg">Add degree & city for higher accuracy</span>
+            <a class="pm-btn" onclick="switchTab('tab-profile')">Complete Profile →</a>
+          </div>
+        </div>
+
+        <!-- Stats 3-Grid -->
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-val" id="statUrgent">0</div>
+            <div class="stat-lbl">Closing Soon</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="statMatched">0</div>
+            <div class="stat-lbl">Top Matches</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="statTracked">0</div>
+            <div class="stat-lbl">Tracked</div>
+          </div>
+        </div>
+
+        <!-- Urgent Section -->
+        <div class="sec-head">
+          <div class="sec-title">
+            <i data-lucide="flame" style="width:18px;height:18px;color:var(--coral);"></i>
+            Don't Miss These
+          </div>
+          <span class="sec-link" onclick="switchTab('tab-deadlines')">View Calendar →</span>
+        </div>
+        <div class="urgent-scroll" id="urgentCarousel">
+          <!-- Populated by JS -->
+          <div style="color:var(--fog);font-size:13px;padding:10px;">Checking urgent opportunities...</div>
+        </div>
+
+        <!-- Ranked Opportunities Feed -->
+        <div class="sec-head">
+          <div class="sec-title">
+            <i data-lucide="compass" style="width:18px;height:18px;color:var(--amber);"></i>
+            Smart Opportunity Intelligence
+          </div>
+          <span class="sec-link" onclick="refreshOpportunities()">Refresh ⟳</span>
+        </div>
+        <div class="opp-list" id="homeOppList">
+          <!-- Populated by JS -->
+          <div style="color:var(--ash);text-align:center;padding:30px 0;">Loading personalized feed...</div>
+        </div>
+      </section>
+
+      <!-- ═════════════════════════════════════════════════════════════
+           TAB 2: NEWS FEED
+      ═════════════════════════════════════════════════════════════ -->
+      <section id="tab-news" class="tab-content">
+        <div class="sec-head" style="margin-top:0;">
+          <div class="sec-title">
+            <i data-lucide="newspaper" style="width:18px;height:18px;color:var(--amber);"></i>
+            Personalized Feed & Updates
+          </div>
+        </div>
+
+        <!-- Category Filter Chips -->
+        <div class="filter-chips" id="newsChips">
+          <div class="chip active" onclick="filterNews('All', this)">All Topics</div>
+          <div class="chip" onclick="filterNews('AI & ML', this)">AI & Robotics</div>
+          <div class="chip" onclick="filterNews('Government Exams', this)">Govt Exams</div>
+          <div class="chip" onclick="filterNews('Internships', this)">Internships</div>
+          <div class="chip" onclick="filterNews('Scholarships', this)">Scholarships</div>
+          <div class="chip" onclick="filterNews('Hackathons', this)">Hackathons</div>
+        </div>
+
+        <div id="newsList">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ═════════════════════════════════════════════════════════════
+           TAB 3: CALENDAR & DEADLINES
+      ═════════════════════════════════════════════════════════════ -->
+      <section id="tab-deadlines" class="tab-content">
+        <div class="sec-head" style="margin-top:0;">
+          <div class="sec-title">
+            <i data-lucide="calendar" style="width:18px;height:18px;color:var(--amber);"></i>
+            Deadline Calendar & Alerts
+          </div>
+        </div>
+
+        <!-- Mini Calendar Box -->
+        <div class="cal-box">
+          <div class="cal-header">
+            <div class="cal-month" id="calMonthTitle">September 2026</div>
+            <div class="cal-nav">
+              <button class="cal-btn" onclick="prevMonth()"><i data-lucide="chevron-left" style="width:16px;height:16px;"></i></button>
+              <button class="cal-btn" onclick="nextMonth()"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></button>
+            </div>
+          </div>
+          <div class="cal-grid" id="calGrid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <div class="sec-head">
+          <div class="sec-title">Upcoming Active Deadlines</div>
+        </div>
+        <div class="opp-list" id="calendarDeadlinesList">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ═════════════════════════════════════════════════════════════
+           TAB 4: PROFILE & ACADEMIC CRITERIA
+      ═════════════════════════════════════════════════════════════ -->
+      <section id="tab-profile" class="tab-content">
+        <div class="profile-hero">
+          <div class="avatar-wrap" id="profAvatar">U</div>
+          <div class="prof-name" id="profDisplayName">Student User</div>
+          <div class="prof-email" id="profDisplayEmail">user@example.com</div>
+          <div class="prof-status-pill">
+            <i data-lucide="check-circle" style="width:13px;height:13px;"></i>
+            AI Personalization Active
+          </div>
+        </div>
+
+        <!-- Academic Form -->
+        <div class="form-box">
+          <div class="form-box-title">
+            <i data-lucide="graduation-cap" style="width:16px;height:16px;color:var(--amber);"></i>
+            Academic Profile & Level
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Education Level / Stage</label>
+            <select class="form-select" id="profEduLevel">
+              <option value="Below 10th">Below 10th Standard</option>
+              <option value="10th">10th Class / SSC</option>
+              <option value="12th">12th Class / Intermediate / HSC</option>
+              <option value="Diploma">Diploma / Polytechnic / ITI</option>
+              <option value="Undergraduate" selected>Undergraduate (B.Tech / B.Sc / B.Com / B.A)</option>
+              <option value="Postgraduate">Postgraduate (M.Tech / M.Sc / MBA / Ph.D)</option>
+              <option value="Graduate / Job seeker">Graduate / Job Seeker</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Degree / Qualification</label>
+            <input type="text" class="form-input" id="profQualification" placeholder="e.g. B.Tech Computer Science, 10th Standard" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Branch / Stream</label>
+            <input type="text" class="form-input" id="profBranch" placeholder="e.g. Computer Science, General, Science" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Location / City</label>
+            <input type="text" class="form-input" id="profCity" placeholder="e.g. Hyderabad, Andhra Pradesh, Delhi" />
+          </div>
+        </div>
+
+        <!-- Tracked Interests -->
+        <div class="form-box">
+          <div class="form-box-title">
+            <i data-lucide="sparkles" style="width:16px;height:16px;color:var(--amber);"></i>
+            Tracked Interests & Topics
+          </div>
+          <div class="tags-container" id="profileInterestsList">
+            <!-- Populated by JS -->
+          </div>
+          <div class="tag-input-row">
+            <input type="text" class="form-input" id="newInterestInput" placeholder="Add custom interest (e.g. ISRO, Robotics)" />
+            <button class="btn-act" onclick="addCustomInterest()" style="padding:0 16px;background:var(--amber-g);color:var(--void);border:none;font-weight:700;">+ Add</button>
+          </div>
+        </div>
+
+        <button class="btn-main" onclick="saveProfileChanges()">
+          <i data-lucide="save" style="width:16px;height:16px;"></i>
+          Save Profile & Recalculate
+        </button>
+
+        <button class="btn-danger-outline" onclick="resetTestUsers()">
+          <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+          🧹 Reset Test Users & Start Fresh
+        </button>
+
+        <button class="btn-act" onclick="handleLogout()" style="width:100%;margin-top:10px;justify-content:center;padding:12px;color:var(--ash);">
+          Sign Out
+        </button>
+      </section>
+
+    </main>
+
+    <!-- ── BOTTOM NAVIGATION ────────────────────────────────────────── -->
+    <nav class="bottom-nav">
+      <button class="nav-tab active" id="btnTabHome" onclick="switchTab('tab-home')">
+        <i data-lucide="home" style="width:20px;height:20px;"></i>
+        <span>Home</span>
+      </button>
+      <button class="nav-tab" id="btnTabNews" onclick="switchTab('tab-news')">
+        <i data-lucide="newspaper" style="width:20px;height:20px;"></i>
+        <span>News</span>
+      </button>
+      <button class="nav-tab" id="btnTabDeadlines" onclick="switchTab('tab-deadlines')">
+        <i data-lucide="calendar" style="width:20px;height:20px;"></i>
+        <span>Deadlines</span>
+      </button>
+      <button class="nav-tab" id="btnTabProfile" onclick="switchTab('tab-profile')">
+        <i data-lucide="user" style="width:20px;height:20px;"></i>
+        <span>Profile</span>
+      </button>
+    </nav>
+
+    <!-- ── MODAL: PROGRESSIVE ONBOARDING (NEW USERS) ────────────────── -->
+    <div class="modal-scrim" id="onboardingModal">
+      <div class="modal-card">
+        <div class="modal-title">⚡ Personalize Your Radar</div>
+        <div class="modal-sub">Tell us what you're looking for so we find exact matching deadlines. Everything except 1 interest is optional!</div>
+
+        <div class="form-group">
+          <label class="form-label">Pick Your Tracked Interests (Tap to select)</label>
+          <div class="tags-container" id="onboardingInterestPills">
+            <!-- Chips -->
+          </div>
+          <div class="tag-input-row" style="margin-top:8px;">
+            <input type="text" class="form-input" id="onboardCustomTag" placeholder="Type custom interest..." />
+            <button class="btn-act" onclick="addOnboardingCustomTag()" style="background:var(--amber-g);color:var(--void);border:none;font-weight:700;">Add</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:16px;">
+          <label class="form-label">Your Current Educational Level (Optional)</label>
+          <select class="form-select" id="onboardEduLevel">
+            <option value="">Prefer not to say (Skip)</option>
+            <option value="Below 10th">Below 10th Standard</option>
+            <option value="10th">10th Class / SSC</option>
+            <option value="12th">12th Class / Intermediate / HSC</option>
+            <option value="Diploma">Diploma / Polytechnic / ITI</option>
+            <option value="Undergraduate" selected>Undergraduate (B.Tech / B.Sc / B.Com / B.A)</option>
+            <option value="Postgraduate">Postgraduate (M.Tech / M.Sc / MBA / Ph.D)</option>
+            <option value="Graduate / Job seeker">Graduate / Job Seeker</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Your City / Location (Optional)</label>
+          <input type="text" class="form-input" id="onboardCity" placeholder="e.g. Hyderabad, India" />
+        </div>
+
+        <button class="btn-main" onclick="submitOnboarding()" style="margin-top:18px;">
+          Continue to Radar →
+        </button>
+      </div>
+    </div>
+
+    <!-- ── MODAL: EVIDENCE & DETAILS ────────────────────────────────── -->
+    <div class="modal-scrim" id="evidenceModal">
+      <div class="modal-card">
+        <button class="modal-close" onclick="closeModal('evidenceModal')">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+        <div class="trust-badge" id="evTrustBadge">
+          <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+          <span id="evTrustText">Official Government Source</span>
+        </div>
+        <div class="modal-title" id="evTitle">Opportunity Title</div>
+        <div class="modal-sub" id="evOrg">Organization</div>
+
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--ash);margin-bottom:4px;">Official Evidence Citation:</div>
+        <div class="quote-box" id="evQuote">
+          "Applications are invited until 25 September 2026."
+        </div>
+
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ash);margin-bottom:16px;">
+          <span>Confidence: <strong id="evConfidence" style="color:var(--jade);">HIGH</strong></span>
+          <span>Last Verified: <strong id="evVerified">12 Sep 2026</strong></span>
+        </div>
+
+        <a class="btn-main" id="evSourceLink" href="#" target="_blank" style="text-decoration:none;">
+          Open Official Website ↗
+        </a>
+      </div>
+    </div>
+
+    <!-- ── MODAL: GLOBAL SEARCH ─────────────────────────────────────── -->
+    <div class="modal-scrim" id="searchModal">
+      <div class="modal-card">
+        <button class="modal-close" onclick="closeModal('searchModal')">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+        <div class="modal-title">Search Opportunities</div>
+        <input type="text" class="form-input" id="globalSearchInput" placeholder="Search by title, organization, topic..." oninput="handleGlobalSearch()" style="margin:12px 0 16px;" autofocus />
+        <div id="searchResultsList" class="opp-list">
+          <div style="color:var(--fog);font-size:13px;text-align:center;padding:20px;">Type a keyword to search</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MODAL: NOTIFICATIONS ─────────────────────────────────────── -->
+    <div class="modal-scrim" id="notificationsModal">
+      <div class="modal-card">
+        <button class="modal-close" onclick="closeModal('notificationsModal')">
+          <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
+        <div class="modal-title">Deadline Alerts & Logs</div>
+        <div class="modal-sub">Upcoming staged reminder dispatches</div>
+        <div id="notificationsLogList" style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TOAST NOTIFICATION ───────────────────────────────────────── -->
+    <div class="toast" id="toastBox">
+      <i data-lucide="info" style="width:16px;height:16px;color:var(--amber);"></i>
+      <span id="toastMsg">Action completed</span>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       JAVASCRIPT LOGIC & API INTEGRATION
+  ═══════════════════════════════════════════════════════════════════ -->
+  <script>
+    // App State
+    let userState = {
+      username: '',
+      email: '',
+      education_level: 'Undergraduate',
+      qualification: '',
+      branch: '',
+      city: '',
+      interests: []
     };
+    let opportunitiesList = [];
+    let newsList = [];
+    let currentCalDate = new Date();
 
-    function Icon({ name, size = 16, strokeWidth = 2, className = "", style = {}, fill = "none", ...props }) {
-      const pathHtml = ICONS_SVG_PATH[name] || '<circle cx="12" cy="12" r="10"/>';
-      return (
-        <svg
-          width={size}
-          height={size}
-          viewBox="0 0 24 24"
-          fill={fill}
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={className}
-          style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0, ...style }}
-          dangerouslySetInnerHTML={{ __html: pathHtml }}
-          {...props}
-        />
-      );
-    }
-
-    const Home = (p) => <Icon name="Home" {...p} />;
-    const Star = (p) => <Icon name="Star" {...p} />;
-    const Sparkles = (p) => <Icon name="Sparkles" {...p} />;
-    const Flame = (p) => <Icon name="Flame" {...p} />;
-    const Bookmark = (p) => <Icon name="Bookmark" {...p} />;
-    const CheckCircle2 = (p) => <Icon name="CheckCircle2" {...p} />;
-    const Bell = (p) => <Icon name="Bell" {...p} />;
-    const User = (p) => <Icon name="User" {...p} />;
-    const Menu = (p) => <Icon name="Menu" {...p} />;
-    const X = (p) => <Icon name="X" {...p} />;
-    const ChevronRight = (p) => <Icon name="ChevronRight" {...p} />;
-    const ShieldCheck = (p) => <Icon name="ShieldCheck" {...p} />;
-    const ShieldQuestion = (p) => <Icon name="ShieldQuestion" {...p} />;
-    const ShieldAlert = (p) => <Icon name="ShieldAlert" {...p} />;
-    const ExternalLink = (p) => <Icon name="ExternalLink" {...p} />;
-    const Info = (p) => <Icon name="Info" {...p} />;
-    const Search = (p) => <Icon name="Search" {...p} />;
-    const MapPin = (p) => <Icon name="MapPin" {...p} />;
-    const GraduationCap = (p) => <Icon name="GraduationCap" {...p} />;
-    const Radar = (p) => <Icon name="Radar" {...p} />;
-    const Clock = (p) => <Icon name="Clock" {...p} />;
-    const ArrowUpRight = (p) => <Icon name="ArrowUpRight" {...p} />;
-    const Check = (p) => <Icon name="Check" {...p} />;
-    const Circle = (p) => <Icon name="Circle" {...p} />;
-
-    /* ------------------------------------------------------------------ */
-    /*  Constants & Options                                               */
-    /* ------------------------------------------------------------------ */
-    const INTEREST_OPTIONS = [
+    const DEFAULT_INTEREST_OPTIONS = [
       "Artificial Intelligence",
-      "Cybersecurity",
       "Government Exams",
+      "Cybersecurity",
       "Data Science",
-      "Web Development",
-      "Civil Services",
       "Robotics",
-      "Finance",
-      "Design",
-      "Research",
-    ];
-
-    const OPP_TYPE_OPTIONS = [
-      "Internships",
-      "Government Jobs",
       "Scholarships",
-      "Hackathons",
-      "Certifications",
-      "Fellowships",
+      "Internships",
+      "Web Development",
+      "Civil Services"
     ];
 
-    const EDUCATION_OPTIONS = [
-      "Below 10th",
-      "10th",
-      "12th",
-      "Diploma",
-      "Undergraduate",
-      "Postgraduate",
-      "Graduate / Job seeker",
-    ];
+    // Initialize App
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+      await checkAuthAndLoad();
+    });
 
-    const initialReminderPrefs = { 30: false, 14: true, 7: true, 3: true, 1: true, 0: true };
-
-    const NAV_ITEMS = [
-      { key: "home", label: "Home", Icon: Home },
-      { key: "recommended", label: "Recommended", Icon: Star },
-      { key: "new", label: "New", Icon: Sparkles },
-      { key: "closing", label: "Closing soon", Icon: Flame },
-      { key: "saved", label: "Saved", Icon: Bookmark },
-      { key: "applied", label: "Applied", Icon: CheckCircle2 },
-      { key: "reminders", label: "Reminders", Icon: Bell },
-      { key: "profile", label: "Profile", Icon: User },
-    ];
-
-    /* ------------------------------------------------------------------ */
-    /*  Helper Functions                                                  */
-    /* ------------------------------------------------------------------ */
-    function urgency(daysLeft) {
-      if (daysLeft <= 1) return "critical";
-      if (daysLeft <= 7) return "soon";
-      return "safe";
-    }
-
-    function trustMeta(trust) {
-      if (trust === "official")
-        return { label: "Official source", Icon: ShieldCheck, cls: "trust-official" };
-      if (trust === "verified")
-        return { label: "Verified secondary", Icon: ShieldCheck, cls: "trust-verified" };
-      return { label: "Unverified — confirm before applying", Icon: ShieldQuestion, cls: "trust-unverified" };
-    }
-
-    function eligIcon(status) {
-      if (status === "match") return <Check size={13} strokeWidth={3} />;
-      if (status === "warn") return <span className="dot-warn" />;
-      return <span className="dot-missing" />;
-    }
-
-    /* ------------------------------------------------------------------ */
-    /*  Root Application Component                                        */
-    /* ------------------------------------------------------------------ */
-    function DeadlineDefenderApp() {
-      const [currentUser, setCurrentUser] = useState(null);
-      const [loading, setLoading] = useState(true);
-      const [authModalOpen, setAuthModalOpen] = useState(false);
-      const [authMode, setAuthMode] = useState('login'); // 'login' | 'signup'
-
-      const [stage, setStage] = useState("app"); // "onboarding" | "app"
-      const [onboardStep, setOnboardStep] = useState(0);
-
-      const [interests, setInterests] = useState([]);
-      const [oppTypes, setOppTypes] = useState(["Internships", "Scholarships", "Government Jobs"]);
-      const [education, setEducation] = useState("");
-      const [city, setCity] = useState("");
-      const [customInterest, setCustomInterest] = useState("");
-
-      const [activeNav, setActiveNav] = useState("home");
-      const [mobileNavOpen, setMobileNavOpen] = useState(false);
-      const [searchQuery, setSearchQuery] = useState("");
-      const [opportunities, setOpportunities] = useState([]);
-      const [evidenceId, setEvidenceId] = useState(null);
-      const [reminderPrefs, setReminderPrefs] = useState(initialReminderPrefs);
-      const [reminderLog, setReminderLog] = useState([]);
-      const [toastMessage, setToastMessage] = useState(null);
-
-      const showToast = (msg) => {
-        setToastMessage(msg);
-        setTimeout(() => setToastMessage(null), 2500);
-      };
-
-      // Load initial state from backend
-      const loadData = useCallback(async () => {
-        try {
-          const pRes = await fetch('/api/user/profile', { credentials: 'include' });
-          if (!pRes.ok) {
-            setAuthModalOpen(true);
-            setLoading(false);
-            return;
-          }
-
-          const uData = await pRes.json();
-          setCurrentUser(uData);
-          setAuthModalOpen(false);
-
-          if (uData.interests) setInterests(uData.interests);
-          if (uData.oppTypes && uData.oppTypes.length) setOppTypes(uData.oppTypes);
-          if (uData.education) setEducation(uData.education);
-          if (uData.city) setCity(uData.city);
-          if (uData.reminderPrefs) setReminderPrefs(uData.reminderPrefs);
-
-          if (uData.needsOnboarding) {
-            setStage("onboarding");
-          } else {
-            setStage("app");
-          }
-
-          // Fetch opportunities and reminder log in parallel
-          const [oRes, rRes] = await Promise.all([
-            fetch('/api/opportunities', { credentials: 'include' }),
-            fetch('/api/reminders/log', { credentials: 'include' })
-          ]);
-
-          if (oRes.ok) {
-            const oData = await oRes.json();
-            setOpportunities(oData.opportunities || []);
-          }
-
-          if (rRes.ok) {
-            const rData = await rRes.json();
-            setReminderLog(rData.log || []);
-          }
-        } catch (err) {
-          console.error("App init error:", err);
-          setAuthModalOpen(true);
-        } finally {
-          setLoading(false);
+    async function checkAuthAndLoad() {
+      try {
+        const res = await fetch('/api/user/profile', { credentials: 'include' });
+        if (res.status === 401) {
+          window.location.href = 'login.html';
+          return;
         }
-      }, []);
-
-      useEffect(() => {
-        loadData();
-      }, [loadData]);
-
-      const toggle = (list, setList, value) =>
-        setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
-
-      const addCustomInterest = () => {
-        const val = customInterest.trim();
-        if (!val) return;
-        if (!interests.includes(val)) {
-          setInterests([...interests, val]);
-          showToast(`Added "${val}" to interests`);
-        }
-        setCustomInterest("");
-      };
-
-      // Save profile changes to backend
-      const saveProfileToBackend = async (payload) => {
-        try {
-          const res = await fetch('/api/user/profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-          });
-          if (res.ok) {
-            showToast("Profile saved & radar updated ✓");
-            await loadData();
-          }
-        } catch (err) {
-          console.error("Save profile error:", err);
-        }
-      };
-
-      // Complete Onboarding
-      const handleFinishOnboarding = async () => {
-        const payload = {
-          interests,
-          oppTypes,
-          education,
-          city
+        const data = await res.json();
+        userState = {
+          username: data.user?.username || 'Student',
+          email: data.user?.email || '',
+          education_level: data.user?.education_level || 'Undergraduate',
+          qualification: data.user?.qualification || '',
+          branch: data.user?.branch || '',
+          city: data.user?.city || '',
+          interests: data.interests || []
         };
-        try {
-          const res = await fetch('/api/user/onboarding', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-          });
-          if (res.ok) {
-            setStage("app");
-            showToast("Welcome! Your radar is now active ⚡");
-            await loadData();
-          }
-        } catch (err) {
-          console.error("Onboarding finish error:", err);
-          setStage("app");
+
+        if (data.needsOnboarding) {
+          openOnboardingModal();
+        } else {
+          renderUserProfile();
+          await loadOpportunities();
+          await loadNews();
+          renderCalendar();
         }
-      };
+      } catch (err) {
+        console.error('Initialization error:', err);
+      }
+    }
 
-      // Toggle Opportunity Track Status (Save / Apply)
-      const handleSetOppStatus = async (id, status) => {
-        // Optimistic UI update
-        setOpportunities(prev => prev.map(o => {
-          if (o.id === id) {
-            if (status === 'saved') return { ...o, saved: !o.saved };
-            if (status === 'applied') return { ...o, applied: !o.applied };
-          }
-          return o;
-        }));
+    // ── NAVIGATION TABS ──────────────────────────────────────────────
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
 
-        const targetOpp = opportunities.find(o => o.id === id);
-        const newStatus = status === 'saved'
-          ? (targetOpp?.saved ? 'unseen' : 'saved')
-          : (targetOpp?.applied ? 'unseen' : 'applied');
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add('active');
 
-        try {
-          await fetch('/api/opportunities/track', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ opportunityId: id, status: newStatus })
-          });
-          showToast(newStatus === 'saved' ? "Saved to radar ✓" : newStatus === 'applied' ? "Marked as Applied ✓" : "Updated ✓");
-        } catch (err) {
-          console.error("Track error:", err);
+      if (tabId === 'tab-home') document.getElementById('btnTabHome').classList.add('active');
+      else if (tabId === 'tab-news') document.getElementById('btnTabNews').classList.add('active');
+      else if (tabId === 'tab-deadlines') document.getElementById('btnTabDeadlines').classList.add('active');
+      else if (tabId === 'tab-profile') document.getElementById('btnTabProfile').classList.add('active');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── LOAD & RENDER OPPORTUNITIES ──────────────────────────────────
+    async function loadOpportunities() {
+      try {
+        const res = await fetch('/api/opportunities', { credentials: 'include' });
+        const data = await res.json();
+        opportunitiesList = data.opportunities || [];
+        renderDashboardStats();
+        renderUrgentCarousel();
+        renderOpportunitiesFeed(opportunitiesList);
+        renderCalendarDeadlines();
+      } catch (err) {
+        console.error('Fetch opportunities error:', err);
+      }
+    }
+
+    function renderDashboardStats() {
+      const urgentCount = opportunitiesList.filter(o => o.daysLeft <= 7 && o.daysLeft >= 0).length;
+      const matchedCount = opportunitiesList.filter(o => o.matchScore >= 80).length;
+      const trackedCount = opportunitiesList.filter(o => o.saved || o.applied).length;
+
+      document.getElementById('statUrgent').textContent = urgentCount;
+      document.getElementById('statMatched').textContent = matchedCount;
+      document.getElementById('statTracked').textContent = trackedCount;
+
+      // Completeness
+      let score = 40;
+      if (userState.interests.length > 0) score += 20;
+      if (userState.education_level) score += 20;
+      if (userState.qualification || userState.city) score += 20;
+      score = Math.min(score, 100);
+
+      document.getElementById('homeProfilePct').textContent = score + '%';
+      document.getElementById('homeProfileFill').style.width = score + '%';
+    }
+
+    function renderUrgentCarousel() {
+      const container = document.getElementById('urgentCarousel');
+      const urgent = opportunitiesList.filter(o => o.daysLeft <= 14 && o.daysLeft >= 0);
+
+      if (!urgent.length) {
+        container.innerHTML = '<div style="color:var(--ash);font-size:13px;padding:10px;">No urgent deadlines due this week. You\'re ahead of schedule! 🎉</div>';
+        return;
+      }
+
+      container.innerHTML = urgent.map(o => `
+        <div class="urgent-card" onclick="openEvidenceModal(${o.id})">
+          <div class="urg-badge">
+            <i data-lucide="clock" style="width:12px;height:12px;"></i>
+            ${o.daysLeft === 0 ? 'CLOSING TODAY' : o.daysLeft + ' DAYS LEFT'}
+          </div>
+          <div class="urg-title">${escapeHtml(o.title)}</div>
+          <div class="urg-org">${escapeHtml(o.org || o.organization || 'Official Source')}</div>
+          <div class="urg-footer">
+            <span class="urg-days">Due ${o.deadlineLabel || o.deadline}</span>
+            <span style="color:var(--amber);font-weight:700;">View Details →</span>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function renderOpportunitiesFeed(list) {
+      const container = document.getElementById('homeOppList');
+      if (!list.length) {
+        container.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px 0;">No opportunities found for your criteria. Try adding more interests in Profile.</div>';
+        return;
+      }
+
+      container.innerHTML = list.map(o => {
+        const strokeColor = o.matchScore >= 85 ? '#00c48c' : o.matchScore >= 70 ? '#f5a623' : '#8a99b5';
+        const circum = 2 * Math.PI * 18;
+        const offset = circum - (o.matchScore / 100) * circum;
+
+        let tagClass = 'tag';
+        const cat = (o.category || '').toLowerCase();
+        if (cat.includes('exam')) tagClass = 'tag tag-exam';
+        else if (cat.includes('intern')) tagClass = 'tag tag-intern';
+        else if (cat.includes('schol')) tagClass = 'tag tag-schol';
+        else if (cat.includes('hack')) tagClass = 'tag tag-hack';
+
+        return `
+          <div class="opp-card" onclick="openEvidenceModal(${o.id})">
+            <div class="opp-header">
+              <div class="opp-main-info">
+                <div class="opp-tags">
+                  <span class="${tagClass}">${escapeHtml(o.category || 'Opportunity')}</span>
+                  ${o.isNew ? '<span class="tag" style="background:rgba(232,96,28,0.15);color:var(--coral);border-color:var(--coral);">● New</span>' : ''}
+                </div>
+                <div class="opp-title">${escapeHtml(o.title)}</div>
+                <div class="opp-org">
+                  <i data-lucide="building" style="width:13px;height:13px;color:var(--fog);"></i>
+                  ${escapeHtml(o.org || o.organization || 'National Agency')}
+                </div>
+              </div>
+              <div class="match-ring-wrap" title="${o.matchScore}% Match Score">
+                <svg class="match-ring-svg" width="46" height="46">
+                  <circle cx="23" cy="23" r="18" fill="none" stroke="var(--ridge)" stroke-width="3"></circle>
+                  <circle cx="23" cy="23" r="18" fill="none" stroke="${strokeColor}" stroke-width="3"
+                    stroke-dasharray="${circum}" stroke-dashoffset="${offset}" stroke-linecap="round"></circle>
+                </svg>
+                <div class="match-ring-val">${o.matchScore}%</div>
+              </div>
+            </div>
+
+            ${o.reasons && o.reasons.length ? `
+              <div class="ai-explain-bar">
+                <strong>AI Match:</strong> ${escapeHtml(o.reasons.slice(0, 2).join(' • '))}
+              </div>
+            ` : ''}
+
+            <div class="opp-meta-row" onclick="event.stopPropagation()">
+              <div class="opp-deadline">
+                <i data-lucide="clock" style="width:13px;height:13px;"></i>
+                ${o.daysLeft !== undefined ? (o.daysLeft === 0 ? 'Today' : o.daysLeft + ' days left') : o.deadline}
+              </div>
+              <div class="opp-actions">
+                <button class="btn-act ${o.applied ? 'applied' : ''}" onclick="toggleApply(${o.id}, this)">
+                  <i data-lucide="${o.applied ? 'check-circle-2' : 'send'}" style="width:12px;height:12px;"></i>
+                  ${o.applied ? 'Applied' : 'Mark Applied'}
+                </button>
+                <button class="btn-act ${o.saved ? 'applied' : ''}" onclick="toggleSave(${o.id}, this)">
+                  <i data-lucide="bookmark" style="width:12px;height:12px;"></i>
+                  ${o.saved ? 'Saved' : 'Save'}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    // ── NEWS FEED ────────────────────────────────────────────────────
+    async function loadNews(category = 'All') {
+      try {
+        const url = category === 'All' ? '/api/news' : `/api/news?category=${encodeURIComponent(category)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        newsList = data.news || [];
+        renderNewsList(newsList);
+      } catch (err) {
+        console.error('Fetch news error:', err);
+      }
+    }
+
+    function renderNewsList(list) {
+      const container = document.getElementById('newsList');
+      if (!list.length) {
+        container.innerHTML = '<div style="color:var(--ash);text-align:center;padding:20px;">No updates found for this topic.</div>';
+        return;
+      }
+
+      container.innerHTML = list.map(n => `
+        <div class="news-card">
+          <div class="news-cat">${escapeHtml(n.category || 'Updates')}</div>
+          <div class="news-title">${escapeHtml(n.headline || n.title)}</div>
+          <div class="news-summary">${escapeHtml(n.summary || '')}</div>
+          <div class="news-footer">
+            <span class="news-src">${escapeHtml(n.source || 'EduPortal')} • ${n.time || 'Today'}</span>
+            <a class="news-link" href="${n.url || '#'}" target="_blank">
+              Read Official ↗
+            </a>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function filterNews(cat, el) {
+      document.querySelectorAll('#newsChips .chip').forEach(c => c.classList.remove('active'));
+      if (el) el.classList.add('active');
+      loadNews(cat);
+    }
+
+    // ── CALENDAR ─────────────────────────────────────────────────────
+    function renderCalendar() {
+      const year = currentCalDate.getFullYear();
+      const month = currentCalDate.getMonth();
+      const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      document.getElementById('calMonthTitle').textContent = `${monthNames[month]} ${year}`;
+
+      const grid = document.getElementById('calGrid');
+      grid.innerHTML = '';
+
+      ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => {
+        grid.innerHTML += `<div class="cal-day-lbl">${d}</div>`;
+      });
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        grid.innerHTML += `<div></div>`;
+      }
+
+      const today = new Date();
+      for (let d = 1; d <= daysInMonth; d++) {
+        const isToday = (today.getFullYear() === year && today.getMonth() === month && today.getDate() === d);
+        // Check if deadline exists on this day
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const hasOpp = opportunitiesList.some(o => o.deadline === dateStr);
+        const isUrgent = opportunitiesList.some(o => o.deadline === dateStr && o.daysLeft <= 3);
+
+        let cls = 'cal-date';
+        if (isToday) cls += ' today';
+        if (hasOpp) cls += ' has-deadline';
+        if (isUrgent) cls += ' urgent';
+
+        grid.innerHTML += `<div class="${cls}">${d}</div>`;
+      }
+    }
+
+    function prevMonth() {
+      currentCalDate.setMonth(currentCalDate.getMonth() - 1);
+      renderCalendar();
+    }
+    function nextMonth() {
+      currentCalDate.setMonth(currentCalDate.getMonth() + 1);
+      renderCalendar();
+    }
+
+    function renderCalendarDeadlines() {
+      const container = document.getElementById('calendarDeadlinesList');
+      const sorted = [...opportunitiesList].sort((a,b) => (a.daysLeft || 999) - (b.daysLeft || 999));
+      renderOpportunitiesFeed(sorted);
+    }
+
+    // ── PROFILE & SETTINGS ───────────────────────────────────────────
+    function renderUserProfile() {
+      document.getElementById('homeUserGreeting').textContent = `Welcome back, ${userState.username}! 👋`;
+      document.getElementById('profDisplayName').textContent = userState.username;
+      document.getElementById('profDisplayEmail').textContent = userState.email || 'Verified Account';
+      document.getElementById('profAvatar').textContent = (userState.username[0] || 'U').toUpperCase();
+
+      document.getElementById('profEduLevel').value = userState.education_level || 'Undergraduate';
+      document.getElementById('profQualification').value = userState.qualification || '';
+      document.getElementById('profBranch').value = userState.branch || '';
+      document.getElementById('profCity').value = userState.city || '';
+
+      renderProfileInterests();
+    }
+
+    function renderProfileInterests() {
+      const container = document.getElementById('profileInterestsList');
+      container.innerHTML = userState.interests.map(i => `
+        <div class="tag-chip active">
+          ${escapeHtml(i)}
+          <span class="tag-remove" onclick="removeInterest('${escapeHtml(i)}')">×</span>
+        </div>
+      `).join('');
+    }
+
+    function addCustomInterest() {
+      const input = document.getElementById('newInterestInput');
+      const val = input.value.trim();
+      if (val && !userState.interests.includes(val)) {
+        userState.interests.push(val);
+        input.value = '';
+        renderProfileInterests();
+      }
+    }
+
+    function removeInterest(item) {
+      userState.interests = userState.interests.filter(i => i !== item);
+      renderProfileInterests();
+    }
+
+    async function saveProfileChanges() {
+      try {
+        const payload = {
+          education_level: document.getElementById('profEduLevel').value,
+          qualification: document.getElementById('profQualification').value.trim(),
+          branch: document.getElementById('profBranch').value.trim(),
+          city: document.getElementById('profCity').value.trim(),
+          interests: userState.interests
+        };
+
+        const res = await fetch('/api/user/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          showToast('Profile & Tracked Topics Saved!');
+          userState = { ...userState, ...payload };
+          await loadOpportunities();
+        } else {
+          showToast('Failed to save profile changes.');
         }
+      } catch (err) {
+        showToast('Network error while saving.');
+      }
+    }
+
+    // ── MODALS: ONBOARDING, EVIDENCE, SEARCH ─────────────────────────
+    function openOnboardingModal() {
+      const pillsBox = document.getElementById('onboardingInterestPills');
+      pillsBox.innerHTML = DEFAULT_INTEREST_OPTIONS.map(opt => `
+        <div class="tag-chip" onclick="this.classList.toggle('active')">${opt}</div>
+      `).join('');
+      document.getElementById('onboardingModal').classList.add('active');
+    }
+
+    function addOnboardingCustomTag() {
+      const inp = document.getElementById('onboardCustomTag');
+      const val = inp.value.trim();
+      if (val) {
+        const box = document.getElementById('onboardingInterestPills');
+        const chip = document.createElement('div');
+        chip.className = 'tag-chip active';
+        chip.textContent = val;
+        chip.onclick = () => chip.classList.toggle('active');
+        box.appendChild(chip);
+        inp.value = '';
+      }
+    }
+
+    async function submitOnboarding() {
+      const activeChips = Array.from(document.querySelectorAll('#onboardingInterestPills .tag-chip.active')).map(el => el.textContent.trim());
+      const interests = activeChips.length ? activeChips : ['Government Exams'];
+
+      const payload = {
+        interests,
+        education_level: document.getElementById('onboardEduLevel').value || 'Undergraduate',
+        city: document.getElementById('onboardCity').value.trim() || 'India'
       };
 
-      // Update Reminder Preferences
-      const handleSetReminderPrefs = async (newPrefs) => {
-        setReminderPrefs(newPrefs);
-        try {
-          await fetch('/api/reminders/prefs', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ prefs: newPrefs })
-          });
-          showToast("Reminder preferences updated");
-        } catch (err) {
-          console.error("Reminder prefs error:", err);
+      try {
+        const res = await fetch('/api/user/onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          closeModal('onboardingModal');
+          userState.interests = interests;
+          userState.education_level = payload.education_level;
+          userState.city = payload.city;
+          renderUserProfile();
+          await loadOpportunities();
+          await loadNews();
+          showToast('Preferences Saved! Welcome aboard 🎉');
         }
-      };
+      } catch (err) {
+        showToast('Error saving onboarding.');
+      }
+    }
 
-      // Calculate confidence & profile completion
-      const confidence = useMemo(() => {
-        const hasEdu = !!education;
-        const hasCity = !!city;
-        const hasInterests = interests.length > 0;
-        if (hasEdu && hasCity && hasInterests) return "high";
-        if (hasInterests && (hasEdu || hasCity)) return "partial";
-        return "interest-only";
-      }, [education, city, interests]);
+    function openEvidenceModal(oppId) {
+      const opp = opportunitiesList.find(o => o.id === oppId);
+      if (!opp) return;
 
-      const profileCompletion = useMemo(() => {
-        const fields = [interests.length > 0, oppTypes.length > 0, !!education, !!city];
-        const done = fields.filter(Boolean).length;
-        return Math.round((done / fields.length) * 100);
-      }, [interests, oppTypes, education, city]);
+      document.getElementById('evTitle').textContent = opp.title;
+      document.getElementById('evOrg').textContent = opp.org || opp.organization || 'Official Agency';
+      document.getElementById('evQuote').textContent = `"${opp.evidenceQuote || opp.deadline_source_text || 'Application closes on ' + (opp.deadlineLabel || opp.deadline)}."`;
+      document.getElementById('evConfidence').textContent = (opp.evidenceConfidence || opp.confidence || 'HIGH').toUpperCase();
+      document.getElementById('evVerified').textContent = opp.lastVerified || 'Verified';
+      document.getElementById('evSourceLink').href = opp.sourceUrl || opp.source_url || '#';
 
-      const evidenceOpp = opportunities.find((o) => o.id === evidenceId) || null;
+      document.getElementById('evidenceModal').classList.add('active');
+      lucide.createIcons();
+    }
 
-      // Filtered lists
-      const filteredOpps = useMemo(() => {
-        if (!searchQuery.trim()) return opportunities;
-        const q = searchQuery.toLowerCase();
-        return opportunities.filter(o => 
-          (o.title || '').toLowerCase().includes(q) ||
-          (o.org || '').toLowerCase().includes(q) ||
-          (o.category || '').toLowerCase().includes(q)
-        );
-      }, [opportunities, searchQuery]);
+    function openSearchModal() {
+      document.getElementById('searchModal').classList.add('active');
+      document.getElementById('globalSearchInput').focus();
+    }
 
-      const closingSoon = useMemo(() => 
-        filteredOpps.filter((o) => o.daysLeft <= 7).sort((a, b) => a.daysLeft - b.daysLeft),
-        [filteredOpps]
+    function handleGlobalSearch() {
+      const q = document.getElementById('globalSearchInput').value.toLowerCase().trim();
+      const container = document.getElementById('searchResultsList');
+      if (!q) {
+        container.innerHTML = '<div style="color:var(--fog);font-size:13px;text-align:center;padding:20px;">Type a keyword to search</div>';
+        return;
+      }
+      const matches = opportunitiesList.filter(o => 
+        (o.title || '').toLowerCase().includes(q) ||
+        (o.org || o.organization || '').toLowerCase().includes(q) ||
+        (o.category || '').toLowerCase().includes(q)
       );
-      const recommended = useMemo(() => 
-        [...filteredOpps].sort((a, b) => b.matchScore - a.matchScore),
-        [filteredOpps]
-      );
-      const fresh = useMemo(() => filteredOpps.filter((o) => o.isNew), [filteredOpps]);
-      const saved = useMemo(() => filteredOpps.filter((o) => o.saved), [filteredOpps]);
-      const applied = useMemo(() => filteredOpps.filter((o) => o.applied), [filteredOpps]);
+      if (!matches.length) {
+        container.innerHTML = '<div style="color:var(--ash);text-align:center;padding:20px;">No matches found.</div>';
+        return;
+      }
+      renderOpportunitiesFeed(matches);
+    }
 
-      const handleResetUsers = async () => {
-        if (!confirm("⚠️ Are you sure you want to delete all test user accounts and start 100% fresh?")) return;
-        try {
-          const res = await fetch('/api/dev/reset-all-users', { method: 'POST' });
-          const d = await res.json();
-          alert(d.message || "Database reset successfully!");
-          window.location.reload();
-        } catch (err) {
-          alert("Reset failed: " + err.message);
+    async function openNotificationsModal() {
+      const container = document.getElementById('notificationsLogList');
+      container.innerHTML = '<div style="color:var(--ash);font-size:13px;">Loading alert history...</div>';
+      document.getElementById('notificationsModal').classList.add('active');
+
+      try {
+        const res = await fetch('/api/reminders/log', { credentials: 'include' });
+        const data = await res.json();
+        const logs = data.log || [];
+        if (!logs.length) {
+          container.innerHTML = '<div style="color:var(--ash);font-size:13px;">No active reminders queued yet. Staged alerts (14d, 7d, 3d, 1d) will appear as deadlines approach.</div>';
+          return;
         }
-      };
-
-      const handleLogout = async () => {
-        await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
-        setCurrentUser(null);
-        setAuthModalOpen(true);
-      };
-
-      return (
-        <div className="dd-root">
-          <GlobalStyle />
-          
-          {stage === "onboarding" ? (
-            <Onboarding
-              step={onboardStep}
-              setStep={setOnboardStep}
-              interests={interests}
-              toggleInterest={(v) => toggle(interests, setInterests, v)}
-              oppTypes={oppTypes}
-              toggleOppType={(v) => toggle(oppTypes, setOppTypes, v)}
-              education={education}
-              setEducation={setEducation}
-              city={city}
-              setCity={setCity}
-              customInterest={customInterest}
-              setCustomInterest={setCustomInterest}
-              addCustomInterest={addCustomInterest}
-              finish={handleFinishOnboarding}
-            />
-          ) : (
-            <div className="shell">
-              <Sidebar
-                active={activeNav}
-                setActive={(k) => {
-                  setActiveNav(k);
-                  setMobileNavOpen(false);
-                }}
-                counts={{ closing: closingSoon.length, new: fresh.length, saved: saved.length, applied: applied.length }}
-                mobileOpen={mobileNavOpen}
-                closeMobile={() => setMobileNavOpen(false)}
-              />
-              <main className="main">
-                <Topbar
-                  onMenu={() => setMobileNavOpen(true)}
-                  completion={profileCompletion}
-                  onProfile={() => setActiveNav("profile")}
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  username={currentUser?.username}
-                />
-                <div className="content">
-                  {activeNav === "home" && (
-                    <HomeView
-                      closingSoon={closingSoon}
-                      recommended={recommended.slice(0, 6)}
-                      savedCount={saved.length}
-                      onEvidence={setEvidenceId}
-                      onSave={(id) => handleSetOppStatus(id, 'saved')}
-                      onApply={(id) => handleSetOppStatus(id, 'applied')}
-                      goTo={setActiveNav}
-                    />
-                  )}
-                  {activeNav === "recommended" && (
-                    <ListView
-                      title="Recommended for you"
-                      subtitle="Ranked by how well each opportunity fits your interests and profile."
-                      items={recommended}
-                      onEvidence={setEvidenceId}
-                      onSave={(id) => handleSetOppStatus(id, 'saved')}
-                      onApply={(id) => handleSetOppStatus(id, 'applied')}
-                    />
-                  )}
-                  {activeNav === "new" && (
-                    <ListView
-                      title="New opportunities"
-                      subtitle="Discovered since your last visit."
-                      items={fresh}
-                      onEvidence={setEvidenceId}
-                      onSave={(id) => handleSetOppStatus(id, 'saved')}
-                      onApply={(id) => handleSetOppStatus(id, 'applied')}
-                    />
-                  )}
-                  {activeNav === "closing" && (
-                    <ListView
-                      title="Closing soon"
-                      subtitle="Sorted by the least time remaining. Act on these first."
-                      items={closingSoon}
-                      onEvidence={setEvidenceId}
-                      onSave={(id) => handleSetOppStatus(id, 'saved')}
-                      onApply={(id) => handleSetOppStatus(id, 'applied')}
-                      emphasize
-                    />
-                  )}
-                  {activeNav === "saved" && (
-                    <ListView
-                      title="Saved"
-                      subtitle="Opportunities you're keeping an eye on."
-                      items={saved}
-                      onEvidence={setEvidenceId}
-                      onSave={(id) => handleSetOppStatus(id, 'saved')}
-                      onApply={(id) => handleSetOppStatus(id, 'applied')}
-                      emptyLabel="Nothing saved yet — tap the bookmark on any card to keep track of it here."
-                    />
-                  )}
-                  {activeNav === "applied" && (
-                    <ListView
-                      title="Applied"
-                      subtitle="Marking an opportunity applied cancels its remaining reminders."
-                      items={applied}
-                      onEvidence={setEvidenceId}
-                      onSave={(id) => handleSetOppStatus(id, 'saved')}
-                      onApply={(id) => handleSetOppStatus(id, 'applied')}
-                      emptyLabel="Nothing marked applied yet."
-                    />
-                  )}
-                  {activeNav === "reminders" && (
-                    <RemindersView
-                      prefs={reminderPrefs}
-                      setPrefs={handleSetReminderPrefs}
-                      log={reminderLog}
-                      onRefreshReminders={loadData}
-                    />
-                  )}
-                  {activeNav === "profile" && (
-                    <ProfileView
-                      username={currentUser?.username}
-                      email={currentUser?.email}
-                      interests={interests}
-                      toggleInterest={(v) => toggle(interests, setInterests, v)}
-                      customInterest={customInterest}
-                      setCustomInterest={setCustomInterest}
-                      addCustomInterest={addCustomInterest}
-                      oppTypes={oppTypes}
-                      toggleOppType={(v) => toggle(oppTypes, setOppTypes, v)}
-                      education={education}
-                      setEducation={setEducation}
-                      city={city}
-                      setCity={setCity}
-                      completion={profileCompletion}
-                      confidence={confidence}
-                      onSave={() => saveProfileToBackend({ interests, oppTypes, education, city })}
-                      onResetAllUsers={handleResetUsers}
-                      onLogout={handleLogout}
-                    />
-                  )}
-                </div>
-              </main>
-            </div>
-          )}
-
-          {evidenceOpp && <EvidenceModal opp={evidenceOpp} onClose={() => setEvidenceId(null)} />}
-
-          {/* Auth Modal (when unauthenticated) */}
-          {authModalOpen && (
-            <AuthModal
-              mode={authMode}
-              setMode={setAuthMode}
-              onSuccess={() => { setAuthModalOpen(false); loadData(); }}
-              onResetAllUsers={handleResetUsers}
-            />
-          )}
-
-          {/* Toast Notification */}
-          {toastMessage && (
-            <div className="toast-pill">
-              <CheckCircle2 size={16} />
-              <span>{toastMessage}</span>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    /* ------------------------------------------------------------------ */
-    /*  Onboarding Component                                              */
-    /* ------------------------------------------------------------------ */
-    function Onboarding({
-      step,
-      setStep,
-      interests,
-      toggleInterest,
-      oppTypes,
-      toggleOppType,
-      education,
-      setEducation,
-      city,
-      setCity,
-      customInterest,
-      setCustomInterest,
-      addCustomInterest,
-      finish,
-    }) {
-      const steps = ["interests", "types", "education", "location"];
-      const total = steps.length;
-
-      const next = () => (step < total - 1 ? setStep(step + 1) : finish());
-      const skip = () => (step < total - 1 ? setStep(step + 1) : finish());
-
-      return (
-        <div className="onboard">
-          <div className="onboard-card">
-            <div className="onboard-brand">
-              <Radar size={20} />
-              <span>Deadline Defender</span>
-            </div>
-
-            <div className="onboard-progress">
-              {steps.map((s, i) => (
-                <span key={s} className={"prog-seg" + (i <= step ? " prog-seg-done" : "")} />
-              ))}
-            </div>
-
-            {step === 0 && (
-              <div>
-                <h1>What are you interested in?</h1>
-                <p className="onboard-sub">Pick a few topics or type custom interests — this is all we need to start scanning for you.</p>
-                <div className="chip-grid">
-                  {INTEREST_OPTIONS.map((opt) => (
-                    <button
-                      key={opt}
-                      className={"chip" + (interests.includes(opt) ? " chip-active" : "")}
-                      onClick={() => toggleInterest(opt)}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                  {interests.filter(i => !INTEREST_OPTIONS.includes(i)).map(custom => (
-                    <button
-                      key={custom}
-                      className="chip chip-active"
-                      onClick={() => toggleInterest(custom)}
-                    >
-                      ⭐ {custom} ✕
-                    </button>
-                  ))}
-                </div>
-
-                <div className="field-row" style={{ marginTop: 14 }}>
-                  <Sparkles size={16} />
-                  <input
-                    className="text-input"
-                    placeholder="Type custom interest (e.g. ISRO, GATE, Robotics)..."
-                    value={customInterest}
-                    onChange={(e) => setCustomInterest(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addCustomInterest()}
-                  />
-                  <button type="button" className="btn-primary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={addCustomInterest}>
-                    + Add
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {step === 1 && (
-              <div>
-                <h1>What kind of opportunities?</h1>
-                <p className="onboard-sub">Select the categories you care about most. You can change this any time.</p>
-                <div className="chip-grid">
-                  {OPP_TYPE_OPTIONS.map((opt) => (
-                    <button
-                      key={opt}
-                      className={"chip" + (oppTypes.includes(opt) ? " chip-active" : "")}
-                      onClick={() => toggleOppType(opt)}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div>
-                <h1>Would you like to add your education?</h1>
-                <p className="onboard-sub">
-                  Any level works, from below 10th to postgraduate. This sharpens eligibility matching, but it's optional.
-                </p>
-                <div className="chip-grid">
-                  {EDUCATION_OPTIONS.map((opt) => (
-                    <button
-                      key={opt}
-                      className={"chip" + (education === opt ? " chip-active" : "")}
-                      onClick={() => setEducation(opt === education ? "" : opt)}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div>
-                <h1>Where are you based?</h1>
-                <p className="onboard-sub">Helps surface location-bound exams, state scholarships, and jobs. Optional.</p>
-                <div className="field-row">
-                  <MapPin size={16} />
-                  <input
-                    className="text-input"
-                    placeholder="City, state, or district (e.g. Hyderabad, Delhi, Bangalore)"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="onboard-actions">
-              <button className="btn-ghost" onClick={skip}>
-                Skip for now
-              </button>
-              <button className="btn-primary" onClick={next}>
-                {step < total - 1 ? "Continue" : "Start scanning"}
-                <ChevronRight size={16} />
-              </button>
+        container.innerHTML = logs.map(l => `
+          <div style="background:var(--well);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;">
+            <div style="font-weight:700;color:var(--white);margin-bottom:2px;">${escapeHtml(l.title)}</div>
+            <div style="color:var(--ash);display:flex;justify-content:space-between;">
+              <span>Stage: ${escapeHtml(l.stage)}</span>
+              <span style="color:var(--amber);font-weight:600;">${l.status}</span>
             </div>
           </div>
-        </div>
-      );
+        `).join('');
+      } catch (err) {
+        container.innerHTML = '<div style="color:var(--coral);font-size:13px;">Failed to load alerts.</div>';
+      }
     }
 
-    /* ------------------------------------------------------------------ */
-    /*  Sidebar & Topbar                                                  */
-    /* ------------------------------------------------------------------ */
-    function Sidebar({ active, setActive, counts, mobileOpen, closeMobile }) {
-      const badge = (key) => {
-        if (key === "closing" && counts.closing) return counts.closing;
-        if (key === "new" && counts.new) return counts.new;
-        if (key === "saved" && counts.saved) return counts.saved;
-        if (key === "applied" && counts.applied) return counts.applied;
-        return null;
-      };
-
-      return (
-        <>
-          {mobileOpen && <div className="scrim" onClick={closeMobile} />}
-          <aside className={"sidebar" + (mobileOpen ? " sidebar-open" : "")}>
-            <div className="sidebar-brand">
-              <div className="brand-mark">
-                <Radar size={18} />
-              </div>
-              <div className="brand-text">
-                <strong>Deadline Defender</strong>
-                <span>Opportunity radar</span>
-              </div>
-              <button className="icon-btn mobile-only" onClick={closeMobile}>
-                <X size={18} />
-              </button>
-            </div>
-
-            <nav className="nav-list">
-              {NAV_ITEMS.map(({ key, label, Icon: ItemIcon }) => {
-                const b = badge(key);
-                return (
-                  <button
-                    key={key}
-                    className={"nav-item" + (active === key ? " nav-item-active" : "")}
-                    onClick={() => setActive(key)}
-                  >
-                    <ItemIcon size={17} />
-                    <span>{label}</span>
-                    {b ? <span className="nav-badge">{b}</span> : null}
-                  </button>
-                );
-              })}
-            </nav>
-
-            <div className="sidebar-foot">
-              <ShieldCheck size={14} />
-              <span>Official sources monitored</span>
-            </div>
-          </aside>
-        </>
-      );
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
     }
 
-    function Topbar({ onMenu, completion, onProfile, searchQuery, setSearchQuery, username }) {
-      return (
-        <div className="topbar">
-          <button className="icon-btn mobile-only" onClick={onMenu}>
-            <Menu size={20} />
-          </button>
-          <div className="topbar-search">
-            <Search size={15} />
-            <input
-              placeholder="Search opportunities, organizations, categories…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <button className="profile-pill" onClick={onProfile}>
-            <div className="ring" style={{ "--pct": completion }}>
-              <span>{completion}%</span>
-            </div>
-            <span className="profile-pill-label">{username || "Profile"}</span>
-          </button>
-        </div>
-      );
-    }
-
-    /* ------------------------------------------------------------------ */
-    /*  Home View                                                         */
-    /* ------------------------------------------------------------------ */
-    function HomeView({ closingSoon, recommended, savedCount, onEvidence, onSave, onApply, goTo }) {
-      return (
-        <div>
-          <section className="hero">
-            <div>
-              <p className="hero-eyebrow">Good to see you</p>
-              <h1 className="hero-title">
-                {closingSoon.length} deadline{closingSoon.length === 1 ? "" : "s"} need attention this week
-              </h1>
-              <p className="hero-sub">
-                Your radar checked verified official sources overnight. Nothing is lost when you refresh —
-                every reminder and saved opportunity is persisted.
-              </p>
-            </div>
-            <div className="hero-stats">
-              <div className="hero-stat">
-                <span className="hero-stat-num">{closingSoon.length}</span>
-                <span className="hero-stat-label">Closing soon</span>
-              </div>
-              <div className="hero-stat">
-                <span className="hero-stat-num">{recommended.length}</span>
-                <span className="hero-stat-label">New matches</span>
-              </div>
-              <div className="hero-stat">
-                <span className="hero-stat-num">{savedCount}</span>
-                <span className="hero-stat-label">Saved</span>
-              </div>
-            </div>
-          </section>
-
-          {closingSoon.length > 0 && (
-            <section className="section">
-              <div className="section-head">
-                <h2>
-                  <Flame size={16} className="flame" /> Closing soon
-                </h2>
-                <button className="link-btn" onClick={() => goTo("closing")}>
-                  View all <ArrowUpRight size={13} />
-                </button>
-              </div>
-              <div className="ticker">
-                {closingSoon.map((o) => (
-                  <div key={o.id} className={"ticker-item ticker-" + urgency(o.daysLeft)}>
-                    <Clock size={13} />
-                    <span className="ticker-days">
-                      {o.daysLeft === 0 ? "Today" : o.daysLeft === 1 ? "1 day" : `${o.daysLeft} days`}
-                    </span>
-                    <span className="ticker-title">{o.title}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          <section className="section">
-            <div className="section-head">
-              <h2>
-                <Star size={16} /> Recommended for you
-              </h2>
-              <button className="link-btn" onClick={() => goTo("recommended")}>
-                View all <ArrowUpRight size={13} />
-              </button>
-            </div>
-            <div className="card-grid">
-              {recommended.map((o) => (
-                <OpportunityCard
-                  key={o.id}
-                  opp={o}
-                  onEvidence={() => onEvidence(o.id)}
-                  onSave={() => onSave(o.id)}
-                  onApply={() => onApply(o.id)}
-                />
-              ))}
-            </div>
-          </section>
-        </div>
-      );
-    }
-
-    /* ------------------------------------------------------------------ */
-    /*  List View                                                         */
-    /* ------------------------------------------------------------------ */
-    function ListView({ title, subtitle, items, onEvidence, onSave, onApply, emphasize, emptyLabel }) {
-      return (
-        <div>
-          <div className="page-head">
-            <h1>{title}</h1>
-            <p>{subtitle}</p>
-          </div>
-          {items.length === 0 ? (
-            <div className="empty-state">{emptyLabel || "Nothing here yet."}</div>
-          ) : (
-            <div className={emphasize ? "card-list" : "card-grid"}>
-              {items.map((o) => (
-                <OpportunityCard
-                  key={o.id}
-                  opp={o}
-                  wide={emphasize}
-                  onEvidence={() => onEvidence(o.id)}
-                  onSave={() => onSave(o.id)}
-                  onApply={() => onApply(o.id)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    /* ------------------------------------------------------------------ */
-    /*  Opportunity Card Component                                        */
-    /* ------------------------------------------------------------------ */
-    function OpportunityCard({ opp, onEvidence, onSave, onApply, wide }) {
-      const u = urgency(opp.daysLeft);
-      const trust = trustMeta(opp.trust);
-
-      return (
-        <article className={"opp-card urgency-" + u + (wide ? " opp-card-wide" : "")}>
-          <div className="opp-card-bar" />
-          <div className="opp-card-body">
-            <div className="opp-card-top">
-              <span className="opp-category">{opp.category}</span>
-              <span className={"opp-countdown countdown-" + u}>
-                {opp.daysLeft === 0 ? "Closes today" : opp.daysLeft === 1 ? "1 day left" : `${opp.daysLeft} days left`}
-              </span>
-            </div>
-
-            <h3 className="opp-title">{opp.title}</h3>
-            <p className="opp-org">{opp.org || opp.organization}</p>
-
-            <div className="opp-eligibility">
-              {(opp.eligibility || []).map((e) => (
-                <span key={e.label} className={"elig-pill elig-" + e.status}>
-                  {eligIcon(e.status)} {e.label}
-                </span>
-              ))}
-            </div>
-
-            <div className="opp-card-foot">
-              <div className="match-block">
-                <MatchDial score={opp.matchScore} />
-                <div className="match-text">
-                  <strong>{opp.matchScore}% match</strong>
-                  <span className={"trust-tag " + trust.cls}>
-                    <trust.Icon size={12} /> {trust.label}
-                  </span>
-                </div>
-              </div>
-              <button className="why-btn" onClick={onEvidence}>
-                <Info size={13} /> Why this?
-              </button>
-            </div>
-
-            <div className="opp-actions">
-              <button className={"action-btn" + (opp.saved ? " action-btn-active" : "")} onClick={onSave}>
-                <Bookmark size={14} fill={opp.saved ? "currentColor" : "none"} /> {opp.saved ? "Saved" : "Save"}
-              </button>
-              <button
-                className={"action-btn" + (opp.applied ? " action-btn-active-green" : "")}
-                onClick={onApply}
-              >
-                <CheckCircle2 size={14} /> {opp.applied ? "Applied" : "Mark applied"}
-              </button>
-              <a className="action-btn action-btn-solid" href={opp.sourceUrl || opp.application_url || "#"} target="_blank" rel="noopener noreferrer">
-                View <ExternalLink size={13} />
-              </a>
-            </div>
-          </div>
-        </article>
-      );
-    }
-
-    function MatchDial({ score = 85 }) {
-      const r = 16;
-      const c = 2 * Math.PI * r;
-      const offset = c - (score / 100) * c;
-      return (
-        <svg width="40" height="40" viewBox="0 0 40 40" className="match-dial">
-          <circle cx="20" cy="20" r={r} className="dial-track" />
-          <circle
-            cx="20"
-            cy="20"
-            r={r}
-            className="dial-fill"
-            strokeDasharray={c}
-            strokeDashoffset={offset}
-            transform="rotate(-90 20 20)"
-          />
-        </svg>
-      );
-    }
-
-    /* ------------------------------------------------------------------ */
-    /*  Evidence Modal Component                                          */
-    /* ------------------------------------------------------------------ */
-    function EvidenceModal({ opp, onClose }) {
-      const trust = trustMeta(opp.trust);
-      return (
-        <div className="modal-scrim" onClick={onClose}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-head">
-              <div>
-                <p className="modal-eyebrow">Why am I seeing this?</p>
-                <h2>{opp.title}</h2>
-              </div>
-              <button className="icon-btn" onClick={onClose}>
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="modal-section">
-              <h4>Interest match</h4>
-              <div className="modal-bar-row">
-                <div className="modal-bar">
-                  <div className="modal-bar-fill" style={{ width: (opp.interestMatch || 90) + "%" }} />
-                </div>
-                <span>{opp.interestMatch || 90}%</span>
-              </div>
-            </div>
-
-            <div className="modal-section">
-              <h4>Eligibility</h4>
-              <ul className="modal-elig-list">
-                {(opp.eligibility || []).map((e) => (
-                  <li key={e.label} className={"elig-" + e.status}>
-                    {eligIcon(e.status)} {e.label}
-                    {e.status === "missing" && <span className="elig-note">not provided in your profile</span>}
-                    {e.status === "warn" && <span className="elig-note">check the exact requirement</span>}
-                  </li>
-                ))}
-              </ul>
-              {opp.eligibilityStatus === "unknown" && (
-                <p className="modal-note">
-                  Relevant to your interests, but eligibility could not be fully verified from your profile.
-                </p>
-              )}
-            </div>
-
-            <div className="modal-section">
-              <h4>Deadline evidence</h4>
-              <blockquote className="evidence-quote">“{opp.evidenceQuote || "Official notification verified."}”</blockquote>
-              <div className="evidence-meta">
-                <span>
-                  Method <strong>{opp.evidenceMethod || "CHRONO"}</strong>
-                </span>
-                <span>
-                  Confidence <strong>{opp.evidenceConfidence || "HIGH"}</strong>
-                </span>
-              </div>
-            </div>
-
-            <div className="modal-section">
-              <h4>Source</h4>
-              <div className="source-row">
-                <span className={"trust-tag " + trust.cls}>
-                  <trust.Icon size={13} /> {trust.label}
-                </span>
-                <span className="verified-date">Last verified {opp.lastVerified || "12 Sep 2026"}</span>
-              </div>
-              <a className="btn-primary modal-source-btn" href={opp.sourceUrl || opp.application_url || "#"} target="_blank" rel="noopener noreferrer">
-                Open official source <ExternalLink size={14} />
-              </a>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    /* ------------------------------------------------------------------ */
-    /*  Reminders View Component                                          */
-    /* ------------------------------------------------------------------ */
-    const STAGE_ORDER = [30, 14, 7, 3, 1, 0];
-    const stageLabel = (d) => (d === 0 ? "Deadline day" : d === 1 ? "1 day before" : `${d} days before`);
-
-    function statusMeta(status) {
-      if (status === "SENT") return { cls: "status-sent", label: "Sent" };
-      if (status === "MISSED") return { cls: "status-missed", label: "Missed" };
-      return { cls: "status-pending", label: "Pending" };
-    }
-
-    function RemindersView({ prefs, setPrefs, log, onRefreshReminders }) {
-      return (
-        <div>
-          <div className="page-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <h1>Reminders</h1>
-              <p>Reminders are stored the moment they're scheduled — refreshing or logging out never loses them.</p>
-            </div>
-            <button className="btn-primary" style={{ fontSize: 12, padding: '8px 14px' }} onClick={onRefreshReminders}>
-              ↻ Refresh Deadlines
-            </button>
-          </div>
-
-          <section className="panel">
-            <h3 className="panel-title">Alert stages</h3>
-            <p className="panel-sub">Choose how far ahead you want to be warned.</p>
-            <div className="stage-toggle-row">
-              {STAGE_ORDER.map((d) => (
-                <button
-                  key={d}
-                  className={"stage-toggle" + (prefs[d] ? " stage-toggle-on" : "")}
-                  onClick={() => setPrefs({ ...prefs, [d]: !prefs[d] })}
-                >
-                  {stageLabel(d)}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="panel">
-            <h3 className="panel-title">Recent activity &amp; scheduled alerts</h3>
-            <div className="reminder-log">
-              {log.length === 0 ? (
-                <div style={{ color: "var(--text-faint)", fontSize: 13, padding: "16px 0", textAlign: "center" }}>
-                  No reminders scheduled yet. Add interests or explore opportunities above to activate reminders.
-                </div>
-              ) : (
-                log.map((r) => {
-                  const s = statusMeta(r.status);
-                  return (
-                    <div key={r.id} className="reminder-row">
-                      <div className={"reminder-dot " + s.cls} />
-                      <div className="reminder-info">
-                        <strong>{r.title}</strong>
-                        <span>
-                          {r.stage} · {r.when}
-                        </span>
-                      </div>
-                      <span className={"reminder-status " + s.cls}>{s.label}</span>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-            <p className="panel-footnote">
-              A missed reminder stays in your history, but later stages for the same deadline are still sent — one miss
-              never means you lose the deadline entirely.
-            </p>
-          </section>
-        </div>
-      );
-    }
-
-    /* ------------------------------------------------------------------ */
-    /*  Profile View Component                                            */
-    /* ------------------------------------------------------------------ */
-    function ProfileView({
-      username,
-      email,
-      interests,
-      toggleInterest,
-      customInterest,
-      setCustomInterest,
-      addCustomInterest,
-      oppTypes,
-      toggleOppType,
-      education,
-      setEducation,
-      city,
-      setCity,
-      completion,
-      confidence,
-      onSave,
-      onResetAllUsers,
-      onLogout,
-    }) {
-      const confMeta = {
-        high: { label: "High-confidence matching", cls: "conf-high", Icon: ShieldCheck },
-        partial: { label: "Partial matching", cls: "conf-partial", Icon: ShieldAlert },
-        "interest-only": { label: "Interest-only discovery", cls: "conf-low", Icon: ShieldQuestion },
-      }[confidence] || { label: "Interest-only discovery", cls: "conf-low", Icon: ShieldQuestion };
-
-      return (
-        <div>
-          <div className="page-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <h1>Profile ({username || "Student"})</h1>
-              <p>Every section here is optional. Add more when it's useful, skip what isn't.</p>
-            </div>
-            <button className="btn-primary" onClick={onSave}>
-              Save Profile Changes ✓
-            </button>
-          </div>
-
-          <section className="panel">
-            <div className="completion-row">
-              <div className="completion-bar">
-                <div className="completion-fill" style={{ width: completion + "%" }} />
-              </div>
-              <span>{completion}%</span>
-            </div>
-            <div className={"confidence-badge " + confMeta.cls}>
-              <confMeta.Icon size={14} /> {confMeta.label}
-            </div>
-          </section>
-
-          <section className="panel">
-            <h3 className="panel-title">
-              <Sparkles size={15} /> Tracked Interests
-            </h3>
-            <div className="chip-grid">
-              {INTEREST_OPTIONS.map((opt) => (
-                <button
-                  key={opt}
-                  className={"chip" + (interests.includes(opt) ? " chip-active" : "")}
-                  onClick={() => toggleInterest(opt)}
-                >
-                  {opt}
-                </button>
-              ))}
-              {interests.filter(i => !INTEREST_OPTIONS.includes(i)).map(custom => (
-                <button
-                  key={custom}
-                  className="chip chip-active"
-                  onClick={() => toggleInterest(custom)}
-                >
-                  ⭐ {custom} ✕
-                </button>
-              ))}
-            </div>
-
-            <div className="field-row" style={{ marginTop: 14 }}>
-              <Sparkles size={16} />
-              <input
-                className="text-input"
-                placeholder="Type custom topic (e.g. UPSC, ISRO, Robotics)..."
-                value={customInterest}
-                onChange={(e) => setCustomInterest(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addCustomInterest()}
-              />
-              <button type="button" className="btn-primary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={addCustomInterest}>
-                + Add
-              </button>
-            </div>
-          </section>
-
-          <section className="panel">
-            <h3 className="panel-title">Looking for</h3>
-            <div className="chip-grid">
-              {OPP_TYPE_OPTIONS.map((opt) => (
-                <button
-                  key={opt}
-                  className={"chip" + (oppTypes.includes(opt) ? " chip-active" : "")}
-                  onClick={() => toggleOppType(opt)}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="panel">
-            <h3 className="panel-title">
-              <GraduationCap size={15} /> Education Level
-            </h3>
-            <div className="chip-grid">
-              {EDUCATION_OPTIONS.map((opt) => (
-                <button
-                  key={opt}
-                  className={"chip" + (education === opt ? " chip-active" : "")}
-                  onClick={() => setEducation(opt === education ? "" : opt)}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="panel">
-            <h3 className="panel-title">
-              <MapPin size={15} /> Location
-            </h3>
-            <div className="field-row">
-              <MapPin size={16} />
-              <input
-                className="text-input"
-                placeholder="City, state, or district — optional"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
-            </div>
-          </section>
-
-          <section className="panel">
-            <h3 className="panel-title">Sensitive fields</h3>
-            <p className="panel-sub">
-              Things like category, disability status, or gender are only ever asked for when a specific opportunity's
-              eligibility genuinely depends on them — and every field stays optional.
-            </p>
-            <div className="chip-grid">
-              {["Category", "Disability status", "Gender", "Age"].map((opt) => (
-                <button key={opt} className="chip chip-disabled" disabled>
-                  <Circle size={11} /> {opt}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="panel" style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <button className="btn-primary" onClick={onSave}>Save Changes ✓</button>
-            <button className="btn-ghost" style={{ color: "var(--critical)", border: "1px solid rgba(255,90,82,0.3)", borderRadius: 10, padding: "10px 16px" }} onClick={onResetAllUsers}>
-              🧹 Reset Test Users &amp; Start Fresh
-            </button>
-            <button className="btn-ghost" onClick={onLogout}>Sign Out</button>
-          </section>
-        </div>
-      );
-    }
-
-    /* ------------------------------------------------------------------ */
-    /*  Auth Modal Component                                              */
-    /* ------------------------------------------------------------------ */
-    function AuthModal({ mode, setMode, onSuccess, onResetAllUsers }) {
-      const [username, setUsername] = useState("");
-      const [email, setEmail] = useState("");
-      const [password, setPassword] = useState("");
-      const [error, setError] = useState("");
-      const [loading, setLoading] = useState(false);
-
-      const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
-        setLoading(true);
-
-        const endpoint = mode === 'signup' ? '/auth/signup' : '/auth/login';
-        const payload = mode === 'signup' ? { username, email, password } : { username, password };
-
-        try {
-          const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-          });
-          const data = await res.json();
-          if (res.ok && data.success) {
-            onSuccess();
-          } else {
-            setError(data.error || 'Authentication failed');
-          }
-        } catch (err) {
-          setError('Network connection error');
-        } finally {
-          setLoading(false);
+    // ── OPPORTUNITY INTERACTIONS ─────────────────────────────────────
+    async function toggleApply(id, btn) {
+      try {
+        const res = await fetch('/api/opportunities/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ opportunityId: id, status: 'applied' })
+        });
+        if (res.ok) {
+          btn.classList.add('applied');
+          btn.innerHTML = '<i data-lucide="check-circle-2" style="width:12px;height:12px;"></i> Applied';
+          showToast('Marked as Applied! Reminders silenced.');
+          lucide.createIcons();
         }
-      };
-
-      return (
-        <div className="modal-scrim">
-          <div className="modal" style={{ maxWidth: 420 }}>
-            <div style={{ textAlign: "center", marginBottom: 20 }}>
-              <div className="brand-mark" style={{ margin: "0 auto 10px", width: 42, height: 42 }}>
-                <Radar size={22} />
-              </div>
-              <h2 style={{ fontSize: 20 }}>{mode === 'login' ? 'Welcome Back' : 'Create an Account'}</h2>
-              <p style={{ color: "var(--text-muted)", fontSize: 13, marginTop: 4 }}>
-                {mode === 'login' ? 'Sign in to access your opportunity radar.' : 'Join Deadline Defender to track deadlines.'}
-              </p>
-            </div>
-
-            {error && (
-              <div style={{ background: "rgba(255,90,82,0.15)", border: "1px solid rgba(255,90,82,0.3)", color: "var(--critical)", padding: "9px 12px", borderRadius: 8, fontSize: 12.5, marginBottom: 14 }}>
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <div className="field-row">
-                <input
-                  className="text-input"
-                  placeholder={mode === 'signup' ? "Choose username" : "Username or Email"}
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </div>
-
-              {mode === 'signup' && (
-                <div className="field-row">
-                  <input
-                    className="text-input"
-                    type="email"
-                    placeholder="Email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
-
-              <div className="field-row">
-                <input
-                  className="text-input"
-                  type="password"
-                  placeholder="Password (min 6 chars)"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  minLength={6}
-                  required
-                />
-              </div>
-
-              <button type="submit" className="btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 4 }} disabled={loading}>
-                {loading ? "Processing..." : mode === 'login' ? "Sign In →" : "Create Account →"}
-              </button>
-            </form>
-
-            <div style={{ textAlign: "center", marginTop: 18, fontSize: 13, color: "var(--text-muted)" }}>
-              {mode === 'login' ? (
-                <>New to Deadline Defender? <a href="#" onClick={(e) => { e.preventDefault(); setMode('signup'); }} style={{ color: "var(--safe)", fontWeight: 600 }}>Create an account</a></>
-              ) : (
-                <>Already have an account? <a href="#" onClick={(e) => { e.preventDefault(); setMode('login'); }} style={{ color: "var(--safe)", fontWeight: 600 }}>Sign In</a></>
-              )}
-            </div>
-
-            <div style={{ textAlign: "center", marginTop: 16 }}>
-              <a href="#" onClick={(e) => { e.preventDefault(); onResetAllUsers(); }} style={{ fontSize: 11.5, color: "var(--text-faint)", textDecoration: "underline" }}>
-                🧹 Reset Test Users &amp; Start Fresh
-              </a>
-            </div>
-          </div>
-        </div>
-      );
+      } catch(_) {}
     }
 
-    /* ------------------------------------------------------------------ */
-    /*  Global Styles                                                     */
-    /* ------------------------------------------------------------------ */
-    function GlobalStyle() {
-      return (
-        <style>{`
-          .dd-root {
-            --bg: #0A121D;
-            --panel: #111B29;
-            --panel-2: #16223269;
-            --card: #131F2E;
-            --border: rgba(255,255,255,0.08);
-            --border-soft: rgba(255,255,255,0.05);
-            --text: #E9EEF5;
-            --text-muted: #8CA0B8;
-            --text-faint: #5C6E82;
-            --critical: #FF5A52;
-            --soon: #FFB648;
-            --safe: #35D9B2;
-            --violet: #8B7CFF;
-            --font-display: 'Space Grotesk', sans-serif;
-            --font-body: 'IBM Plex Sans', sans-serif;
-
-            font-family: var(--font-body);
-            color: var(--text);
-            background: var(--bg);
-            min-height: 100vh;
-            width: 100%;
-          }
-          .dd-root * { box-sizing: border-box; }
-          .dd-root h1, .dd-root h2, .dd-root h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.01em; }
-          .dd-root p { margin: 0; }
-          .dd-root button { font-family: var(--font-body); cursor: pointer; }
-          .dd-root input { font-family: var(--font-body); }
-
-          /* ---------- Toast ---------- */
-          .toast-pill {
-            position: fixed; bottom: 24px; right: 24px; z-index: 100;
-            background: var(--panel); border: 1px solid var(--safe); color: var(--safe);
-            padding: 10px 18px; border-radius: 30px; font-size: 13px; font-weight: 600;
-            display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            animation: slideToast 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-          }
-          @keyframes slideToast {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-          }
-
-          /* ---------- Onboarding ---------- */
-          .onboard {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 32px 20px;
-            background:
-              radial-gradient(circle at 15% 10%, rgba(139,124,255,0.10), transparent 45%),
-              radial-gradient(circle at 85% 90%, rgba(53,217,178,0.08), transparent 45%),
-              var(--bg);
-          }
-          .onboard-card {
-            width: 100%;
-            max-width: 520px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 36px 32px;
-          }
-          .onboard-brand {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-family: var(--font-display);
-            font-weight: 600;
-            color: var(--safe);
-            margin-bottom: 24px;
-            font-size: 14px;
-          }
-          .onboard-progress { display: flex; gap: 6px; margin-bottom: 28px; }
-          .prog-seg { height: 3px; flex: 1; border-radius: 2px; background: var(--border); }
-          .prog-seg-done { background: var(--safe); }
-          .onboard-card h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
-          .onboard-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
-          .onboard-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
-
-          .chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-          .chip {
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--text-muted);
-            padding: 9px 14px;
-            border-radius: 20px;
-            font-size: 13.5px;
-            transition: border-color .15s, color .15s, background .15s;
-            display: inline-flex; align-items: center; gap: 6px;
-          }
-          .chip:hover { border-color: rgba(255,255,255,0.22); color: var(--text); }
-          .chip-active { background: rgba(53,217,178,0.12); border-color: var(--safe); color: var(--safe); }
-          .chip-disabled { opacity: 0.45; cursor: not-allowed; }
-          .chip-disabled:hover { border-color: var(--border); color: var(--text-muted); }
-
-          .field-row {
-            display: flex; align-items: center; gap: 10px;
-            border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px;
-            color: var(--text-faint); background: var(--card);
-          }
-          .text-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-size: 14px; }
-          .text-input::placeholder { color: var(--text-faint); }
-
-          .btn-primary {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: var(--safe); color: #062822; border: none;
-            font-weight: 600; font-size: 14px; padding: 11px 20px; border-radius: 10px;
-            text-decoration: none; transition: opacity 0.2s;
-          }
-          .btn-primary:hover { opacity: 0.92; }
-          .btn-ghost {
-            background: transparent; border: none; color: var(--text-muted); font-size: 14px;
-          }
-          .btn-ghost:hover { color: var(--text); }
-
-          /* ---------- Shell ---------- */
-          .shell { display: flex; min-height: 100vh; }
-          .sidebar {
-            width: 240px; flex-shrink: 0; background: var(--panel);
-            border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; padding: 22px 16px;
-            position: sticky; top: 0; height: 100vh;
-          }
-          .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding: 0 4px; }
-          .brand-mark {
-            width: 34px; height: 34px; border-radius: 9px;
-            background: linear-gradient(145deg, rgba(53,217,178,0.18), rgba(139,124,255,0.18));
-            color: var(--safe); display: flex; align-items: center; justify-content: center;
-            border: 1px solid var(--border);
-          }
-          .brand-text { display: flex; flex-direction: column; line-height: 1.25; }
-          .brand-text strong { font-family: var(--font-display); font-size: 14.5px; }
-          .brand-text span { font-size: 11.5px; color: var(--text-faint); }
-
-          .nav-list { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-          .nav-item {
-            display: flex; align-items: center; gap: 11px;
-            padding: 10px 12px; border-radius: 9px; border: none; background: transparent;
-            color: var(--text-muted); font-size: 13.5px; text-align: left;
-          }
-          .nav-item:hover { background: var(--panel-2); color: var(--text); }
-          .nav-item-active { background: rgba(53,217,178,0.10); color: var(--safe); }
-          .nav-badge {
-            margin-left: auto; background: rgba(255,255,255,0.08); color: var(--text-muted);
-            font-size: 11px; padding: 1px 7px; border-radius: 10px;
-          }
-          .nav-item-active .nav-badge { background: rgba(53,217,178,0.18); color: var(--safe); }
-          .sidebar-foot {
-            display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--text-faint);
-            border-top: 1px solid var(--border-soft); padding-top: 14px; margin-top: 10px;
-          }
-
-          .main { flex: 1; min-width: 0; }
-          .topbar {
-            display: flex; align-items: center; gap: 14px;
-            padding: 16px 28px; border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; background: rgba(10,18,29,0.85); backdrop-filter: blur(8px); z-index: 5;
-          }
-          .topbar-search {
-            flex: 1; display: flex; align-items: center; gap: 9px;
-            background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
-            padding: 9px 13px; color: var(--text-faint); max-width: 460px;
-          }
-          .topbar-search input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-size: 13.5px; }
-          .topbar-search input::placeholder { color: var(--text-faint); }
-          .profile-pill { display: flex; align-items: center; gap: 8px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; }
-          .ring {
-            --pct: 0;
-            width: 30px; height: 30px; border-radius: 50%;
-            background: conic-gradient(var(--safe) calc(var(--pct) * 1%), rgba(255,255,255,0.09) 0);
-            display: flex; align-items: center; justify-content: center; position: relative;
-          }
-          .ring::before { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--panel); }
-          .ring span { position: relative; font-size: 9px; font-weight: 600; color: var(--text); }
-          .profile-pill-label { font-size: 13px; }
-
-          .content { padding: 26px 28px 60px; max-width: 1180px; }
-
-          .icon-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px; border-radius: 8px; cursor: pointer; }
-          .icon-btn:hover { background: var(--panel-2); }
-          .mobile-only { display: none; }
-          .scrim { display: none; }
-
-          /* ---------- Hero / Home ---------- */
-          .hero {
-            display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
-            background: linear-gradient(135deg, rgba(53,217,178,0.06), rgba(139,124,255,0.05));
-            border: 1px solid var(--border); border-radius: 16px; padding: 26px 28px; margin-bottom: 30px;
-            flex-wrap: wrap;
-          }
-          .hero-eyebrow { color: var(--safe); font-size: 12.5px; font-weight: 600; margin-bottom: 8px; }
-          .hero-title { font-size: 26px; font-weight: 600; max-width: 520px; line-height: 1.3; margin-bottom: 10px; }
-          .hero-sub { color: var(--text-muted); font-size: 13.5px; max-width: 460px; line-height: 1.55; }
-          .hero-stats { display: flex; gap: 22px; }
-          .hero-stat { display: flex; flex-direction: column; align-items: center; min-width: 64px; }
-          .hero-stat-num { font-family: var(--font-display); font-size: 26px; font-weight: 700; }
-          .hero-stat-label { font-size: 11.5px; color: var(--text-faint); margin-top: 2px; text-align: center; }
-
-          .section { margin-bottom: 34px; }
-          .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-          .section-head h2 { font-size: 15.5px; display: flex; align-items: center; gap: 7px; font-weight: 600; }
-          .flame { color: var(--critical); }
-          .link-btn { background: transparent; border: none; color: var(--text-muted); font-size: 12.5px; display: flex; align-items: center; gap: 4px; cursor: pointer; }
-          .link-btn:hover { color: var(--safe); }
-
-          .page-head { margin-bottom: 24px; }
-          .page-head h1 { font-size: 21px; font-weight: 600; margin-bottom: 6px; }
-          .page-head p { color: var(--text-muted); font-size: 13.5px; }
-          .empty-state { color: var(--text-faint); font-size: 13.5px; padding: 40px 0; text-align: center; border: 1px dashed var(--border); border-radius: 12px; }
-
-          .ticker { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
-          .ticker-item {
-            flex-shrink: 0; display: flex; align-items: center; gap: 8px;
-            border: 1px solid var(--border); border-radius: 10px; padding: 9px 14px; font-size: 12.5px;
-            background: var(--card);
-          }
-          .ticker-title { color: var(--text-muted); white-space: nowrap; }
-          .ticker-days { font-weight: 600; white-space: nowrap; }
-          .ticker-critical { border-color: rgba(255,90,82,0.4); }
-          .ticker-critical .ticker-days { color: var(--critical); }
-          .ticker-soon { border-color: rgba(255,182,72,0.35); }
-          .ticker-soon .ticker-days { color: var(--soon); }
-
-          /* ---------- Cards ---------- */
-          .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-          .card-list { display: flex; flex-direction: column; gap: 12px; }
-
-          .opp-card {
-            position: relative; background: var(--card); border: 1px solid var(--border);
-            border-radius: 14px; overflow: hidden; padding-left: 4px; display: flex;
-          }
-          .opp-card-bar { width: 4px; flex-shrink: 0; }
-          .urgency-critical .opp-card-bar { background: var(--critical); }
-          .urgency-soon .opp-card-bar { background: var(--soon); }
-          .urgency-safe .opp-card-bar { background: var(--safe); }
-          .opp-card-body { padding: 16px 18px 18px; flex: 1; min-width: 0; }
-          .opp-card-wide .opp-card-body { display: block; }
-
-          .opp-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-          .opp-category { font-size: 11px; color: var(--text-faint); text-transform: none; }
-          .opp-countdown { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
-          .countdown-critical { color: var(--critical); background: rgba(255,90,82,0.12); }
-          .countdown-soon { color: var(--soon); background: rgba(255,182,72,0.12); }
-          .countdown-safe { color: var(--safe); background: rgba(53,217,178,0.10); }
-
-          .opp-title { font-size: 15.5px; font-weight: 600; margin-bottom: 3px; line-height: 1.35; }
-          .opp-org { font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px; }
-
-          .opp-eligibility { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-          .elig-pill {
-            font-size: 11px; display: inline-flex; align-items: center; gap: 5px;
-            padding: 3px 8px; border-radius: 8px; background: rgba(255,255,255,0.04); color: var(--text-muted);
-          }
-          .elig-match { color: var(--safe); }
-          .elig-warn { color: var(--soon); }
-          .elig-missing { color: var(--text-faint); }
-          .dot-warn, .dot-missing { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-          .dot-warn { background: var(--soon); }
-          .dot-missing { background: var(--text-faint); }
-
-          .opp-card-foot { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-top: 12px; border-top: 1px solid var(--border-soft); }
-          .match-block { display: flex; align-items: center; gap: 10px; }
-          .match-dial { flex-shrink: 0; }
-          .dial-track { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 4; }
-          .dial-fill { fill: none; stroke: var(--violet); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset .4s; }
-          .match-text { display: flex; flex-direction: column; gap: 3px; }
-          .match-text strong { font-size: 13px; }
-          .trust-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; }
-          .trust-official { color: var(--safe); }
-          .trust-verified { color: var(--violet); }
-          .trust-unverified { color: var(--soon); }
-          .why-btn {
-            display: flex; align-items: center; gap: 5px; background: transparent; border: 1px solid var(--border);
-            color: var(--text-muted); font-size: 11.5px; padding: 6px 10px; border-radius: 8px; white-space: nowrap; cursor: pointer;
-          }
-          .why-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
-
-          .opp-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-          .action-btn {
-            display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 8px 11px; border-radius: 9px;
-            border: 1px solid var(--border); background: transparent; color: var(--text-muted); text-decoration: none; flex: 1; justify-content: center; cursor: pointer;
-          }
-          .action-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
-          .action-btn-active { color: var(--violet); border-color: rgba(139,124,255,0.4); }
-          .action-btn-active-green { color: var(--safe); border-color: rgba(53,217,178,0.4); }
-          .action-btn-solid { background: rgba(255,255,255,0.05); }
-
-          /* ---------- Modal ---------- */
-          .modal-scrim {
-            position: fixed; inset: 0; background: rgba(4,8,14,0.72); backdrop-filter: blur(4px);
-            display: flex; align-items: center; justify-content: center; z-index: 50; padding: 20px;
-          }
-          .modal {
-            width: 100%; max-width: 520px; max-height: 88vh; overflow-y: auto;
-            background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 26px 26px 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-          }
-          .modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; }
-          .modal-eyebrow { font-size: 11.5px; color: var(--violet); font-weight: 600; margin-bottom: 4px; }
-          .modal-head h2 { font-size: 18px; font-weight: 600; max-width: 400px; line-height: 1.35; }
-          .modal-section { margin-bottom: 22px; }
-          .modal-section h4 { font-size: 12px; text-transform: none; color: var(--text-faint); margin-bottom: 10px; font-weight: 600; letter-spacing: 0.02em; }
-          .modal-bar-row { display: flex; align-items: center; gap: 10px; }
-          .modal-bar { flex: 1; height: 6px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; }
-          .modal-bar-fill { height: 100%; background: var(--violet); border-radius: 4px; }
-          .modal-bar-row span { font-size: 12.5px; color: var(--text-muted); font-weight: 600; }
-          .modal-elig-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-          .modal-elig-list li { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-          .elig-note { color: var(--text-faint); font-size: 11.5px; }
-          .modal-note { margin-top: 10px; font-size: 12.5px; color: var(--soon); background: rgba(255,182,72,0.08); padding: 9px 12px; border-radius: 9px; }
-          .evidence-quote {
-            margin: 0; padding: 12px 14px; border-left: 2px solid var(--violet);
-            background: rgba(139,124,255,0.06); font-size: 13px; color: var(--text); font-style: italic; line-height: 1.5;
-          }
-          .evidence-meta { display: flex; gap: 18px; margin-top: 10px; font-size: 11.5px; color: var(--text-faint); }
-          .evidence-meta strong { color: var(--text-muted); }
-          .source-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-          .verified-date { font-size: 11.5px; color: var(--text-faint); }
-          .modal-source-btn { width: 100%; justify-content: center; }
-
-          /* ---------- Reminders ---------- */
-          .panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; margin-bottom: 18px; }
-          .panel-title { font-size: 14.5px; font-weight: 600; display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
-          .panel-sub { font-size: 12.5px; color: var(--text-muted); margin-bottom: 14px; }
-          .stage-toggle-row { display: flex; flex-wrap: wrap; gap: 8px; }
-          .stage-toggle {
-            border: 1px solid var(--border); background: transparent; color: var(--text-faint);
-            padding: 8px 13px; border-radius: 9px; font-size: 12.5px; cursor: pointer;
-          }
-          .stage-toggle-on { border-color: var(--safe); color: var(--safe); background: rgba(53,217,178,0.08); }
-          .reminder-log { display: flex; flex-direction: column; gap: 4px; }
-          .reminder-row { display: flex; align-items: center; gap: 12px; padding: 11px 4px; border-bottom: 1px solid var(--border-soft); }
-          .reminder-row:last-child { border-bottom: none; }
-          .reminder-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-          .status-pending { background: var(--text-faint); }
-          .status-sent { background: var(--violet); }
-          .status-missed { background: var(--critical); }
-          .reminder-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-          .reminder-info strong { font-size: 13px; }
-          .reminder-info span { font-size: 11.5px; color: var(--text-faint); }
-          .reminder-status { font-size: 11.5px; font-weight: 600; }
-          .reminder-status.status-pending { color: var(--text-faint); }
-          .reminder-status.status-sent { color: var(--violet); }
-          .reminder-status.status-missed { color: var(--critical); }
-          .panel-footnote { font-size: 11.5px; color: var(--text-faint); margin-top: 14px; line-height: 1.5; }
-
-          /* ---------- Profile ---------- */
-          .completion-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-          .completion-bar { flex: 1; height: 7px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; }
-          .completion-fill { height: 100%; background: linear-gradient(90deg, var(--violet), var(--safe)); border-radius: 4px; transition: width .3s; }
-          .completion-row span { font-size: 13px; font-weight: 600; color: var(--text-muted); }
-          .confidence-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 12px; border-radius: 20px; }
-          .conf-high { background: rgba(53,217,178,0.12); color: var(--safe); }
-          .conf-partial { background: rgba(255,182,72,0.12); color: var(--soon); }
-          .conf-low { background: rgba(139,124,255,0.12); color: var(--violet); }
-
-          /* ---------- Responsive ---------- */
-          @media (max-width: 860px) {
-            .mobile-only { display: inline-flex; }
-            .sidebar {
-              position: fixed; z-index: 40; left: 0; top: 0; transform: translateX(-100%);
-              transition: transform .2s ease; box-shadow: 0 0 40px rgba(0,0,0,0.5);
-            }
-            .sidebar-open { transform: translateX(0); }
-            .scrim { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 39; }
-            .content { padding: 20px 16px 50px; }
-            .topbar { padding: 14px 16px; }
-            .hero { flex-direction: column; align-items: stretch; }
-            .hero-stats { justify-content: space-between; }
-            .card-grid { grid-template-columns: 1fr; }
-          }
-        `}</style>
-      );
+    async function toggleSave(id, btn) {
+      try {
+        const res = await fetch('/api/opportunities/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ opportunityId: id, status: 'saved' })
+        });
+        if (res.ok) {
+          btn.classList.add('applied');
+          btn.innerHTML = '<i data-lucide="bookmark" style="width:12px;height:12px;"></i> Saved';
+          showToast('Saved to your tracked list.');
+          lucide.createIcons();
+        }
+      } catch(_) {}
     }
 
-    /* Mount the application */
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<DeadlineDefenderApp />);
+    async function refreshOpportunities() {
+      showToast('Refreshing opportunity feeds...');
+      await fetch('/user/update-reminders', { method: 'POST', credentials: 'include' });
+      await loadOpportunities();
+    }
+
+    async function resetTestUsers() {
+      if (!confirm('Are you sure you want to reset all test user data and profiles?')) return;
+      try {
+        const res = await fetch('/api/dev/reset-all-users', { method: 'POST' });
+        if (res.ok) {
+          alert('Database reset successfully! Redirecting to login.');
+          window.location.href = 'login.html';
+        }
+      } catch(err) {
+        alert('Reset failed: ' + err.message);
+      }
+    }
+
+    async function handleLogout() {
+      await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+      window.location.href = 'login.html';
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastBox');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
   </script>
 </body>
 </html>
