@@ -347,7 +347,7 @@ async function autoInitDatabaseTables() {
       items_duplicate INT(11) DEFAULT 0,
       api_calls INT(11) DEFAULT 0,
       llm_calls INT(11) DEFAULT 0,
-      PRIMARY KEY (`id`),
+      PRIMARY KEY (id),
       KEY idx_pr_run_id (run_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 
