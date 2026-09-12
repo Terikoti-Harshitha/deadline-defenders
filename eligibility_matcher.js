@@ -77,7 +77,7 @@ class EligibilityMatcher {
         score += 20;
         educationMatched = true;
         verifiedReasons.push('✓ Open to All Students & Applicants');
-      } else if (is10th && (oppQual.includes('10th') || oppQual.includes('matric') || oppQual.includes('secondary') || oppTitle.includes('olympiad') || oppTitle.includes('scholarship'))) {
+      } else if (is10th && (oppQual.includes('10th') || oppQual.includes('matric') || oppQual.includes('secondary') || oppTitle.includes('olympiad'))) {
         score += 25;
         educationMatched = true;
         verifiedReasons.push(`✓ Matches 10th Standard Level`);
