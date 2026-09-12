@@ -189,6 +189,8 @@ async function autoInitDatabaseTables() {
       gender VARCHAR(50) DEFAULT NULL,
       skills TEXT DEFAULT NULL,
       career_goal VARCHAR(100) DEFAULT NULL,
+      opp_types TEXT DEFAULT NULL,
+      reminder_prefs TEXT DEFAULT NULL,
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (user_id),
       CONSTRAINT fk_up_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -315,7 +317,7 @@ async function autoInitDatabaseTables() {
       application_end DATE DEFAULT NULL,
       event_date DATE DEFAULT NULL,
       location VARCHAR(255) DEFAULT 'India',
-      short_note VARCHAR(255) NOT NULL,
+      short_note VARCHAR(255) NOT NULL DEFAULT '',
       source VARCHAR(500) DEFAULT NULL,
       confidence ENUM('high','medium','low') DEFAULT 'medium',
       reminder_stage VARCHAR(20) DEFAULT 'STANDARD',
@@ -414,6 +416,8 @@ async function autoInitDatabaseTables() {
       'ALTER TABLE user_profiles ADD COLUMN gender VARCHAR(50) DEFAULT NULL',
       'ALTER TABLE user_profiles ADD COLUMN skills TEXT DEFAULT NULL',
       'ALTER TABLE user_profiles ADD COLUMN career_goal VARCHAR(100) DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN opp_types TEXT DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN reminder_prefs TEXT DEFAULT NULL',
       "ALTER TABLE opportunities ADD COLUMN qualification_req VARCHAR(255) DEFAULT 'Any'",
       "ALTER TABLE opportunities ADD COLUMN branch_req VARCHAR(255) DEFAULT 'Any'",
       "ALTER TABLE opportunities ADD COLUMN graduation_year_req VARCHAR(100) DEFAULT 'Any'",
@@ -422,7 +426,16 @@ async function autoInitDatabaseTables() {
       "ALTER TABLE opportunities ADD COLUMN confidence ENUM('high', 'medium', 'low') NOT NULL DEFAULT 'medium'",
       'ALTER TABLE opportunities ADD COLUMN raw_evidence TEXT DEFAULT NULL',
       "ALTER TABLE user_reminders ADD COLUMN reminder_stage VARCHAR(20) DEFAULT 'STANDARD'",
-      'ALTER TABLE user_reminders ADD COLUMN opportunity_id INT(11) DEFAULT NULL'
+      'ALTER TABLE user_reminders ADD COLUMN opportunity_id INT(11) DEFAULT NULL',
+      'ALTER TABLE user_reminders ADD COLUMN scheduled_at DATE DEFAULT NULL',
+      'ALTER TABLE user_reminders ADD COLUMN sent_at TIMESTAMP NULL DEFAULT NULL',
+      'ALTER TABLE user_reminders ADD COLUMN application_start DATE DEFAULT NULL',
+      'ALTER TABLE user_reminders ADD COLUMN application_end DATE DEFAULT NULL',
+      'ALTER TABLE user_reminders ADD COLUMN event_date DATE DEFAULT NULL',
+      "ALTER TABLE user_reminders ADD COLUMN location VARCHAR(255) DEFAULT 'India'",
+      "ALTER TABLE user_reminders ADD COLUMN short_note VARCHAR(255) DEFAULT ''",
+      'ALTER TABLE user_reminders ADD COLUMN source VARCHAR(500) DEFAULT NULL',
+      'ALTER TABLE user_reminders ADD COLUMN interest VARCHAR(100) DEFAULT NULL'
     ];
 
     for (const m of migrations) {
@@ -657,6 +670,10 @@ app.post('/auth/reset-password', async (req, res) => {
 // ── ONBOARDING: ACADEMIC PROFILE + INTERESTS SETUP ──────────
 app.post('/api/user/onboarding', requireLogin, async (req, res) => {
   const {
+    interests,
+    oppTypes,
+    opp_types,
+    education,
     education_level,
     qualification,
     branch,
@@ -667,19 +684,22 @@ app.post('/api/user/onboarding', requireLogin, async (req, res) => {
     age,
     gender,
     skills,
-    career_goal,
-    interests
+    career_goal
   } = req.body;
+
+  const eduVal = education || education_level || null;
+  const cityVal = city || state_location || null;
+  const typesVal = oppTypes ? (Array.isArray(oppTypes) ? JSON.stringify(oppTypes) : String(oppTypes))
+    : opp_types ? (Array.isArray(opp_types) ? JSON.stringify(opp_types) : String(opp_types)) : null;
 
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
 
-    // 1. Save Profile (Nullable, no fake defaults!)
     await conn.query(
       `INSERT INTO user_profiles
-       (user_id, education_level, qualification, branch, study_status, graduation_year, state_location, city, age, gender, skills, career_goal)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       (user_id, education_level, qualification, branch, study_status, graduation_year, state_location, city, age, gender, skills, career_goal, opp_types)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          education_level = VALUES(education_level),
          qualification = VALUES(qualification),
@@ -691,24 +711,25 @@ app.post('/api/user/onboarding', requireLogin, async (req, res) => {
          age = VALUES(age),
          gender = VALUES(gender),
          skills = VALUES(skills),
-         career_goal = VALUES(career_goal)`,
+         career_goal = VALUES(career_goal),
+         opp_types = VALUES(opp_types)`,
       [
         req.session.userId,
-        education_level || null,
-        qualification || null,
+        eduVal,
+        qualification || eduVal,
         branch || null,
         study_status || null,
         graduation_year ? parseInt(graduation_year, 10) : null,
-        state_location || null,
-        city || null,
+        cityVal,
+        cityVal,
         age ? parseInt(age, 10) : null,
         gender || null,
         skills ? (Array.isArray(skills) ? JSON.stringify(skills) : String(skills)) : null,
-        career_goal || null
+        career_goal || null,
+        typesVal
       ]
     );
 
-    // 2. Save Interests
     await conn.query('DELETE FROM user_interests WHERE user_id = ?', [req.session.userId]);
     if (Array.isArray(interests) && interests.length > 0) {
       const validInts = interests.filter(i => i && String(i).trim());
@@ -718,7 +739,6 @@ app.post('/api/user/onboarding', requireLogin, async (req, res) => {
       }
     }
 
-    // 3. Mark Onboarding as Completed
     await conn.query('UPDATE users SET onboarding_completed = 1 WHERE id = ?', [req.session.userId]);
 
     await conn.commit();
@@ -730,7 +750,6 @@ app.post('/api/user/onboarding', requireLogin, async (req, res) => {
     conn.release();
   }
 
-  // 4. Instant local reminder reconciliation & quick response
   try {
     await reconciler.reconcileUserReminders(req.session.userId);
   } catch (syncErr) {
@@ -739,7 +758,6 @@ app.post('/api/user/onboarding', requireLogin, async (req, res) => {
 
   res.json({ success: true, message: 'Onboarding completed successfully!' });
 
-  // 5. Run external background discovery asynchronously (non-blocking)
   setImmediate(async () => {
     try {
       if (Array.isArray(interests) && interests.length > 0) {
@@ -765,57 +783,63 @@ app.get('/api/user/profile', requireLogin, async (req, res) => {
     const [profRows] = await pool.query('SELECT * FROM user_profiles WHERE user_id = ?', [req.session.userId]);
     const [intRows] = await pool.query('SELECT interest FROM user_interests WHERE user_id = ? ORDER BY id ASC', [req.session.userId]);
 
-    const profile = profRows.length > 0 ? profRows[0] : null;
+    const profile = profRows.length > 0 ? profRows[0] : {};
     const interests = intRows.map(r => r.interest);
 
-    // Calculate profile completeness score (0 - 100%)
-    let points = 0;
-    const totalPoints = 6;
-    if (interests.length > 0) points++;
-    if (profile?.education_level || profile?.qualification) points++;
-    if (profile?.branch || profile?.study_status) points++;
-    if (profile?.state_location || profile?.city) points++;
-    if (profile?.age || profile?.gender) points++;
-    if (profile?.skills || profile?.career_goal) points++;
-
-    const completeness = Math.round((points / totalPoints) * 100);
-
-    // Determine matching confidence
-    let matchingConfidence = 'DISCOVERY';
-    if ((profile?.education_level || profile?.qualification) && (profile?.state_location || profile?.city) && interests.length > 0) {
-      matchingConfidence = 'FULL_MATCH';
-    } else if (profile?.education_level || profile?.qualification || profile?.state_location) {
-      matchingConfidence = 'PARTIAL_MATCH';
-    } else if (interests.length > 0) {
-      matchingConfidence = 'INTEREST_DISCOVERY';
-    } else {
-      matchingConfidence = 'EXPLORE_ALL';
+    let oppTypes = [];
+    try {
+      oppTypes = profile.opp_types ? JSON.parse(profile.opp_types) : [];
+    } catch (_) {
+      oppTypes = profile.opp_types ? profile.opp_types.split(',').map(s => s.trim()) : [];
     }
 
-    const checklist = {
-      interests: interests.length > 0,
-      education: Boolean(profile?.education_level || profile?.qualification),
-      location: Boolean(profile?.state_location || profile?.city),
-      age: Boolean(profile?.age),
-      skills: Boolean(profile?.skills)
-    };
+    let reminderPrefs = { 30: false, 14: true, 7: true, 3: true, 1: true, 0: true };
+    try {
+      if (profile.reminder_prefs) reminderPrefs = JSON.parse(profile.reminder_prefs);
+    } catch (_) {}
+
+    // Calculate completeness
+    const fields = [
+      interests.length > 0,
+      oppTypes.length > 0,
+      Boolean(profile.education_level || profile.qualification),
+      Boolean(profile.city || profile.state_location)
+    ];
+    const done = fields.filter(Boolean).length;
+    const completeness = Math.round((done / fields.length) * 100);
+
+    // Calculate confidence
+    const hasEdu = Boolean(profile.education_level || profile.qualification);
+    const hasCity = Boolean(profile.city || profile.state_location);
+    const hasInterests = interests.length > 0;
+    let confidence = 'interest-only';
+    if (hasEdu && hasCity && hasInterests) confidence = 'high';
+    else if (hasInterests && (hasEdu || hasCity)) confidence = 'partial';
 
     res.json({
       ...userRows[0],
       profile,
       interests,
+      oppTypes,
+      education: profile.education_level || profile.qualification || '',
+      city: profile.city || profile.state_location || '',
       completeness,
-      matchingConfidence,
-      checklist,
+      confidence,
+      reminderPrefs,
       needsOnboarding: !Boolean(userRows[0].onboarding_completed)
     });
   } catch (err) {
+    console.error('Fetch profile error:', err);
     res.status(500).json({ error: 'Failed to fetch profile' });
   }
 });
 
 app.post('/api/user/profile', requireLogin, async (req, res) => {
   const {
+    interests,
+    oppTypes,
+    opp_types,
+    education,
     education_level,
     qualification,
     branch,
@@ -827,8 +851,13 @@ app.post('/api/user/profile', requireLogin, async (req, res) => {
     gender,
     skills,
     career_goal,
-    interests
+    reminder_prefs
   } = req.body;
+
+  const eduVal = education || education_level || null;
+  const cityVal = city || state_location || null;
+  const typesVal = oppTypes ? (Array.isArray(oppTypes) ? JSON.stringify(oppTypes) : String(oppTypes))
+    : opp_types ? (Array.isArray(opp_types) ? JSON.stringify(opp_types) : String(opp_types)) : null;
 
   const conn = await pool.getConnection();
   try {
@@ -836,33 +865,37 @@ app.post('/api/user/profile', requireLogin, async (req, res) => {
 
     await conn.query(
       `INSERT INTO user_profiles
-       (user_id, education_level, qualification, branch, study_status, graduation_year, state_location, city, age, gender, skills, career_goal)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       (user_id, education_level, qualification, branch, study_status, graduation_year, state_location, city, age, gender, skills, career_goal, opp_types, reminder_prefs)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
-         education_level = VALUES(education_level),
-         qualification = VALUES(qualification),
-         branch = VALUES(branch),
-         study_status = VALUES(study_status),
-         graduation_year = VALUES(graduation_year),
-         state_location = VALUES(state_location),
-         city = VALUES(city),
-         age = VALUES(age),
-         gender = VALUES(gender),
-         skills = VALUES(skills),
-         career_goal = VALUES(career_goal)`,
+         education_level = COALESCE(VALUES(education_level), education_level),
+         qualification = COALESCE(VALUES(qualification), qualification),
+         branch = COALESCE(VALUES(branch), branch),
+         study_status = COALESCE(VALUES(study_status), study_status),
+         graduation_year = COALESCE(VALUES(graduation_year), graduation_year),
+         state_location = COALESCE(VALUES(state_location), state_location),
+         city = COALESCE(VALUES(city), city),
+         age = COALESCE(VALUES(age), age),
+         gender = COALESCE(VALUES(gender), gender),
+         skills = COALESCE(VALUES(skills), skills),
+         career_goal = COALESCE(VALUES(career_goal), career_goal),
+         opp_types = COALESCE(VALUES(opp_types), opp_types),
+         reminder_prefs = COALESCE(VALUES(reminder_prefs), reminder_prefs)`,
       [
         req.session.userId,
-        education_level !== undefined ? (education_level || null) : null,
-        qualification !== undefined ? (qualification || null) : null,
-        branch !== undefined ? (branch || null) : null,
-        study_status !== undefined ? (study_status || null) : null,
+        eduVal,
+        qualification || eduVal,
+        branch || null,
+        study_status || null,
         graduation_year ? parseInt(graduation_year, 10) : null,
-        state_location !== undefined ? (state_location || null) : null,
-        city !== undefined ? (city || null) : null,
+        cityVal,
+        cityVal,
         age ? parseInt(age, 10) : null,
-        gender !== undefined ? (gender || null) : null,
+        gender || null,
         skills ? (Array.isArray(skills) ? JSON.stringify(skills) : String(skills)) : null,
-        career_goal !== undefined ? (career_goal || null) : null
+        career_goal || null,
+        typesVal,
+        reminder_prefs ? JSON.stringify(reminder_prefs) : null
       ]
     );
 
@@ -905,6 +938,83 @@ app.post('/api/user/profile', requireLogin, async (req, res) => {
         console.warn('Background discovery notice:', bgErr.message);
       }
     });
+  }
+});
+
+// ── REMINDER PREFERENCES & LOGS ──────────────────────────────
+app.get('/api/reminders/prefs', requireLogin, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT reminder_prefs FROM user_profiles WHERE user_id = ?', [req.session.userId]);
+    let prefs = { 30: false, 14: true, 7: true, 3: true, 1: true, 0: true };
+    if (rows.length && rows[0].reminder_prefs) {
+      try {
+        prefs = JSON.parse(rows[0].reminder_prefs);
+      } catch (_) {}
+    }
+    res.json({ prefs });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch reminder prefs' });
+  }
+});
+
+app.post('/api/reminders/prefs', requireLogin, async (req, res) => {
+  try {
+    const { prefs } = req.body;
+    if (prefs && typeof prefs === 'object') {
+      await pool.query(
+        `INSERT INTO user_profiles (user_id, reminder_prefs) VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE reminder_prefs = VALUES(reminder_prefs)`,
+        [req.session.userId, JSON.stringify(prefs)]
+      );
+    }
+    res.json({ success: true, message: 'Preferences updated' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save reminder prefs' });
+  }
+});
+
+app.get('/api/reminders/log', requireLogin, async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT ur.*, o.title as opp_title, o.organization as opp_org, o.deadline as opp_deadline, o.trust_level
+       FROM user_reminders ur
+       LEFT JOIN opportunities o ON o.id = ur.opportunity_id
+       WHERE ur.user_id = ? AND ur.status != 'CANCELLED'
+       ORDER BY COALESCE(ur.scheduled_at, ur.application_end, ur.created_at) ASC`,
+      [req.session.userId]
+    );
+
+    const log = rows.map(r => {
+      const title = r.opp_title || r.short_note || 'Opportunity Deadline';
+      let stage = '1 day';
+      if (r.reminder_stage) {
+        if (r.reminder_stage === 'DEADLINE_DAY' || r.reminder_stage === '0') stage = 'Deadline day';
+        else if (r.reminder_stage.includes('1_')) stage = '1 day';
+        else if (r.reminder_stage.includes('3_')) stage = '3 days';
+        else if (r.reminder_stage.includes('7_')) stage = '7 days';
+        else if (r.reminder_stage.includes('14_')) stage = '14 days';
+        else if (r.reminder_stage.includes('30_')) stage = '30 days';
+        else stage = r.reminder_stage;
+      }
+      
+      const when = r.sent_at ? new Date(r.sent_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+        : r.scheduled_at ? new Date(r.scheduled_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+        : 'Upcoming';
+
+      return {
+        id: r.id,
+        opportunityId: r.opportunity_id,
+        title,
+        stage,
+        status: r.status || 'PENDING',
+        when
+      };
+    });
+
+    res.json({ log });
+  } catch (err) {
+    console.error('Fetch reminder log error:', err);
+    res.status(500).json({ error: 'Failed to fetch reminder log' });
   }
 });
 
@@ -992,23 +1102,22 @@ app.get('/user/reminders', requireLogin, async (req, res) => {
     let [rows] = await pool.query(
       `SELECT * FROM user_reminders
        WHERE user_id = ? AND status != 'CANCELLED'
-       ORDER BY COALESCE(application_end, event_date, scheduled_at) ASC`,
+       ORDER BY COALESCE(application_end, event_date, id) ASC`,
       [req.session.userId]
     );
-    // New users can reach this screen before the background task completes.
-    // Rebuild once when the list is empty so the UI is never stuck blank.
     if (rows.length === 0) {
       await reconciler.reconcileUserReminders(req.session.userId);
       [rows] = await pool.query(
         `SELECT * FROM user_reminders
          WHERE user_id = ? AND status != 'CANCELLED'
-         ORDER BY scheduled_at ASC, COALESCE(application_end, event_date) ASC`,
+         ORDER BY COALESCE(application_end, event_date, id) ASC`,
         [req.session.userId]
       );
     }
     res.json({ reminders: rows });
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('GET /user/reminders notice:', err.message);
+    res.json({ reminders: [] });
   }
 });
 

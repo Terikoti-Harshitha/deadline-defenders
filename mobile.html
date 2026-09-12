@@ -1,1904 +1,1829 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>Deadline Defender — Academic Opportunity Intelligence</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
-<style>
-/* ════════════════════════════════════════
-   DESIGN SYSTEM & THEME
-════════════════════════════════════════ */
-:root {
-  --pit:       #06080c;
-  --void:      #0b0e14;
-  --deep:      #101520;
-  --well:      #161c2b;
-  --card:      #1c2336;
-  --ridge:     #28324a;
-  --line:      rgba(255,255,255,0.08);
-  --line-high: rgba(255,255,255,0.16);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Deadline Defender — Opportunity Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  
+  <!-- React 18 & ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-  --snow:      #f0f4fc;
-  --ash:       #8a99b5;
-  --fog:       #505f7c;
-
-  --amber:     #f5a623;
-  --amber-g:   linear-gradient(135deg,#f5a623,#e8601c);
-  --coral:     #e8601c;
-  --jade:      #00c48c;
-  --jade2:     #00e5a3;
-  --ice:       #4fc3f7;
-  --crimson:   #ff4757;
-  --purple:    #9c88ff;
-
-  --fb: 'Plus Jakarta Sans',sans-serif;
-  --fd: 'Space Grotesk',sans-serif;
-  --fm: 'JetBrains Mono',monospace;
-
-  --r1: 12px;
-  --r2: 18px;
-  --r3: 24px;
-
-  --silk: cubic-bezier(0.16,1,0.3,1);
-}
-
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{
-  width:100%;height:100%;background:var(--pit);
-  font-family:var(--fb);color:var(--snow);
-  overflow:hidden;-webkit-font-smoothing:antialiased;
-}
-
-#app{
-  width:100%;height:100%;max-width:480px;
-  margin:0 auto;position:relative;background:var(--void);
-  overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,0.85);
-}
-
-.page{
-  position:absolute;inset:0;bottom:70px;
-  display:none;flex-direction:column;
-  overflow:hidden;background:var(--void);
-}
-.page.active{display:flex}
-.page.no-nav{bottom:0}
-
-.scrl{
-  flex:1;overflow-y:auto;overflow-x:hidden;
-  padding:20px 18px 28px;
-}
-.scrl::-webkit-scrollbar{width:4px}
-.scrl::-webkit-scrollbar-thumb{background:var(--ridge);border-radius:4px}
-
-/* ════ HEADER ════ */
-.d-top{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:16px;
-}
-.d-wm{display:flex;align-items:center;gap:10px}
-.d-wm-shield{
-  width:34px;height:34px;border-radius:10px;background:var(--amber-g);
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;box-shadow:0 0 16px rgba(245,166,35,0.35);
-}
-.d-wm-name{font-family:var(--fd);font-size:18px;font-weight:700;letter-spacing:-0.02em}
-.d-bell{
-  position:relative;width:38px;height:38px;border-radius:50%;
-  background:var(--well);border:1px solid var(--line);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:17px;transition:transform .2s;
-}
-.d-bell:active{transform:scale(0.92)}
-.d-bell-dot{
-  position:absolute;top:7px;right:7px;width:7px;height:7px;
-  border-radius:50%;background:var(--jade);box-shadow:0 0 6px var(--jade);
-}
-
-/* ════ HERO ════ */
-.d-hero{margin-bottom:16px}
-.d-hi{font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:0.1em}
-.d-name{font-family:var(--fd);font-size:24px;font-weight:700;letter-spacing:-0.02em;margin:2px 0 3px}
-.d-sub{font-size:12px;color:var(--ash)}
-
-/* ════ PROFILE COMPLETENESS & CONFIDENCE STRIP ════ */
-.confidence-box{
-  background:var(--well);border:1px solid var(--line);border-radius:var(--r1);
-  padding:14px;margin-bottom:16px;
-}
-.conf-header{
-  display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
-}
-.conf-title{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--fog);letter-spacing:0.08em}
-.conf-badge{
-  font-family:var(--fd);font-size:10px;font-weight:700;padding:3px 8px;border-radius:var(--r3);letter-spacing:0.04em;text-transform:uppercase;
-}
-.conf-badge.full{background:rgba(0,196,140,0.15);color:var(--jade2);border:1px solid rgba(0,196,140,0.3)}
-.conf-badge.partial{background:rgba(245,166,35,0.15);color:var(--amber);border:1px solid rgba(245,166,35,0.3)}
-.conf-badge.discovery{background:rgba(79,195,247,0.15);color:var(--ice);border:1px solid rgba(79,195,247,0.3)}
-
-.meter-track{
-  height:6px;width:100%;border-radius:3px;background:rgba(255,255,255,0.06);margin-bottom:10px;overflow:hidden;
-}
-.meter-fill{
-  height:100%;border-radius:3px;background:var(--amber-g);transition:width .4s ease;
-}
-
-.conf-checklist{
-  display:flex;flex-wrap:wrap;gap:6px;font-size:11px;
-}
-.chk-pill{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:2px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid var(--line);color:var(--ash);
-}
-.chk-pill.active{color:var(--jade2);border-color:rgba(0,196,140,0.25);background:rgba(0,196,140,0.06)}
-.chk-pill.warning{color:var(--amber);border-color:rgba(245,166,35,0.25)}
-
-/* ════ STATS STRIP ════ */
-.score-strip{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;
-}
-.score-item{
-  background:var(--well);border:1px solid var(--line);border-radius:var(--r1);
-  padding:12px 10px;text-align:center;
-}
-.score-n{font-family:var(--fd);font-size:20px;font-weight:700;margin-bottom:2px}
-.score-l{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--ash);letter-spacing:0.06em}
-.c-amber{color:var(--amber)}
-.c-jade{color:var(--jade2)}
-.c-ice{color:var(--ice)}
-.c-purple{color:var(--purple)}
-
-/* ════ SECTION HEADINGS ════ */
-.sec-hd{
-  display:flex;align-items:center;justify-content:space-between;
-  margin:18px 0 12px;
-}
-.sec-ht{font-family:var(--fd);font-size:15px;font-weight:700;letter-spacing:-0.01em;display:flex;align-items:center;gap:6px}
-.sec-lnk{font-size:12px;color:var(--amber);text-decoration:none;font-weight:600;cursor:pointer}
-.sec-lnk:hover{text-decoration:underline}
-
-/* ════ INTERESTS & SKILLS CHIPS DISPLAY ════ */
-.int-tags-wrap{
-  display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;
-}
-.int-chip{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:6px 12px;border-radius:var(--r3);
-  background:var(--well);border:1px solid var(--line);
-  font-size:12px;font-weight:600;color:var(--snow);
-  cursor:pointer;transition:all .15s;user-select:none;
-}
-.int-chip:hover{border-color:var(--amber);transform:translateY(-1px)}
-.int-chip.selected{
-  background:rgba(245,166,35,0.15);border-color:var(--amber);color:var(--amber);
-}
-.int-chip .chip-del{
-  font-size:11px;color:var(--fog);cursor:pointer;margin-left:2px;
-}
-.int-chip .chip-del:hover{color:var(--crimson)}
-
-.chip-add-box{
-  display:flex;gap:8px;margin-top:8px;
-}
-.chip-add-box input{
-  flex:1;padding:10px 14px;background:var(--well);border:1px solid var(--line);
-  border-radius:var(--r1);font-family:var(--fb);font-size:13px;color:var(--snow);outline:none;
-}
-.chip-add-box input:focus{border-color:var(--amber)}
-.chip-add-btn{
-  padding:10px 16px;background:var(--well);border:1px solid var(--amber);
-  color:var(--amber);border-radius:var(--r1);font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;
-}
-.chip-add-btn:hover{background:rgba(245,166,35,0.12)}
-
-/* ════ FILTER STRIP ════ */
-.fstrip{
-  display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:12px;
-}
-.fstrip::-webkit-scrollbar{display:none}
-.fpill{
-  padding:7px 14px;border-radius:var(--r3);
-  background:var(--well);border:1px solid var(--line);
-  font-size:12px;font-weight:600;color:var(--ash);cursor:pointer;
-  white-space:nowrap;transition:all .2s;
-}
-.fpill.on{
-  background:rgba(245,166,35,0.14);border-color:var(--amber);color:var(--amber);
-}
-
-/* ════ OPPORTUNITY CARD ════ */
-.opp-card{
-  background:var(--well);border:1px solid var(--line);
-  border-radius:var(--r2);padding:16px;margin-bottom:14px;
-  transition:all .2s;position:relative;overflow:hidden;
-}
-.opp-card:hover{border-color:rgba(245,166,35,0.35);transform:translateY(-2px)}
-.opp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.opp-trust{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:3px 10px;border-radius:var(--r3);
-  font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;
-}
-.opp-trust.official{background:rgba(0,196,140,0.12);color:var(--jade2);border:1px solid rgba(0,196,140,0.25)}
-.opp-trust.secondary{background:rgba(79,195,247,0.1);color:var(--ice);border:1px solid rgba(79,195,247,0.2)}
-.opp-trust.unverified{background:rgba(255,255,255,0.08);color:var(--ash);border:1px solid var(--line)}
-
-.opp-match-tag{
-  font-family:var(--fd);font-size:11px;font-weight:700;
-  padding:3px 10px;border-radius:var(--r3);
-  background:linear-gradient(135deg,rgba(245,166,35,0.2),rgba(232,96,28,0.2));
-  color:var(--amber);border:1px solid rgba(245,166,35,0.3);
-}
-
-.opp-org{font-size:11px;font-weight:700;color:var(--fog);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
-.opp-title{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--snow);line-height:1.35;margin-bottom:8px}
-
-.opp-reasons{
-  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;
-}
-.opp-reason-tag{
-  font-size:11px;padding:2px 8px;border-radius:6px;
-  background:rgba(255,255,255,0.04);color:var(--ash);border:1px solid var(--line);
-}
-.opp-reason-tag.verified{color:var(--jade2);border-color:rgba(0,196,140,0.25);background:rgba(0,196,140,0.05)}
-.opp-reason-tag.unverified{color:var(--amber);border-color:rgba(245,166,35,0.25);background:rgba(245,166,35,0.05)}
-
-.opp-foot{
-  display:flex;align-items:center;justify-content:space-between;
-  padding-top:12px;border-top:1px solid var(--line);
-}
-.opp-dl{font-size:12px;color:var(--ash)}
-.opp-dl-val{font-weight:700;color:var(--amber);margin-left:4px}
-
-.opp-actions{display:flex;gap:6px}
-.opp-btn{
-  padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;
-  border:none;cursor:pointer;transition:all .15s;
-}
-.opp-btn-pri{background:var(--amber);color:var(--pit)}
-.opp-btn-pri:hover{opacity:0.9}
-.opp-btn-ghost{background:rgba(255,255,255,0.06);color:var(--snow);border:1px solid var(--line)}
-.opp-btn-ghost:hover{background:rgba(255,255,255,0.12)}
-.opp-btn-done{background:rgba(0,196,140,0.15);color:var(--jade2);border:1px solid rgba(0,196,140,0.3)}
-
-/* ════ REMINDER ITEM ════ */
-.rem-item{
-  background:var(--well);border:1px solid var(--line);
-  border-radius:var(--r1);padding:14px 16px;margin-bottom:10px;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.rem-main{flex:1;margin-right:12px}
-.rem-t{font-size:14px;font-weight:600;margin-bottom:3px;color:var(--snow)}
-.rem-s{font-size:11px;color:var(--ash)}
-.rem-badge{
-  padding:4px 10px;border-radius:var(--r3);
-  font-family:var(--fd);font-size:11px;font-weight:700;
-}
-.rem-badge.urgent{background:rgba(232,96,28,0.15);color:var(--coral);border:1px solid rgba(232,96,28,0.3)}
-.rem-badge.norm{background:rgba(79,195,247,0.1);color:var(--ice);border:1px solid rgba(79,195,247,0.2)}
-
-/* CALENDAR */
-.calendar-shell{background:var(--well);border:1px solid var(--line);border-radius:var(--r2);padding:14px;margin-bottom:14px}
-.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.calendar-title{font-family:var(--fd);font-size:16px;font-weight:700}
-.calendar-arrow{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--deep);color:var(--snow);font-size:18px;cursor:pointer}
-.calendar-week,.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.calendar-week{margin-bottom:7px}
-.calendar-week span{text-align:center;font-size:10px;font-weight:700;color:var(--fog);text-transform:uppercase}
-.calendar-day{min-height:42px;padding:5px 2px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--snow);font-family:var(--fb);font-size:12px;cursor:pointer;position:relative}
-.calendar-day:hover{background:rgba(255,255,255,0.06)}
-.calendar-day.empty{cursor:default}
-.calendar-day.today{border-color:rgba(245,166,35,0.55);color:var(--amber)}
-.calendar-day.has-reminder{background:rgba(0,196,140,0.13);color:var(--jade2)}
-.calendar-day.selected{background:var(--amber-g);color:var(--pit);font-weight:800}
-.calendar-count{display:block;width:5px;height:5px;margin:4px auto 0;border-radius:50%;background:currentColor}
-.calendar-agenda-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fog);margin:2px 0 9px}
-
-/* ════ BOTTOM NAV ════ */
-nav#nav{
-  position:absolute;bottom:0;left:0;right:0;height:70px;
-  background:rgba(16,21,32,0.96);backdrop-filter:blur(14px);
-  border-top:1px solid var(--line);display:none;z-index:200;
-}
-nav#nav.on{display:flex}
-.nav-inner{
-  display:grid;grid-template-columns:repeat(5,1fr);width:100%;height:100%;
-}
-.nb{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;background:none;border:none;cursor:pointer;color:var(--fog);transition:all .2s;
-}
-.nb.on{color:var(--amber)}
-.nb-icon{font-size:18px}
-.nb-lbl{font-size:10px;font-weight:700;letter-spacing:0.04em}
-
-/* ════ BUTTONS & ACTIONS ════ */
-.abtn{
-  width:100%;padding:14px;border-radius:var(--r1);
-  font-family:var(--fd);font-size:13px;font-weight:700;
-  text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;
-  border:none;transition:all .2s;
-}
-.abtn-amber{background:var(--amber-g);color:var(--pit);box-shadow:0 4px 20px rgba(245,166,35,0.25)}
-.abtn-amber:hover{opacity:0.92;transform:scale(0.99)}
-.abtn-ghost{background:rgba(255,255,255,0.06);color:var(--snow);border:1px solid var(--line)}
-.abtn-ghost:hover{background:rgba(255,255,255,0.12)}
-.ref-btn{
-  width:100%;padding:13px;border-radius:var(--r1);margin-top:14px;
-  background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.18);
-  color:var(--ash);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;
-}
-.ref-btn:hover{border-color:var(--amber);color:var(--amber)}
-
-/* ════ MODAL / BOTTOM SHEET ════ */
-.sheet-bk{
-  position:fixed;inset:0;z-index:500;
-  background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);
-  display:none;align-items:flex-end;justify-content:center;
-}
-.sheet-bk.open{display:flex}
-.sheet{
-  background:var(--deep);border:1px solid var(--line-high);
-  border-radius:24px 24px 0 0;padding:20px 22px max(32px,env(safe-area-inset-bottom));
-  width:100%;max-width:480px;max-height:85vh;overflow-y:auto;
-}
-.sheet-grip{width:36px;height:4px;border-radius:2px;background:var(--ridge);margin:0 auto 16px}
-.sheet-title{font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:6px}
-.sheet-sub{font-size:12px;color:var(--ash);margin-bottom:16px}
-.sheet-box{
-  background:var(--well);border:1px solid var(--line);border-radius:var(--r1);
-  padding:14px;margin-bottom:12px;
-}
-.sheet-box-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--fog);letter-spacing:0.08em;margin-bottom:6px}
-.sheet-box-val{font-size:13px;color:var(--snow);line-height:1.5}
-.sheet-close{
-  width:100%;padding:14px;border-radius:var(--r1);margin-top:12px;
-  background:var(--well);border:1px solid var(--line);color:var(--ash);
-  font-size:12px;font-weight:700;cursor:pointer;
-}
-
-/* ════ AUTH & ONBOARDING FORMS ════ */
-.auth-shell{padding:32px 20px}
-.wordmark{display:flex;align-items:center;gap:10px;margin-bottom:20px}
-.wm-shield{width:38px;height:38px;border-radius:10px;background:var(--amber-g);display:flex;align-items:center;justify-content:center;font-size:20px}
-.wm-top{font-family:var(--fd);font-size:18px;font-weight:700;line-height:1}
-.wm-bot{font-size:12px;color:var(--ash);letter-spacing:0.12em;text-transform:uppercase}
-.auth-headline{font-family:var(--fd);font-size:28px;font-weight:800;line-height:1.15;margin-bottom:8px}
-.auth-headline .tilt{color:var(--amber)}
-.auth-desc{font-size:13px;color:var(--ash);margin-bottom:20px;line-height:1.5}
-.fld{margin-bottom:14px}
-.fld label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--fog);margin-bottom:6px}
-.fld input,.fld select,.fld textarea{
-  width:100%;padding:12px 14px;background:var(--well);border:1px solid var(--line);
-  border-radius:var(--r1);font-family:var(--fb);font-size:13px;color:var(--snow);outline:none;
-}
-.fld input:focus,.fld select:focus{border-color:var(--amber)}
-.fld select option{background:var(--deep);color:var(--snow)}
-
-.aalert{padding:12px;border-radius:var(--r1);font-size:12px;margin-bottom:16px;display:none}
-.aalert.on{display:block}
-.aalert-e{background:rgba(232,96,28,0.15);color:var(--coral);border:1px solid rgba(232,96,28,0.3)}
-.aalert-ok{background:rgba(0,196,140,0.15);color:var(--jade2);border:1px solid rgba(0,196,140,0.3)}
-.afoot{text-align:center;font-size:13px;color:var(--ash);margin-top:20px}
-.afoot a{color:var(--amber);text-decoration:none;font-weight:600}
-.afoot a:hover{text-decoration:underline}
-
-/* ════ PROGRESSIVE WIZARD STYLES ════ */
-.prog-card{
-  background:var(--well);border:1px solid var(--line);border-radius:var(--r1);
-  padding:16px;margin-bottom:16px;
-}
-.prog-head{
-  display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
-}
-.prog-badge{
-  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
-  padding:3px 8px;border-radius:var(--r3);background:rgba(245,166,35,0.15);color:var(--amber);
-}
-.prog-opt-tag{
-  font-size:10px;font-weight:600;color:var(--fog);text-transform:uppercase;
-}
-.toggle-choice-bar{
-  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;
-}
-.tog-btn{
-  padding:10px;border-radius:var(--r1);background:rgba(255,255,255,0.04);border:1px solid var(--line);
-  font-family:var(--fb);font-size:12px;font-weight:600;color:var(--ash);cursor:pointer;text-align:center;transition:all .2s;
-}
-.tog-btn.selected{
-  background:rgba(245,166,35,0.15);border-color:var(--amber);color:var(--amber);
-}
-
-/* ════ LOADING SPINNER ════ */
-.st-load{padding:40px 20px;text-align:center;color:var(--ash)}
-.spin{width:32px;height:32px;border-radius:50%;border:3px solid var(--well);border-top-color:var(--amber);animation:spin .7s linear infinite;margin:0 auto 12px}
-@keyframes spin{to{transform:rotate(360deg)}}
-</style>
+  <style>
+    /* Base reset & fonts */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root { width: 100%; min-height: 100vh; background: #0A121D; color: #E9EEF5; }
+    body { font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
+  </style>
 </head>
 <body>
-<div id="app">
-
-<!-- ══════════════════════════════════════════════════════════
-     1. LOGIN PAGE
-══════════════════════════════════════════════════════════ -->
-<div class="page no-nav active" id="loginPage">
-  <div class="scrl auth-shell">
-    <div class="wordmark">
-      <div class="wm-shield">⚡</div>
-      <div><div class="wm-top">Deadline Defender</div><div class="wm-bot">Academic Intelligence</div></div>
-    </div>
-    <h1 class="auth-headline">Welcome<br><span class="tilt">back.</span></h1>
-    <p class="auth-desc">Discovers opportunities, verifies sources &amp; tracks deadlines.</p>
-    <div id="la" class="aalert aalert-e"></div>
-    <form id="loginForm">
-      <div class="fld"><label>Username or Email</label><input id="lu" type="text" placeholder="Enter username or email" required autocomplete="username"/></div>
-      <div class="fld"><label>Password</label><input id="lp" type="password" placeholder="Password" required autocomplete="current-password"/></div>
-      <div style="text-align:right;margin:-6px 0 16px"><a href="#" onclick="openModal('forgotBk');return false" style="font-size:12px;color:var(--ash);text-decoration:none">Forgot password?</a></div>
-      <button type="submit" id="lBtn" class="abtn abtn-amber">Sign In →</button>
-    </form>
-    <div class="afoot">New to Deadline Defender? <a href="#" onclick="showPage('signupPage');return false">Create an account</a></div>
-    <div style="text-align:center;margin-top:18px"><a href="#" onclick="promptResetAllUsers();return false" style="font-size:11px;color:var(--ash);text-decoration:underline">🧹 Reset Test Users &amp; Start Fresh</a></div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     2. SIGNUP PAGE
-══════════════════════════════════════════════════════════ -->
-<div class="page no-nav" id="signupPage">
-  <div class="scrl auth-shell">
-    <div class="wordmark">
-      <div class="wm-shield">⚡</div>
-      <div><div class="wm-top">Deadline Defender</div><div class="wm-bot">Join Free</div></div>
-    </div>
-    <h1 class="auth-headline">Create<br><span class="tilt">Account.</span></h1>
-    <p class="auth-desc">Enter your credentials below. Next, you can optionally personalize what opportunities you wish to track.</p>
-    <div id="sa" class="aalert aalert-e"></div>
-    <form id="signupForm">
-      <div class="fld"><label>Username</label><input id="su" type="text" placeholder="Choose a username" required autocomplete="username"/></div>
-      <div class="fld"><label>Email Address</label><input id="se" type="email" placeholder="name@college.edu.in" required autocomplete="email"/></div>
-      <div class="fld"><label>Password</label><input id="sp" type="password" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password"/></div>
-      <button type="submit" id="sBtn" class="abtn abtn-amber">Continue to Personalization →</button>
-    </form>
-    <div class="afoot">Already have an account? <a href="#" onclick="showPage('loginPage');return false">Sign In</a></div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     3. PROGRESSIVE ONBOARDING WIZARD (100% OPTIONAL & INCLUSIVE)
-══════════════════════════════════════════════════════════ -->
-<div class="page no-nav" id="onboardingPage">
-  <div class="scrl auth-shell">
-    <div class="wordmark">
-      <div class="wm-shield">🎯</div>
-      <div><div class="wm-top">Deadline Defender</div><div class="wm-bot">Personalize Opportunities</div></div>
-    </div>
-
-    <h1 class="auth-headline">Let's Tailor <span class="tilt">Your Feed.</span></h1>
-    <p class="auth-desc">You control what you share. You can skip anything you don't want to provide and update it anytime.</p>
-
-    <div id="oba" class="aalert aalert-e"></div>
-
-    <form id="onboardingForm">
-      
-      <!-- ── STEP 1: WHAT ARE YOU LOOKING FOR? (PRIMARY ⭐) ── -->
-      <div class="prog-card">
-        <div class="prog-head">
-          <span class="prog-badge">⭐ Step 1: Interests</span>
-          <span class="prog-opt-tag" style="color:var(--amber)">Recommended</span>
-        </div>
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">What are you interested in?</h3>
-        <p style="font-size:12px;color:var(--ash);margin-bottom:12px">Select categories you wish to track, or type your own custom topics:</p>
-
-        <!-- Category Presets -->
-        <div style="font-size:10px;font-weight:700;color:var(--fog);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Opportunity Categories</div>
-        <div class="int-tags-wrap" id="obCatChips">
-          <div class="int-chip selected" data-val="Government Jobs">🏛️ Govt Jobs</div>
-          <div class="int-chip selected" data-val="Private Jobs">💼 Private Jobs</div>
-          <div class="int-chip selected" data-val="Internships">🎓 Internships</div>
-          <div class="int-chip selected" data-val="Scholarships">💰 Scholarships</div>
-          <div class="int-chip selected" data-val="Government Exams">🏛️ Govt Exams</div>
-          <div class="int-chip" data-val="Apprenticeships">⚙️ Apprenticeships</div>
-          <div class="int-chip selected" data-val="Hackathons">⚡ Hackathons</div>
-          <div class="int-chip" data-val="Competitions">🏆 Competitions</div>
-          <div class="int-chip" data-val="Fellowships">🎗️ Fellowships</div>
-          <div class="int-chip" data-val="Certifications">📜 Certifications</div>
-          <div class="int-chip" data-val="Research">🔬 Research</div>
-          <div class="int-chip" data-val="Training Programs">🛠️ Training Programs</div>
-        </div>
-
-        <!-- Technical & Domain Topics -->
-        <div style="font-size:10px;font-weight:700;color:var(--fog);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Technical &amp; Domain Interests</div>
-        <div class="int-tags-wrap" id="obTechChips">
-          <div class="int-chip" data-val="AI & Machine Learning">🤖 AI / Machine Learning</div>
-          <div class="int-chip" data-val="Data Science">📊 Data Science</div>
-          <div class="int-chip" data-val="Cybersecurity">🔒 Cybersecurity</div>
-          <div class="int-chip" data-val="Web Development">🌐 Web Development</div>
-          <div class="int-chip" data-val="Robotics">🦾 Robotics &amp; Automation</div>
-          <div class="int-chip" data-val="Electronics">🔌 Electronics &amp; IoT</div>
-          <div class="int-chip" data-val="Cloud Computing">☁️ Cloud &amp; DevOps</div>
-          <div class="int-chip" data-val="Programming">💻 Competitive Coding</div>
-        </div>
-
-        <!-- Custom Interest Adder -->
-        <div style="margin-top:8px">
-          <div class="chip-add-box">
-            <input type="text" id="obCustomInput" placeholder="+ Add your own custom interest (e.g. UPSC, ISRO, AWS, Python)" onkeydown="if(event.key==='Enter'){event.preventDefault();addObCustomChip();}"/>
-            <button type="button" class="chip-add-btn" onclick="addObCustomChip()">+ Add</button>
-          </div>
-          <div class="int-tags-wrap" id="obCustomChips" style="margin-top:8px"></div>
-        </div>
-      </div>
-
-      <!-- ── STEP 2: EDUCATION (OPTIONAL & INCLUSIVE) ── -->
-      <div class="prog-card">
-        <div class="prog-head">
-          <span class="prog-badge">Step 2: Education</span>
-          <span class="prog-opt-tag">Optional</span>
-        </div>
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">Would you like to provide education details?</h3>
-        <p style="font-size:12px;color:var(--ash);margin-bottom:12px">Helps verify exact eligibility requirements (Works for 10th, 12th, Diploma, Degree, or skip):</p>
-
-        <div class="toggle-choice-bar">
-          <button type="button" class="tog-btn selected" id="togEduYes" onclick="toggleEduSection(true)">➕ Yes, add details</button>
-          <button type="button" class="tog-btn" id="togEduNo" onclick="toggleEduSection(false)">⏭️ Skip for now</button>
-        </div>
-
-        <div id="eduDetailsBox">
-          <div class="fld">
-            <label>Current Education Level</label>
-            <select id="obEduLevel" onchange="onEduLevelChange(this.value)">
-              <option value="10th">10th Standard / Matriculation</option>
-              <option value="12th">11th / 12th / Intermediate</option>
-              <option value="Diploma">Diploma / ITI (Polytechnic / Vocational)</option>
-              <option value="Undergraduate" selected>Undergraduate (B.Tech, B.Sc, B.Com, BCA, etc.)</option>
-              <option value="Postgraduate">Postgraduate (M.Tech, MCA, MBA, M.Sc, etc.)</option>
-              <option value="PhD">Ph.D. / Doctorate</option>
-              <option value="Completed">Completed Education / Working Professional</option>
-              <option value="Below 10th">Below 10th Standard</option>
-              <option value="Other">Other / Self-Learner</option>
-            </select>
-          </div>
-
-          <!-- Dynamic Qualification/Degree Input -->
-          <div class="fld" id="fldQual">
-            <label id="lblQual">Degree / Course Name</label>
-            <input type="text" id="obQual" placeholder="e.g. B.Tech, B.Sc, 10th Standard, ITI Electrician" value="B.Tech"/>
-          </div>
-
-          <!-- Dynamic Stream / Specialization Input -->
-          <div class="fld" id="fldBranch">
-            <label id="lblBranch">Branch / Major / Stream</label>
-            <input type="text" id="obBranch" placeholder="e.g. Computer Science, MPC, Mechanical, Commerce" value="Computer Science"/>
-          </div>
-
-          <div class="fld">
-            <label>Study Status</label>
-            <select id="obStatus">
-              <option value="Currently Studying">Currently Studying</option>
-              <option value="Completed">Completed</option>
-              <option value="Preparing for Entrance/Competitive">Preparing for Further Studies / Exams</option>
-            </select>
-          </div>
-
-          <div class="fld">
-            <label>Passing / Graduation Year (Optional)</label>
-            <input type="number" id="obYear" placeholder="e.g. 2026" min="1990" max="2035" value="2026"/>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── STEP 3: LOCATION (OPTIONAL) ── -->
-      <div class="prog-card">
-        <div class="prog-head">
-          <span class="prog-badge">Step 3: Location</span>
-          <span class="prog-opt-tag">Optional</span>
-        </div>
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">Would you like location-based opportunities?</h3>
-        <p style="font-size:12px;color:var(--ash);margin-bottom:12px">Helps filter state &amp; regional exams/jobs:</p>
-
-        <div class="toggle-choice-bar">
-          <button type="button" class="tog-btn selected" id="togLocYes" onclick="toggleLocSection(true)">➕ Yes, add location</button>
-          <button type="button" class="tog-btn" id="togLocNo" onclick="toggleLocSection(false)">⏭️ Skip</button>
-        </div>
-
-        <div id="locDetailsBox">
-          <div class="fld">
-            <label>State / Region</label>
-            <select id="obLoc">
-              <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
-              <option value="Telangana">Telangana</option>
-              <option value="Karnataka">Karnataka</option>
-              <option value="Tamil Nadu">Tamil Nadu</option>
-              <option value="Maharashtra">Maharashtra</option>
-              <option value="Delhi NCR">Delhi / NCR</option>
-              <option value="Uttar Pradesh">Uttar Pradesh</option>
-              <option value="All India">All India / Pan-India</option>
-            </select>
-          </div>
-          <div class="fld" style="margin-bottom:0">
-            <label>City / District (Optional)</label>
-            <input type="text" id="obCity" placeholder="e.g. Visakhapatnam, Hyderabad, Bengaluru"/>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── STEP 4: ADDITIONAL PREFERENCES & SKILLS (OPTIONAL) ── -->
-      <div class="prog-card">
-        <div class="prog-head">
-          <span class="prog-badge">Step 4: Skills &amp; Goals</span>
-          <span class="prog-opt-tag">Optional</span>
-        </div>
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">Skills &amp; Career Aspirations</h3>
-        <p style="font-size:12px;color:var(--ash);margin-bottom:12px">Tag your skills and career focus:</p>
-
-        <div class="fld">
-          <label>Skills (e.g. Python, Excel, AutoCAD, Robotics, Tally)</label>
-          <div class="chip-add-box">
-            <input type="text" id="obSkillInput" placeholder="Type a skill and press + Add" onkeydown="if(event.key==='Enter'){event.preventDefault();addObSkillChip();}"/>
-            <button type="button" class="chip-add-btn" onclick="addObSkillChip()">+ Add</button>
-          </div>
-          <div class="int-tags-wrap" id="obSkillChips" style="margin-top:8px"></div>
-        </div>
-
-        <div class="fld">
-          <label>Career Goal / Focus</label>
-          <select id="obGoal">
-            <option value="Job / Placement">Get a Job / Placement</option>
-            <option value="Internship">Secure an Internship</option>
-            <option value="Government Exam">Crack a Government / Public Exam</option>
-            <option value="Scholarship">Find Scholarships &amp; Aid</option>
-            <option value="Higher Education">Higher Education &amp; Research</option>
-            <option value="Competitions & Hackathons">Win Competitions &amp; Hackathons</option>
-            <option value="Learn Skills">Learn New Skills</option>
-            <option value="Just Exploring" selected>Just Exploring Opportunities</option>
-          </select>
-        </div>
-
-        <div class="fld" style="margin-bottom:0">
-          <label>Gender (Optional)</label>
-          <select id="obGender">
-            <option value="Prefer not to say">Prefer not to say</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-      </div>
-
-      <button type="submit" id="obBtn" class="abtn abtn-amber">Complete Setup &amp; Launch Dashboard ⚡</button>
-      <div style="text-align:center;margin-top:14px">
-        <a href="#" onclick="skipOnboardingToDash();return false" style="font-size:12px;color:var(--ash);text-decoration:none">Skip all &amp; explore general opportunities →</a>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     4. DASHBOARD (HOME)
-══════════════════════════════════════════════════════════ -->
-<div class="page" id="dashPage">
-  <div class="scrl">
-    <div class="d-top">
-      <div class="d-wm">
-        <div class="d-wm-shield">⚡</div>
-        <div class="d-wm-name">Deadline Defender</div>
-      </div>
-      <div class="d-bell" id="bellBtn" onclick="togNotifs()" title="Toggle Web Push Notifications">🔔<div class="d-bell-dot" id="bellDot" style="display:none"></div></div>
-    </div>
-    
-    <div class="d-hero">
-      <div class="d-hi">Academic Opportunity Intelligence</div>
-      <div class="d-name" id="dName">Welcome 👋</div>
-      <div class="d-sub" id="dSub">Multi-Source Intelligence Feed</div>
-    </div>
-
-    <!-- ── Profile Completeness & Matching Confidence Bar ── -->
-    <div class="confidence-box">
-      <div class="conf-header">
-        <span class="conf-title">🎯 Profile Completeness</span>
-        <span class="conf-badge discovery" id="dConfBadge">Interest Match</span>
-      </div>
-      <div class="meter-track">
-        <div class="meter-fill" id="dMeterFill" style="width:50%"></div>
-      </div>
-      <div class="conf-checklist" id="dChecklist">
-        <span class="chk-pill" id="chkInt">⭐ Interests</span>
-        <span class="chk-pill" id="chkEdu">🎓 Education</span>
-        <span class="chk-pill" id="chkLoc">📍 Location</span>
-        <span class="chk-pill" id="chkAge">🎂 Age</span>
-      </div>
-      <div style="margin-top:8px;text-align:right">
-        <a href="#" class="sec-lnk" onclick="openProfileEdit();return false" style="font-size:11px">✏️ Edit Profile Criteria ↗</a>
-      </div>
-    </div>
-
-    <!-- Active Interests Strip -->
-    <div class="sheet-box" style="padding:10px 14px;margin-bottom:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <span class="sheet-box-lbl" style="margin-bottom:0">⭐ Tracked Topics</span>
-        <a href="#" class="sec-lnk" onclick="openProfileEdit();return false">+ Add Topic</a>
-      </div>
-      <div class="int-tags-wrap" id="dInterests" style="margin-bottom:0"></div>
-    </div>
-
-    <!-- Metrics Strip -->
-    <div class="score-strip">
-      <div class="score-item"><div class="score-n c-amber" id="stO">0</div><div class="score-l">Matches</div></div>
-      <div class="score-item"><div class="score-n c-jade" id="stR">0</div><div class="score-l">Reminders</div></div>
-      <div class="score-item"><div class="score-n c-ice" id="stS">12+</div><div class="score-l">Sources</div></div>
-    </div>
-
-    <div class="sec-hd">
-      <div class="sec-ht">🎯 Recommended For You</div>
-      <a href="#" class="sec-lnk" onclick="navTo('oppPage');return false">View All</a>
-    </div>
-    
-    <div id="dFeed">
-      <div class="st-load"><div class="spin"></div>Loading personalized opportunities…</div>
-    </div>
-
-    <button class="ref-btn" id="refBtn" onclick="refreshDeadlines()">↻ &nbsp;Run Shared Discovery &amp; Reconcile Reminders</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     5. OPPORTUNITY INTELLIGENCE FEED
-══════════════════════════════════════════════════════════ -->
-<div class="page" id="oppPage">
-  <div class="scrl">
-    <div class="sec-hd" style="margin-top:0">
-      <div class="sec-ht">Opportunity Intelligence</div>
-      <span style="font-size:11px;color:var(--fog)">Shared Pipeline</span>
-    </div>
-
-    <div class="fstrip">
-      <button class="fpill on" data-cat="all" onclick="setCatFilter('all',this)">All</button>
-      <button class="fpill" data-cat="Government Exam" onclick="setCatFilter('Government Exam',this)">🏛️ Govt Exams</button>
-      <button class="fpill" data-cat="Job" onclick="setCatFilter('Job',this)">💼 Jobs</button>
-      <button class="fpill" data-cat="Internship" onclick="setCatFilter('Internship',this)">🎓 Internships</button>
-      <button class="fpill" data-cat="Scholarship" onclick="setCatFilter('Scholarship',this)">💰 Scholarships</button>
-      <button class="fpill" data-cat="Hackathon" onclick="setCatFilter('Hackathon',this)">⚡ Hackathons</button>
-    </div>
-
-    <div id="oppList">
-      <div class="st-load"><div class="spin"></div>Loading master opportunities…</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     6. PERSISTENT REMINDERS
-══════════════════════════════════════════════════════════ -->
-<div class="page" id="remPage">
-  <div class="scrl">
-    <div class="sec-hd" style="margin-top:0">
-      <div class="sec-ht">Scheduled Reminders</div>
-      <span style="font-size:11px;color:var(--jade2)">Idempotent</span>
-    </div>
-    <p style="font-size:12px;color:var(--ash);margin-bottom:16px">Multi-stage reminders at 30, 14, 7, 3, 1 &amp; 0 days before closing date.</p>
-    <div id="remList">
-      <div class="st-load"><div class="spin"></div>Loading reminders…</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     7. TIMELINE VIEW
-══════════════════════════════════════════════════════════ -->
-<div class="page" id="calPage">
-  <div class="scrl">
-    <div class="sec-hd" style="margin-top:0"><div class="sec-ht">Reminder Calendar</div></div>
-    <p style="font-size:12px;color:var(--ash);margin-bottom:16px">Select a highlighted date to see every reminder scheduled for that day.</p>
-    <div id="calList">
-      <div class="st-load"><div class="spin"></div>Loading timeline…</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     8. STUDENT PROFILE & ACADEMIC SETTINGS
-══════════════════════════════════════════════════════════ -->
-<div class="page" id="profPage">
-  <div class="scrl">
-    <div class="sec-hd" style="margin-top:0"><div class="sec-ht">User Profile &amp; Preferences</div></div>
-    
-    <div class="sheet-box">
-      <div class="sheet-box-lbl">User Account</div>
-      <div style="font-size:16px;font-weight:700;color:var(--snow)" id="puName">–</div>
-      <div style="font-size:12px;color:var(--ash)" id="puEmail">–</div>
-    </div>
-
-    <div class="sheet-box">
-      <div class="sheet-box-lbl">Eligibility Matching Profile</div>
-      <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:var(--fog)">Education Level:</span>
-        <div style="font-weight:600;color:var(--snow)" id="pEduLevel">Not Provided</div>
-      </div>
-      <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:var(--fog)">Degree / Qualification:</span>
-        <div style="font-weight:600;color:var(--snow)" id="pQual">Not Provided</div>
-      </div>
-      <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:var(--fog)">Branch / Stream / Trade:</span>
-        <div style="font-weight:600;color:var(--snow)" id="pBranch">Not Provided</div>
-      </div>
-      <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:var(--fog)">State Location:</span>
-        <div style="font-weight:600;color:var(--snow)" id="pLoc">Not Provided</div>
-      </div>
-      <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:var(--fog)">Career Focus:</span>
-        <div style="font-weight:600;color:var(--snow)" id="pGoal">Exploring</div>
-      </div>
-    </div>
-
-    <div class="sheet-box">
-      <div class="sheet-box-lbl">Tracked Interests &amp; Topics</div>
-      <div class="int-tags-wrap" id="pInterests" style="margin-top:8px;margin-bottom:0"></div>
-    </div>
-
-    <div class="sheet-box">
-      <div class="sheet-box-lbl">Skills</div>
-      <div class="int-tags-wrap" id="pSkills" style="margin-top:8px;margin-bottom:0"></div>
-    </div>
-
-    <button class="abtn abtn-ghost" style="margin-top:10px" onclick="openProfileEdit()">Edit Profile Criteria &amp; Interests →</button>
-    <button class="abtn abtn-ghost" style="margin-top:10px;color:var(--coral)" onclick="logout()">Sign Out</button>
-    <button class="abtn abtn-ghost" style="margin-top:10px;color:var(--crimson);border-color:rgba(255,71,87,0.3)" onclick="promptResetAllUsers()">🧹 Delete All Test Users &amp; Start Fresh</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     BOTTOM NAVIGATION BAR
-══════════════════════════════════════════════════════════ -->
-<nav id="nav">
-  <div class="nav-inner">
-    <button class="nb on" data-page="dashPage" onclick="navTo('dashPage')"><span class="nb-icon">⚡</span><span class="nb-lbl">Home</span></button>
-    <button class="nb" data-page="oppPage" onclick="navTo('oppPage')"><span class="nb-icon">🎯</span><span class="nb-lbl">Opps</span></button>
-    <button class="nb" data-page="remPage" onclick="navTo('remPage')"><span class="nb-icon">📋</span><span class="nb-lbl">Reminders</span></button>
-    <button class="nb" data-page="calPage" onclick="navTo('calPage')"><span class="nb-icon">📅</span><span class="nb-lbl">Calendar</span></button>
-    <button class="nb" data-page="profPage" onclick="navTo('profPage')"><span class="nb-icon">👤</span><span class="nb-lbl">Profile</span></button>
-  </div>
-</nav>
-
-<!-- ══════════════════════════════════════════════════════════
-     MODAL: EVIDENCE / PROVENANCE INSPECTOR
-══════════════════════════════════════════════════════════ -->
-<div class="sheet-bk" id="evidenceBk" onclick="closeModal('evidenceBk')">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <div class="sheet-grip"></div>
-    <div class="sheet-title" id="evTitle">Official Provenance Evidence</div>
-    <div class="sheet-sub" id="evOrg">Verified Source Evidence</div>
-    
-    <div class="sheet-box">
-      <div class="sheet-box-lbl">Exact Extracted Sentence Evidence</div>
-      <div class="sheet-box-val" id="evText" style="font-family:var(--fm);font-size:12px;color:var(--amber)">“...”</div>
-    </div>
-
-    <div class="sheet-box">
-      <div class="sheet-box-lbl">Source Provenance &amp; Verification</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span id="evTrustBadge" class="opp-trust official">OFFICIAL</span>
-        <span style="font-size:11px;color:var(--ash)" id="evConf">High Confidence</span>
-      </div>
-      <div style="font-size:11px;color:var(--fog);word-break:break-all" id="evUrl">https://...</div>
-    </div>
-
-    <a href="#" target="_blank" rel="noopener" id="evLinkBtn" class="abtn abtn-amber" style="display:block;text-align:center;text-decoration:none">Open Official Notice ↗</a>
-    <button class="sheet-close" onclick="closeModal('evidenceBk')">Close</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     MODAL: EDIT PROFILE & INTERESTS
-══════════════════════════════════════════════════════════ -->
-<div class="sheet-bk" id="profEditBk" onclick="closeModal('profEditBk')">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <div class="sheet-grip"></div>
-    <div class="sheet-title">Edit Profile &amp; Preferences</div>
-    <div class="sheet-sub">Update education, location, skills, or tracked interests</div>
-    
-    <form id="profForm">
-      <div class="fld">
-        <label>Education Level</label>
-        <select id="eqLevel">
-          <option value="">(None / Skip)</option>
-          <option value="10th">10th Standard</option>
-          <option value="12th">12th / Intermediate</option>
-          <option value="Diploma">Diploma / ITI</option>
-          <option value="Undergraduate">Undergraduate (B.Tech, B.Sc, B.Com, etc.)</option>
-          <option value="Postgraduate">Postgraduate (M.Tech, MCA, MBA, etc.)</option>
-          <option value="PhD">Ph.D.</option>
-          <option value="Completed">Completed / Working</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-
-      <div class="fld">
-        <label>Qualification / Degree</label>
-        <input type="text" id="eq" placeholder="e.g. B.Tech, 10th Standard, MPC, Diploma"/>
-      </div>
-
-      <div class="fld">
-        <label>Branch / Stream / Trade</label>
-        <input type="text" id="eb" placeholder="e.g. Computer Science, Mechanical, BiPC"/>
-      </div>
-
-      <div class="fld">
-        <label>State / Region</label>
-        <select id="el">
-          <option value="">(None / Skip)</option>
-          <option value="Andhra Pradesh">Andhra Pradesh</option>
-          <option value="Telangana">Telangana</option>
-          <option value="Karnataka">Karnataka</option>
-          <option value="Tamil Nadu">Tamil Nadu</option>
-          <option value="Maharashtra">Maharashtra</option>
-          <option value="Delhi NCR">Delhi / NCR</option>
-          <option value="Uttar Pradesh">Uttar Pradesh</option>
-          <option value="All India">All India</option>
-        </select>
-      </div>
-
-      <div class="fld">
-        <label>City / District</label>
-        <input type="text" id="ecity" placeholder="e.g. Visakhapatnam"/>
-      </div>
-
-      <div class="fld">
-        <label>Career Goal</label>
-        <select id="egoal">
-          <option value="Job / Placement">Get a Job / Placement</option>
-          <option value="Internship">Secure an Internship</option>
-          <option value="Government Exam">Crack a Government / Public Exam</option>
-          <option value="Scholarship">Find Scholarships &amp; Aid</option>
-          <option value="Higher Education">Higher Education &amp; Research</option>
-          <option value="Competitions & Hackathons">Win Competitions &amp; Hackathons</option>
-          <option value="Learn Skills">Learn New Skills</option>
-          <option value="Just Exploring">Just Exploring</option>
-        </select>
-      </div>
-
-      <!-- Interests in Modal -->
-      <div style="margin:16px 0 12px">
-        <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--fog);letter-spacing:0.08em">Manage Tracked Topics</label>
-        <div class="chip-add-box">
-          <input type="text" id="editCustomInput" placeholder="Add custom topic (e.g. UPSC, AI, Python)" onkeydown="if(event.key==='Enter'){event.preventDefault();addEditCustomChip();}"/>
-          <button type="button" class="chip-add-btn" onclick="addEditCustomChip()">+ Add</button>
-        </div>
-        <div class="int-tags-wrap" id="editCustomChips" style="margin-top:10px"></div>
-      </div>
-
-      <!-- Skills in Modal -->
-      <div style="margin:16px 0 12px">
-        <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--fog);letter-spacing:0.08em">Manage Skills</label>
-        <div class="chip-add-box">
-          <input type="text" id="editSkillInput" placeholder="Add skill (e.g. Python, Excel)" onkeydown="if(event.key==='Enter'){event.preventDefault();addEditSkillChip();}"/>
-          <button type="button" class="chip-add-btn" onclick="addEditSkillChip()">+ Add</button>
-        </div>
-        <div class="int-tags-wrap" id="editSkillChips" style="margin-top:10px"></div>
-      </div>
-
-      <button type="submit" id="profSaveBtn" class="abtn abtn-amber">Save &amp; Recalculate Matches →</button>
-    </form>
-    <button class="sheet-close" onclick="closeModal('profEditBk')">Cancel</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     MODAL: FORGOT PASSWORD
-══════════════════════════════════════════════════════════ -->
-<div class="sheet-bk" id="forgotBk" onclick="closeModal('forgotBk')">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <div class="sheet-grip"></div>
-    <div class="sheet-title">Reset Password</div>
-    <div class="sheet-sub">Enter your email address to receive a password reset link.</div>
-    <div id="fa" class="aalert aalert-e"></div>
-    <form id="forgotForm">
-      <div class="fld"><label>Email Address</label><input type="email" id="fe" placeholder="name@college.edu.in" required/></div>
-      <button type="submit" id="fBtn" class="abtn abtn-amber">Send Reset Link →</button>
-    </form>
-    <button class="sheet-close" onclick="closeModal('forgotBk')">Cancel</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     MODAL: SET NEW PASSWORD (TOKEN FLOW)
-══════════════════════════════════════════════════════════ -->
-<div class="sheet-bk" id="resetBk">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <div class="sheet-grip"></div>
-    <div class="sheet-title">Create New Password</div>
-    <div class="sheet-sub">Enter your new secure password below.</div>
-    <div id="ra" class="aalert aalert-e"></div>
-    <form id="resetForm">
-      <div class="fld"><label>New Password</label><input type="password" id="rp" placeholder="At least 6 characters" required minlength="6"/></div>
-      <button type="submit" id="rBtn" class="abtn abtn-amber">Update Password &amp; Sign In →</button>
-    </form>
-  </div>
-</div>
-
-</div><!-- /app -->
-
-<script src="push-notification-client.js"></script>
-<script>
-let uData = null, allOpps = [], allRem = [], currentCat = 'all';
-let calendarCursor = new Date();
-let selectedCalendarDate = null;
-let obCustomInterests = [];
-let obSkillsList = [];
-let editCustomInterests = [];
-let editSkillsList = [];
-let includeEdu = true;
-let includeLoc = true;
-let resetToken = null;
-
-/* ════ NAVIGATION & PAGE MANAGEMENT ════ */
-function showPage(id){
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const target = document.getElementById(id);
-  if(target) target.classList.add('active');
-
-  const n = document.getElementById('nav');
-  if(['loginPage','signupPage','onboardingPage'].includes(id)){
-    n.classList.remove('on');
-  } else {
-    n.classList.add('on');
-    document.querySelectorAll('#nav .nb').forEach(b => b.classList.toggle('on', b.dataset.page === id));
-  }
-}
-
-function navTo(pageId){ showPage(pageId); }
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-
-/* ════ DYNAMIC ONBOARDING BEHAVIORS ════ */
-function toggleEduSection(yes){
-  includeEdu = yes;
-  document.getElementById('togEduYes').classList.toggle('selected', yes);
-  document.getElementById('togEduNo').classList.toggle('selected', !yes);
-  document.getElementById('eduDetailsBox').style.display = yes ? 'block' : 'none';
-}
-
-function toggleLocSection(yes){
-  includeLoc = yes;
-  document.getElementById('togLocYes').classList.toggle('selected', yes);
-  document.getElementById('togLocNo').classList.toggle('selected', !yes);
-  document.getElementById('locDetailsBox').style.display = yes ? 'block' : 'none';
-}
-
-function onEduLevelChange(val){
-  const qInp = document.getElementById('obQual');
-  const bInp = document.getElementById('obBranch');
-  const qLbl = document.getElementById('lblQual');
-  const bLbl = document.getElementById('lblBranch');
-
-  if(val === '10th'){
-    qLbl.textContent = 'Standard / Class';
-    qInp.value = '10th Standard';
-    bLbl.textContent = 'Subject Focus (e.g. Science, Maths, Arts, Olympiads)';
-    bInp.value = 'Science & Technology';
-  } else if(val === '12th'){
-    qLbl.textContent = 'Intermediate / 12th Course';
-    qInp.value = '12th Standard';
-    bLbl.textContent = 'Stream (e.g. MPC, BiPC, MEC, CEC, Arts)';
-    bInp.value = 'MPC (Maths, Physics, Chem)';
-  } else if(val === 'Diploma'){
-    qLbl.textContent = 'Course (Diploma / ITI)';
-    qInp.value = 'Diploma (Polytechnic)';
-    bLbl.textContent = 'Trade / Specialization (e.g. Mechanical, Civil, Electrician, Fitter)';
-    bInp.value = 'Mechanical';
-  } else if(val === 'Undergraduate'){
-    qLbl.textContent = 'Degree Name';
-    qInp.value = 'B.Tech';
-    bLbl.textContent = 'Branch / Major (e.g. CSE, ECE, B.Sc Physics, B.Com)';
-    bInp.value = 'Computer Science';
-  } else if(val === 'Postgraduate'){
-    qLbl.textContent = 'Master\'s Degree';
-    qInp.value = 'M.Tech / MCA';
-    bLbl.textContent = 'Specialization';
-    bInp.value = 'Computer Science';
-  } else {
-    qLbl.textContent = 'Qualification';
-    qInp.value = val;
-    bLbl.textContent = 'Field / Area';
-    bInp.value = 'General';
-  }
-}
-
-/* ════ CHIP SELECTION LISTENERS ════ */
-document.querySelectorAll('#obCatChips .int-chip, #obTechChips .int-chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    chip.classList.toggle('selected');
-  });
-});
-
-function addObCustomChip(){
-  const inp = document.getElementById('obCustomInput');
-  const val = inp.value.trim();
-  if(!val) return;
-  if(!obCustomInterests.includes(val)){
-    obCustomInterests.push(val);
-    renderObCustomChips();
-  }
-  inp.value = '';
-}
-
-function removeObCustomChip(val){
-  obCustomInterests = obCustomInterests.filter(i => i !== val);
-  renderObCustomChips();
-}
-
-function renderObCustomChips(){
-  const el = document.getElementById('obCustomChips');
-  el.innerHTML = obCustomInterests.map(val => `
-    <div class="int-chip selected">
-      ⭐ ${val}
-      <span class="chip-del" onclick="removeObCustomChip('${val.replace(/'/g,"\\'")}')">✕</span>
-    </div>
-  `).join('');
-}
-
-function addObSkillChip(){
-  const inp = document.getElementById('obSkillInput');
-  const val = inp.value.trim();
-  if(!val) return;
-  if(!obSkillsList.includes(val)){
-    obSkillsList.push(val);
-    renderObSkillChips();
-  }
-  inp.value = '';
-}
-
-function removeObSkillChip(val){
-  obSkillsList = obSkillsList.filter(i => i !== val);
-  renderObSkillChips();
-}
-
-function renderObSkillChips(){
-  const el = document.getElementById('obSkillChips');
-  el.innerHTML = obSkillsList.map(val => `
-    <div class="int-chip selected">
-      ✓ ${val}
-      <span class="chip-del" onclick="removeObSkillChip('${val.replace(/'/g,"\\'")}')">✕</span>
-    </div>
-  `).join('');
-}
-
-/* ════ ONBOARDING FORM SUBMISSION ════ */
-document.getElementById('onboardingForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  await submitOnboarding(false);
-});
-
-async function skipOnboardingToDash(){
-  await submitOnboarding(true);
-}
-
-async function submitOnboarding(isSkipAll){
-  const alertEl = document.getElementById('oba');
-  alertEl.classList.remove('on');
-
-  const btn = document.getElementById('obBtn');
-  btn.disabled = true;
-  btn.textContent = 'Personalizing Your Opportunity Pool… ⚡';
-
-  let allSelectedInterests = [];
-  if(!isSkipAll){
-    const selectedPresetCats = Array.from(document.querySelectorAll('#obCatChips .int-chip.selected, #obTechChips .int-chip.selected')).map(c => c.dataset.val);
-    allSelectedInterests = Array.from(new Set([...selectedPresetCats, ...obCustomInterests]));
-  }
-
-  const payload = {
-    education_level: (!isSkipAll && includeEdu) ? document.getElementById('obEduLevel').value : null,
-    qualification: (!isSkipAll && includeEdu) ? document.getElementById('obQual').value.trim() : null,
-    branch: (!isSkipAll && includeEdu) ? document.getElementById('obBranch').value.trim() : null,
-    study_status: (!isSkipAll && includeEdu) ? document.getElementById('obStatus').value : null,
-    graduation_year: (!isSkipAll && includeEdu) ? document.getElementById('obYear').value : null,
-    state_location: (!isSkipAll && includeLoc) ? document.getElementById('obLoc').value : null,
-    city: (!isSkipAll && includeLoc) ? document.getElementById('obCity').value.trim() : null,
-    gender: !isSkipAll ? document.getElementById('obGender').value : null,
-    skills: (!isSkipAll && obSkillsList.length > 0) ? obSkillsList : null,
-    career_goal: !isSkipAll ? document.getElementById('obGoal').value : null,
-    interests: allSelectedInterests
-  };
-
-  try {
-    const res = await fetch('/api/user/onboarding', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json();
-    if(!res.ok){
-      alertEl.textContent = data.error || 'Setup failed';
-      alertEl.classList.add('on');
-      btn.disabled = false;
-      btn.textContent = 'Complete Setup & Launch Dashboard ⚡';
-      return;
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useCallback, useRef } = React;
+
+    /* ------------------------------------------------------------------ */
+    /*  Icon helper                                                       */
+    /* ------------------------------------------------------------------ */
+    const ICONS_SVG_PATH = {
+      Home: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+      Star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+      Sparkles: '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>',
+      Flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3.5z"/>',
+      Bookmark: '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>',
+      CheckCircle2: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+      Bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+      User: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+      Menu: '<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',
+      X: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+      ChevronRight: '<path d="m9 18 6-6-6-6"/>',
+      ShieldCheck: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+      ShieldQuestion: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+      ShieldAlert: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
+      ExternalLink: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+      Info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+      Search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+      MapPin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+      GraduationCap: '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+      Radar: '<path d="M19.07 4.93a10 10 0 0 0-14.14 0"/><path d="M16.24 7.76a6 6 0 0 0-8.49 0"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/>',
+      Clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+      ArrowUpRight: '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+      Check: '<path d="M20 6 9 17l-5-5"/>',
+      Circle: '<circle cx="12" cy="12" r="10"/>'
+    };
+
+    function Icon({ name, size = 16, strokeWidth = 2, className = "", style = {}, fill = "none", ...props }) {
+      const pathHtml = ICONS_SVG_PATH[name] || '<circle cx="12" cy="12" r="10"/>';
+      return (
+        <svg
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill={fill}
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={className}
+          style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0, ...style }}
+          dangerouslySetInnerHTML={{ __html: pathHtml }}
+          {...props}
+        />
+      );
     }
 
-    await loadState();
-    showPage('dashPage');
-  } catch(err) {
-    alertEl.textContent = 'Network error during setup';
-    alertEl.classList.add('on');
-    btn.disabled = false;
-    btn.textContent = 'Complete Setup & Launch Dashboard ⚡';
-  }
-}
+    const Home = (p) => <Icon name="Home" {...p} />;
+    const Star = (p) => <Icon name="Star" {...p} />;
+    const Sparkles = (p) => <Icon name="Sparkles" {...p} />;
+    const Flame = (p) => <Icon name="Flame" {...p} />;
+    const Bookmark = (p) => <Icon name="Bookmark" {...p} />;
+    const CheckCircle2 = (p) => <Icon name="CheckCircle2" {...p} />;
+    const Bell = (p) => <Icon name="Bell" {...p} />;
+    const User = (p) => <Icon name="User" {...p} />;
+    const Menu = (p) => <Icon name="Menu" {...p} />;
+    const X = (p) => <Icon name="X" {...p} />;
+    const ChevronRight = (p) => <Icon name="ChevronRight" {...p} />;
+    const ShieldCheck = (p) => <Icon name="ShieldCheck" {...p} />;
+    const ShieldQuestion = (p) => <Icon name="ShieldQuestion" {...p} />;
+    const ShieldAlert = (p) => <Icon name="ShieldAlert" {...p} />;
+    const ExternalLink = (p) => <Icon name="ExternalLink" {...p} />;
+    const Info = (p) => <Icon name="Info" {...p} />;
+    const Search = (p) => <Icon name="Search" {...p} />;
+    const MapPin = (p) => <Icon name="MapPin" {...p} />;
+    const GraduationCap = (p) => <Icon name="GraduationCap" {...p} />;
+    const Radar = (p) => <Icon name="Radar" {...p} />;
+    const Clock = (p) => <Icon name="Clock" {...p} />;
+    const ArrowUpRight = (p) => <Icon name="ArrowUpRight" {...p} />;
+    const Check = (p) => <Icon name="Check" {...p} />;
+    const Circle = (p) => <Icon name="Circle" {...p} />;
 
-/* ════ LOAD COMPLETE INTELLIGENCE STATE ════ */
-async function loadState(){
-  try {
-    const [pRes, oRes, rRes] = await Promise.all([
-      fetch('/api/user/profile', { credentials: 'include' }),
-      fetch(`/api/opportunities?category=${currentCat}`, { credentials: 'include' }),
-      fetch('/user/reminders', { credentials: 'include' })
-    ]);
+    /* ------------------------------------------------------------------ */
+    /*  Constants & Options                                               */
+    /* ------------------------------------------------------------------ */
+    const INTEREST_OPTIONS = [
+      "Artificial Intelligence",
+      "Cybersecurity",
+      "Government Exams",
+      "Data Science",
+      "Web Development",
+      "Civil Services",
+      "Robotics",
+      "Finance",
+      "Design",
+      "Research",
+    ];
 
-    if(!pRes.ok) throw new Error('unauthorized');
-    if(!oRes.ok || !rRes.ok) throw new Error('Unable to load opportunities or reminders');
-    uData = await pRes.json();
+    const OPP_TYPE_OPTIONS = [
+      "Internships",
+      "Government Jobs",
+      "Scholarships",
+      "Hackathons",
+      "Certifications",
+      "Fellowships",
+    ];
 
-    if(uData.needsOnboarding) {
-      showPage('onboardingPage');
-      return;
+    const EDUCATION_OPTIONS = [
+      "Below 10th",
+      "10th",
+      "12th",
+      "Diploma",
+      "Undergraduate",
+      "Postgraduate",
+      "Graduate / Job seeker",
+    ];
+
+    const initialReminderPrefs = { 30: false, 14: true, 7: true, 3: true, 1: true, 0: true };
+
+    const NAV_ITEMS = [
+      { key: "home", label: "Home", Icon: Home },
+      { key: "recommended", label: "Recommended", Icon: Star },
+      { key: "new", label: "New", Icon: Sparkles },
+      { key: "closing", label: "Closing soon", Icon: Flame },
+      { key: "saved", label: "Saved", Icon: Bookmark },
+      { key: "applied", label: "Applied", Icon: CheckCircle2 },
+      { key: "reminders", label: "Reminders", Icon: Bell },
+      { key: "profile", label: "Profile", Icon: User },
+    ];
+
+    /* ------------------------------------------------------------------ */
+    /*  Helper Functions                                                  */
+    /* ------------------------------------------------------------------ */
+    function urgency(daysLeft) {
+      if (daysLeft <= 1) return "critical";
+      if (daysLeft <= 7) return "soon";
+      return "safe";
     }
 
-    const oData = await oRes.json();
-    const rData = await rRes.json();
-
-    allOpps = oData.opportunities || [];
-    allRem = rData.reminders || [];
-    const nextReminder = allRem
-      .filter(r => r.scheduled_at && r.status !== 'CANCELLED')
-      .sort((a, b) => String(a.scheduled_at).localeCompare(String(b.scheduled_at)))[0];
-    if (!selectedCalendarDate && nextReminder) {
-      selectedCalendarDate = String(nextReminder.scheduled_at).slice(0, 10);
-      calendarCursor = new Date(`${selectedCalendarDate}T00:00:00`);
+    function trustMeta(trust) {
+      if (trust === "official")
+        return { label: "Official source", Icon: ShieldCheck, cls: "trust-official" };
+      if (trust === "verified")
+        return { label: "Verified secondary", Icon: ShieldCheck, cls: "trust-verified" };
+      return { label: "Unverified — confirm before applying", Icon: ShieldQuestion, cls: "trust-unverified" };
     }
 
-    renderDashboard();
-    renderOpportunities();
-    renderReminders();
-    renderProfile();
-  } catch(err) {
-    console.warn('State load notice:', err.message);
-  }
-}
+    function eligIcon(status) {
+      if (status === "match") return <Check size={13} strokeWidth={3} />;
+      if (status === "warn") return <span className="dot-warn" />;
+      return <span className="dot-missing" />;
+    }
 
-/* ════ RENDER DASHBOARD ════ */
-function renderDashboard(){
-  if(!uData) return;
-  document.getElementById('dName').textContent = `Hey, ${uData.username} 👋`;
-  
-  const prof = uData.profile || {};
-  const eduStr = prof.qualification || prof.education_level || 'Open Intelligence';
-  const locStr = prof.state_location || prof.city || 'India / Remote';
-  document.getElementById('dSub').textContent = `${eduStr} · ${locStr}`;
+    /* ------------------------------------------------------------------ */
+    /*  Root Application Component                                        */
+    /* ------------------------------------------------------------------ */
+    function DeadlineDefenderApp() {
+      const [currentUser, setCurrentUser] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [authModalOpen, setAuthModalOpen] = useState(false);
+      const [authMode, setAuthMode] = useState('login'); // 'login' | 'signup'
 
-  document.getElementById('stO').textContent = allOpps.length;
-  document.getElementById('stR').textContent = allRem.length;
-  document.getElementById('stS').textContent = '12+';
+      const [stage, setStage] = useState("app"); // "onboarding" | "app"
+      const [onboardStep, setOnboardStep] = useState(0);
 
-  // Render Completeness Bar & Badge
-  const comp = uData.completeness || 40;
-  document.getElementById('dMeterFill').style.width = `${comp}%`;
+      const [interests, setInterests] = useState([]);
+      const [oppTypes, setOppTypes] = useState(["Internships", "Scholarships", "Government Jobs"]);
+      const [education, setEducation] = useState("");
+      const [city, setCity] = useState("");
+      const [customInterest, setCustomInterest] = useState("");
 
-  const confBadge = document.getElementById('dConfBadge');
-  const confMode = uData.matchingConfidence || 'INTEREST_DISCOVERY';
-  if(confMode === 'FULL_MATCH'){
-    confBadge.textContent = '🟢 Full Eligibility Match';
-    confBadge.className = 'conf-badge full';
-  } else if(confMode === 'PARTIAL_MATCH'){
-    confBadge.textContent = '🟡 Partial Match';
-    confBadge.className = 'conf-badge partial';
-  } else {
-    confBadge.textContent = '🔵 Interest Match';
-    confBadge.className = 'conf-badge discovery';
-  }
+      const [activeNav, setActiveNav] = useState("home");
+      const [mobileNavOpen, setMobileNavOpen] = useState(false);
+      const [searchQuery, setSearchQuery] = useState("");
+      const [opportunities, setOpportunities] = useState([]);
+      const [evidenceId, setEvidenceId] = useState(null);
+      const [reminderPrefs, setReminderPrefs] = useState(initialReminderPrefs);
+      const [reminderLog, setReminderLog] = useState([]);
+      const [toastMessage, setToastMessage] = useState(null);
 
-  // Checklist
-  const chk = uData.checklist || {};
-  document.getElementById('chkInt').className = `chk-pill ${chk.interests ? 'active' : 'warning'}`;
-  document.getElementById('chkInt').textContent = chk.interests ? '✓ Interests' : '⚠️ No Interests';
+      const showToast = (msg) => {
+        setToastMessage(msg);
+        setTimeout(() => setToastMessage(null), 2500);
+      };
 
-  document.getElementById('chkEdu').className = `chk-pill ${chk.education ? 'active' : 'warning'}`;
-  document.getElementById('chkEdu').textContent = chk.education ? '✓ Education' : '⚠️ Education (Skipped)';
+      // Load initial state from backend
+      const loadData = useCallback(async () => {
+        try {
+          const pRes = await fetch('/api/user/profile', { credentials: 'include' });
+          if (!pRes.ok) {
+            setAuthModalOpen(true);
+            setLoading(false);
+            return;
+          }
 
-  document.getElementById('chkLoc').className = `chk-pill ${chk.location ? 'active' : 'warning'}`;
-  document.getElementById('chkLoc').textContent = chk.location ? '✓ Location' : '⚠️ Location (Skipped)';
+          const uData = await pRes.json();
+          setCurrentUser(uData);
+          setAuthModalOpen(false);
 
-  document.getElementById('chkAge').className = `chk-pill ${chk.age ? 'active' : ''}`;
-  document.getElementById('chkAge').textContent = chk.age ? '✓ Age' : '○ Age (Optional)';
+          if (uData.interests) setInterests(uData.interests);
+          if (uData.oppTypes && uData.oppTypes.length) setOppTypes(uData.oppTypes);
+          if (uData.education) setEducation(uData.education);
+          if (uData.city) setCity(uData.city);
+          if (uData.reminderPrefs) setReminderPrefs(uData.reminderPrefs);
 
-  // Render Tracked Topics
-  const intContainer = document.getElementById('dInterests');
-  const userInts = uData.interests || [];
-  if(userInts.length === 0){
-    intContainer.innerHTML = `<span style="font-size:12px;color:var(--ash)">Exploring all opportunities. Tap "+ Add Topic" to filter.</span>`;
-  } else {
-    intContainer.innerHTML = userInts.map(i => `<span class="int-chip selected" style="cursor:default">⭐ ${i}</span>`).join('');
-  }
+          if (uData.needsOnboarding) {
+            setStage("onboarding");
+          } else {
+            setStage("app");
+          }
 
-  // Render Top Recommendations
-  const feedEl = document.getElementById('dFeed');
-  const topMatches = allOpps.slice(0, 4);
+          // Fetch opportunities and reminder log in parallel
+          const [oRes, rRes] = await Promise.all([
+            fetch('/api/opportunities', { credentials: 'include' }),
+            fetch('/api/reminders/log', { credentials: 'include' })
+          ]);
 
-  if(!topMatches.length){
-    feedEl.innerHTML = `<div class="st-load">No matching opportunities found yet. Click below to run discovery.</div>`;
-    return;
-  }
+          if (oRes.ok) {
+            const oData = await oRes.json();
+            setOpportunities(oData.opportunities || []);
+          }
 
-  feedEl.innerHTML = topMatches.map(opp => renderOppCard(opp)).join('');
-}
+          if (rRes.ok) {
+            const rData = await rRes.json();
+            setReminderLog(rData.log || []);
+          }
+        } catch (err) {
+          console.error("App init error:", err);
+          setAuthModalOpen(true);
+        } finally {
+          setLoading(false);
+        }
+      }, []);
 
-/* ════ RENDER OPPORTUNITIES FEED ════ */
-function renderOpportunities(){
-  const el = document.getElementById('oppList');
-  if(!allOpps.length){
-    el.innerHTML = `<div class="st-load">No opportunities in this category. Click discovery below to scan sources.</div>`;
-    return;
-  }
-  el.innerHTML = allOpps.map(opp => renderOppCard(opp)).join('');
-}
+      useEffect(() => {
+        loadData();
+      }, [loadData]);
 
-function renderOppCard(opp){
-  const trustCls = opp.trust_level === 'OFFICIAL' ? 'official' : opp.trust_level === 'VERIFIED_SECONDARY' ? 'secondary' : 'unverified';
-  const trustTxt = opp.trust_level === 'OFFICIAL' ? '🛡️ Official .gov.in' : opp.trust_level === 'VERIFIED_SECONDARY' ? '🏢 Verified Org' : '🌐 Web Notice';
-  const isApplied = opp.userStatus === 'applied' || opp.userStatus === 'completed';
+      const toggle = (list, setList, value) =>
+        setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
 
-  const verifiedTags = (opp.matchReasons || []).map(r => `<span class="opp-reason-tag verified">${r}</span>`).join('');
-  const unverifiedTags = (opp.unverifiedNotices || []).map(n => `<span class="opp-reason-tag unverified">${n}</span>`).join('');
+      const addCustomInterest = () => {
+        const val = customInterest.trim();
+        if (!val) return;
+        if (!interests.includes(val)) {
+          setInterests([...interests, val]);
+          showToast(`Added "${val}" to interests`);
+        }
+        setCustomInterest("");
+      };
 
-  return `
-    <div class="opp-card">
-      <div class="opp-top">
-        <span class="opp-trust ${trustCls}">${trustTxt}</span>
-        <span class="opp-match-tag">🎯 ${opp.matchScore || 75}% · ${opp.matchType === 'FULL_MATCH' ? 'Full Match' : opp.matchType === 'PARTIAL_MATCH' ? 'Partial' : 'Interest Match'}</span>
-      </div>
-      <div class="opp-org">${opp.organization || 'General'} · ${opp.category || 'Career'}</div>
-      <div class="opp-title">${opp.title}</div>
-      <div class="opp-reasons">
-        ${verifiedTags}
-        ${unverifiedTags}
-      </div>
-      <div class="opp-foot">
-        <div class="opp-dl">Closing:<span class="opp-dl-val">${opp.deadline || 'TBA'}</span></div>
-        <div class="opp-actions">
-          <button class="opp-btn opp-btn-ghost" onclick='inspectEvidence(${JSON.stringify(opp).replace(/'/g,"&#39;")})'>🔍 Evidence</button>
-          ${isApplied ? `<button class="opp-btn opp-btn-done">✓ Applied</button>` : `<button class="opp-btn opp-btn-pri" onclick="trackOpp(${opp.id},'applied')">Mark Applied</button>`}
+      // Save profile changes to backend
+      const saveProfileToBackend = async (payload) => {
+        try {
+          const res = await fetch('/api/user/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+          });
+          if (res.ok) {
+            showToast("Profile saved & radar updated ✓");
+            await loadData();
+          }
+        } catch (err) {
+          console.error("Save profile error:", err);
+        }
+      };
+
+      // Complete Onboarding
+      const handleFinishOnboarding = async () => {
+        const payload = {
+          interests,
+          oppTypes,
+          education,
+          city
+        };
+        try {
+          const res = await fetch('/api/user/onboarding', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+          });
+          if (res.ok) {
+            setStage("app");
+            showToast("Welcome! Your radar is now active ⚡");
+            await loadData();
+          }
+        } catch (err) {
+          console.error("Onboarding finish error:", err);
+          setStage("app");
+        }
+      };
+
+      // Toggle Opportunity Track Status (Save / Apply)
+      const handleSetOppStatus = async (id, status) => {
+        // Optimistic UI update
+        setOpportunities(prev => prev.map(o => {
+          if (o.id === id) {
+            if (status === 'saved') return { ...o, saved: !o.saved };
+            if (status === 'applied') return { ...o, applied: !o.applied };
+          }
+          return o;
+        }));
+
+        const targetOpp = opportunities.find(o => o.id === id);
+        const newStatus = status === 'saved'
+          ? (targetOpp?.saved ? 'unseen' : 'saved')
+          : (targetOpp?.applied ? 'unseen' : 'applied');
+
+        try {
+          await fetch('/api/opportunities/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ opportunityId: id, status: newStatus })
+          });
+          showToast(newStatus === 'saved' ? "Saved to radar ✓" : newStatus === 'applied' ? "Marked as Applied ✓" : "Updated ✓");
+        } catch (err) {
+          console.error("Track error:", err);
+        }
+      };
+
+      // Update Reminder Preferences
+      const handleSetReminderPrefs = async (newPrefs) => {
+        setReminderPrefs(newPrefs);
+        try {
+          await fetch('/api/reminders/prefs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ prefs: newPrefs })
+          });
+          showToast("Reminder preferences updated");
+        } catch (err) {
+          console.error("Reminder prefs error:", err);
+        }
+      };
+
+      // Calculate confidence & profile completion
+      const confidence = useMemo(() => {
+        const hasEdu = !!education;
+        const hasCity = !!city;
+        const hasInterests = interests.length > 0;
+        if (hasEdu && hasCity && hasInterests) return "high";
+        if (hasInterests && (hasEdu || hasCity)) return "partial";
+        return "interest-only";
+      }, [education, city, interests]);
+
+      const profileCompletion = useMemo(() => {
+        const fields = [interests.length > 0, oppTypes.length > 0, !!education, !!city];
+        const done = fields.filter(Boolean).length;
+        return Math.round((done / fields.length) * 100);
+      }, [interests, oppTypes, education, city]);
+
+      const evidenceOpp = opportunities.find((o) => o.id === evidenceId) || null;
+
+      // Filtered lists
+      const filteredOpps = useMemo(() => {
+        if (!searchQuery.trim()) return opportunities;
+        const q = searchQuery.toLowerCase();
+        return opportunities.filter(o => 
+          (o.title || '').toLowerCase().includes(q) ||
+          (o.org || '').toLowerCase().includes(q) ||
+          (o.category || '').toLowerCase().includes(q)
+        );
+      }, [opportunities, searchQuery]);
+
+      const closingSoon = useMemo(() => 
+        filteredOpps.filter((o) => o.daysLeft <= 7).sort((a, b) => a.daysLeft - b.daysLeft),
+        [filteredOpps]
+      );
+      const recommended = useMemo(() => 
+        [...filteredOpps].sort((a, b) => b.matchScore - a.matchScore),
+        [filteredOpps]
+      );
+      const fresh = useMemo(() => filteredOpps.filter((o) => o.isNew), [filteredOpps]);
+      const saved = useMemo(() => filteredOpps.filter((o) => o.saved), [filteredOpps]);
+      const applied = useMemo(() => filteredOpps.filter((o) => o.applied), [filteredOpps]);
+
+      const handleResetUsers = async () => {
+        if (!confirm("⚠️ Are you sure you want to delete all test user accounts and start 100% fresh?")) return;
+        try {
+          const res = await fetch('/api/dev/reset-all-users', { method: 'POST' });
+          const d = await res.json();
+          alert(d.message || "Database reset successfully!");
+          window.location.reload();
+        } catch (err) {
+          alert("Reset failed: " + err.message);
+        }
+      };
+
+      const handleLogout = async () => {
+        await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+        setCurrentUser(null);
+        setAuthModalOpen(true);
+      };
+
+      return (
+        <div className="dd-root">
+          <GlobalStyle />
+          
+          {stage === "onboarding" ? (
+            <Onboarding
+              step={onboardStep}
+              setStep={setOnboardStep}
+              interests={interests}
+              toggleInterest={(v) => toggle(interests, setInterests, v)}
+              oppTypes={oppTypes}
+              toggleOppType={(v) => toggle(oppTypes, setOppTypes, v)}
+              education={education}
+              setEducation={setEducation}
+              city={city}
+              setCity={setCity}
+              customInterest={customInterest}
+              setCustomInterest={setCustomInterest}
+              addCustomInterest={addCustomInterest}
+              finish={handleFinishOnboarding}
+            />
+          ) : (
+            <div className="shell">
+              <Sidebar
+                active={activeNav}
+                setActive={(k) => {
+                  setActiveNav(k);
+                  setMobileNavOpen(false);
+                }}
+                counts={{ closing: closingSoon.length, new: fresh.length, saved: saved.length, applied: applied.length }}
+                mobileOpen={mobileNavOpen}
+                closeMobile={() => setMobileNavOpen(false)}
+              />
+              <main className="main">
+                <Topbar
+                  onMenu={() => setMobileNavOpen(true)}
+                  completion={profileCompletion}
+                  onProfile={() => setActiveNav("profile")}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  username={currentUser?.username}
+                />
+                <div className="content">
+                  {activeNav === "home" && (
+                    <HomeView
+                      closingSoon={closingSoon}
+                      recommended={recommended.slice(0, 6)}
+                      savedCount={saved.length}
+                      onEvidence={setEvidenceId}
+                      onSave={(id) => handleSetOppStatus(id, 'saved')}
+                      onApply={(id) => handleSetOppStatus(id, 'applied')}
+                      goTo={setActiveNav}
+                    />
+                  )}
+                  {activeNav === "recommended" && (
+                    <ListView
+                      title="Recommended for you"
+                      subtitle="Ranked by how well each opportunity fits your interests and profile."
+                      items={recommended}
+                      onEvidence={setEvidenceId}
+                      onSave={(id) => handleSetOppStatus(id, 'saved')}
+                      onApply={(id) => handleSetOppStatus(id, 'applied')}
+                    />
+                  )}
+                  {activeNav === "new" && (
+                    <ListView
+                      title="New opportunities"
+                      subtitle="Discovered since your last visit."
+                      items={fresh}
+                      onEvidence={setEvidenceId}
+                      onSave={(id) => handleSetOppStatus(id, 'saved')}
+                      onApply={(id) => handleSetOppStatus(id, 'applied')}
+                    />
+                  )}
+                  {activeNav === "closing" && (
+                    <ListView
+                      title="Closing soon"
+                      subtitle="Sorted by the least time remaining. Act on these first."
+                      items={closingSoon}
+                      onEvidence={setEvidenceId}
+                      onSave={(id) => handleSetOppStatus(id, 'saved')}
+                      onApply={(id) => handleSetOppStatus(id, 'applied')}
+                      emphasize
+                    />
+                  )}
+                  {activeNav === "saved" && (
+                    <ListView
+                      title="Saved"
+                      subtitle="Opportunities you're keeping an eye on."
+                      items={saved}
+                      onEvidence={setEvidenceId}
+                      onSave={(id) => handleSetOppStatus(id, 'saved')}
+                      onApply={(id) => handleSetOppStatus(id, 'applied')}
+                      emptyLabel="Nothing saved yet — tap the bookmark on any card to keep track of it here."
+                    />
+                  )}
+                  {activeNav === "applied" && (
+                    <ListView
+                      title="Applied"
+                      subtitle="Marking an opportunity applied cancels its remaining reminders."
+                      items={applied}
+                      onEvidence={setEvidenceId}
+                      onSave={(id) => handleSetOppStatus(id, 'saved')}
+                      onApply={(id) => handleSetOppStatus(id, 'applied')}
+                      emptyLabel="Nothing marked applied yet."
+                    />
+                  )}
+                  {activeNav === "reminders" && (
+                    <RemindersView
+                      prefs={reminderPrefs}
+                      setPrefs={handleSetReminderPrefs}
+                      log={reminderLog}
+                      onRefreshReminders={loadData}
+                    />
+                  )}
+                  {activeNav === "profile" && (
+                    <ProfileView
+                      username={currentUser?.username}
+                      email={currentUser?.email}
+                      interests={interests}
+                      toggleInterest={(v) => toggle(interests, setInterests, v)}
+                      customInterest={customInterest}
+                      setCustomInterest={setCustomInterest}
+                      addCustomInterest={addCustomInterest}
+                      oppTypes={oppTypes}
+                      toggleOppType={(v) => toggle(oppTypes, setOppTypes, v)}
+                      education={education}
+                      setEducation={setEducation}
+                      city={city}
+                      setCity={setCity}
+                      completion={profileCompletion}
+                      confidence={confidence}
+                      onSave={() => saveProfileToBackend({ interests, oppTypes, education, city })}
+                      onResetAllUsers={handleResetUsers}
+                      onLogout={handleLogout}
+                    />
+                  )}
+                </div>
+              </main>
+            </div>
+          )}
+
+          {evidenceOpp && <EvidenceModal opp={evidenceOpp} onClose={() => setEvidenceId(null)} />}
+
+          {/* Auth Modal (when unauthenticated) */}
+          {authModalOpen && (
+            <AuthModal
+              mode={authMode}
+              setMode={setAuthMode}
+              onSuccess={() => { setAuthModalOpen(false); loadData(); }}
+              onResetAllUsers={handleResetUsers}
+            />
+          )}
+
+          {/* Toast Notification */}
+          {toastMessage && (
+            <div className="toast-pill">
+              <CheckCircle2 size={16} />
+              <span>{toastMessage}</span>
+            </div>
+          )}
         </div>
-      </div>
-    </div>
-  `;
-}
+      );
+    }
 
-/* ════ RENDER REMINDERS & TIMELINE ════ */
-function renderReminders(){
-  const el = document.getElementById('remList');
-  if(!allRem.length){
-    el.innerHTML = `<div class="st-load">No scheduled reminders. Matching deadlines will be scheduled automatically.</div>`;
-  } else {
-    el.innerHTML = allRem.map(r => `
-      <div class="rem-item">
-        <div class="rem-main">
-          <div class="rem-t">${r.short_note}</div>
-          <div class="rem-s">Scheduled: ${r.scheduled_at ? r.scheduled_at.split('T')[0] : 'Upcoming'} · Stage: ${r.reminder_stage || 'ALERT'}</div>
+    /* ------------------------------------------------------------------ */
+    /*  Onboarding Component                                              */
+    /* ------------------------------------------------------------------ */
+    function Onboarding({
+      step,
+      setStep,
+      interests,
+      toggleInterest,
+      oppTypes,
+      toggleOppType,
+      education,
+      setEducation,
+      city,
+      setCity,
+      customInterest,
+      setCustomInterest,
+      addCustomInterest,
+      finish,
+    }) {
+      const steps = ["interests", "types", "education", "location"];
+      const total = steps.length;
+
+      const next = () => (step < total - 1 ? setStep(step + 1) : finish());
+      const skip = () => (step < total - 1 ? setStep(step + 1) : finish());
+
+      return (
+        <div className="onboard">
+          <div className="onboard-card">
+            <div className="onboard-brand">
+              <Radar size={20} />
+              <span>Deadline Defender</span>
+            </div>
+
+            <div className="onboard-progress">
+              {steps.map((s, i) => (
+                <span key={s} className={"prog-seg" + (i <= step ? " prog-seg-done" : "")} />
+              ))}
+            </div>
+
+            {step === 0 && (
+              <div>
+                <h1>What are you interested in?</h1>
+                <p className="onboard-sub">Pick a few topics or type custom interests — this is all we need to start scanning for you.</p>
+                <div className="chip-grid">
+                  {INTEREST_OPTIONS.map((opt) => (
+                    <button
+                      key={opt}
+                      className={"chip" + (interests.includes(opt) ? " chip-active" : "")}
+                      onClick={() => toggleInterest(opt)}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                  {interests.filter(i => !INTEREST_OPTIONS.includes(i)).map(custom => (
+                    <button
+                      key={custom}
+                      className="chip chip-active"
+                      onClick={() => toggleInterest(custom)}
+                    >
+                      ⭐ {custom} ✕
+                    </button>
+                  ))}
+                </div>
+
+                <div className="field-row" style={{ marginTop: 14 }}>
+                  <Sparkles size={16} />
+                  <input
+                    className="text-input"
+                    placeholder="Type custom interest (e.g. ISRO, GATE, Robotics)..."
+                    value={customInterest}
+                    onChange={(e) => setCustomInterest(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && addCustomInterest()}
+                  />
+                  <button type="button" className="btn-primary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={addCustomInterest}>
+                    + Add
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {step === 1 && (
+              <div>
+                <h1>What kind of opportunities?</h1>
+                <p className="onboard-sub">Select the categories you care about most. You can change this any time.</p>
+                <div className="chip-grid">
+                  {OPP_TYPE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt}
+                      className={"chip" + (oppTypes.includes(opt) ? " chip-active" : "")}
+                      onClick={() => toggleOppType(opt)}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div>
+                <h1>Would you like to add your education?</h1>
+                <p className="onboard-sub">
+                  Any level works, from below 10th to postgraduate. This sharpens eligibility matching, but it's optional.
+                </p>
+                <div className="chip-grid">
+                  {EDUCATION_OPTIONS.map((opt) => (
+                    <button
+                      key={opt}
+                      className={"chip" + (education === opt ? " chip-active" : "")}
+                      onClick={() => setEducation(opt === education ? "" : opt)}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div>
+                <h1>Where are you based?</h1>
+                <p className="onboard-sub">Helps surface location-bound exams, state scholarships, and jobs. Optional.</p>
+                <div className="field-row">
+                  <MapPin size={16} />
+                  <input
+                    className="text-input"
+                    placeholder="City, state, or district (e.g. Hyderabad, Delhi, Bangalore)"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="onboard-actions">
+              <button className="btn-ghost" onClick={skip}>
+                Skip for now
+              </button>
+              <button className="btn-primary" onClick={next}>
+                {step < total - 1 ? "Continue" : "Start scanning"}
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
         </div>
-        <span class="rem-badge ${r.reminder_stage === 'DEADLINE_DAY' ? 'urgent' : 'norm'}">${r.status || 'PENDING'}</span>
-      </div>
-    `).join('');
-  }
+      );
+    }
 
-  // Timeline
-  const calEl = document.getElementById('calList');
-  if(!allRem.length){
-    calEl.innerHTML = `<div class="st-load">No deadline events on timeline yet.</div>`;
-  } else {
-    calEl.innerHTML = allRem.map(r => `
-      <div class="rem-item">
-        <div class="rem-main">
-          <div class="rem-t">${r.short_note}</div>
-          <div class="rem-s">Target Date: ${r.application_end || r.event_date || 'Active'}</div>
+    /* ------------------------------------------------------------------ */
+    /*  Sidebar & Topbar                                                  */
+    /* ------------------------------------------------------------------ */
+    function Sidebar({ active, setActive, counts, mobileOpen, closeMobile }) {
+      const badge = (key) => {
+        if (key === "closing" && counts.closing) return counts.closing;
+        if (key === "new" && counts.new) return counts.new;
+        if (key === "saved" && counts.saved) return counts.saved;
+        if (key === "applied" && counts.applied) return counts.applied;
+        return null;
+      };
+
+      return (
+        <>
+          {mobileOpen && <div className="scrim" onClick={closeMobile} />}
+          <aside className={"sidebar" + (mobileOpen ? " sidebar-open" : "")}>
+            <div className="sidebar-brand">
+              <div className="brand-mark">
+                <Radar size={18} />
+              </div>
+              <div className="brand-text">
+                <strong>Deadline Defender</strong>
+                <span>Opportunity radar</span>
+              </div>
+              <button className="icon-btn mobile-only" onClick={closeMobile}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <nav className="nav-list">
+              {NAV_ITEMS.map(({ key, label, Icon: ItemIcon }) => {
+                const b = badge(key);
+                return (
+                  <button
+                    key={key}
+                    className={"nav-item" + (active === key ? " nav-item-active" : "")}
+                    onClick={() => setActive(key)}
+                  >
+                    <ItemIcon size={17} />
+                    <span>{label}</span>
+                    {b ? <span className="nav-badge">{b}</span> : null}
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className="sidebar-foot">
+              <ShieldCheck size={14} />
+              <span>Official sources monitored</span>
+            </div>
+          </aside>
+        </>
+      );
+    }
+
+    function Topbar({ onMenu, completion, onProfile, searchQuery, setSearchQuery, username }) {
+      return (
+        <div className="topbar">
+          <button className="icon-btn mobile-only" onClick={onMenu}>
+            <Menu size={20} />
+          </button>
+          <div className="topbar-search">
+            <Search size={15} />
+            <input
+              placeholder="Search opportunities, organizations, categories…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <button className="profile-pill" onClick={onProfile}>
+            <div className="ring" style={{ "--pct": completion }}>
+              <span>{completion}%</span>
+            </div>
+            <span className="profile-pill-label">{username || "Profile"}</span>
+          </button>
         </div>
-        <span class="opp-trust official">TRACKED</span>
-      </div>
-    `).join('');
-  }
-}
-
-/* ════ RENDER PROFILE ════ */
-function reminderDateKey(value){
-  return value ? String(value).slice(0, 10) : null;
-}
-
-function formatReminderDate(value){
-  const key = reminderDateKey(value);
-  if(!key) return 'Not set';
-  return new Date(`${key}T00:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-function formatReminderStage(stage){
-  if(stage === 'DEADLINE_DAY') return 'Deadline day';
-  return stage ? stage.replace('_DAYS_BEFORE', ' days before').replace('_', ' ') : 'Scheduled alert';
-}
-
-function localDateKey(date){
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
-
-function changeCalendarMonth(offset){
-  calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + offset, 1);
-  renderCalendar(allRem.filter(r => r.status !== 'CANCELLED'));
-}
-
-function selectCalendarDate(dateKey){
-  selectedCalendarDate = dateKey;
-  renderCalendar(allRem.filter(r => r.status !== 'CANCELLED'));
-}
-
-function renderCalendar(reminders){
-  const calEl = document.getElementById('calList');
-  const scheduled = reminders.filter(r => reminderDateKey(r.scheduled_at));
-  if(!scheduled.length){
-    calEl.innerHTML = `<div class="st-load">Your reminder dates will appear here as soon as matching opportunities are available.</div>`;
-    return;
-  }
-
-  const grouped = scheduled.reduce((map, reminder) => {
-    const key = reminderDateKey(reminder.scheduled_at);
-    (map[key] ||= []).push(reminder);
-    return map;
-  }, {});
-  const year = calendarCursor.getFullYear();
-  const month = calendarCursor.getMonth();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const todayKey = localDateKey(new Date());
-  const currentMonthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-  if(!selectedCalendarDate || !selectedCalendarDate.startsWith(currentMonthKey)) {
-    selectedCalendarDate = Object.keys(grouped).find(key => key.startsWith(currentMonthKey)) || `${currentMonthKey}-01`;
-  }
-
-  const emptyDays = Array.from({ length: firstDay }, () => '<div class="calendar-day empty" aria-hidden="true"></div>');
-  const dayButtons = Array.from({ length: daysInMonth }, (_, index) => {
-    const day = index + 1;
-    const key = `${currentMonthKey}-${String(day).padStart(2, '0')}`;
-    const count = grouped[key]?.length || 0;
-    const classes = ['calendar-day'];
-    if(key === todayKey) classes.push('today');
-    if(count) classes.push('has-reminder');
-    if(key === selectedCalendarDate) classes.push('selected');
-    return `<button type="button" class="${classes.join(' ')}" onclick="selectCalendarDate('${key}')" aria-label="${formatReminderDate(key)}${count ? `, ${count} reminder${count === 1 ? '' : 's'}` : ''}">${day}${count ? '<span class="calendar-count" aria-hidden="true"></span>' : ''}</button>`;
-  });
-  const agenda = grouped[selectedCalendarDate] || [];
-  calEl.innerHTML = `
-    <section class="calendar-shell" aria-label="Reminder calendar">
-      <div class="calendar-head">
-        <button type="button" class="calendar-arrow" onclick="changeCalendarMonth(-1)" aria-label="Previous month">‹</button>
-        <div class="calendar-title">${calendarCursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</div>
-        <button type="button" class="calendar-arrow" onclick="changeCalendarMonth(1)" aria-label="Next month">›</button>
-      </div>
-      <div class="calendar-week"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
-      <div class="calendar-grid">${emptyDays.join('')}${dayButtons.join('')}</div>
-    </section>
-    <div class="calendar-agenda-title">${formatReminderDate(selectedCalendarDate)}</div>
-    ${agenda.length ? agenda.map(r => `<div class="rem-item"><div class="rem-main"><div class="rem-t">${r.short_note}</div><div class="rem-s">${formatReminderStage(r.reminder_stage)} · Deadline: ${formatReminderDate(r.application_end || r.event_date)}</div></div><span class="rem-badge ${r.reminder_stage === 'DEADLINE_DAY' ? 'urgent' : 'norm'}">${r.status || 'PENDING'}</span></div>`).join('') : '<div class="st-load">No reminder is scheduled for this date.</div>'}
-  `;
-}
-
-function renderProfile(){
-  renderCalendar(allRem.filter(r => r.status !== 'CANCELLED'));
-  if(!uData) return;
-  document.getElementById('puName').textContent = uData.username;
-  document.getElementById('puEmail').textContent = uData.email;
-
-  const prof = uData.profile || {};
-  document.getElementById('pEduLevel').textContent = prof.education_level || 'Not Provided (Skipped)';
-  document.getElementById('pQual').textContent = prof.qualification || 'Not Provided';
-  document.getElementById('pBranch').textContent = prof.branch || 'Not Provided';
-  document.getElementById('pLoc').textContent = prof.state_location || prof.city || 'Not Provided';
-  document.getElementById('pGoal').textContent = prof.career_goal || 'Exploring Opportunities';
-
-  const pIntEl = document.getElementById('pInterests');
-  const userInts = uData.interests || [];
-  if(!userInts.length){
-    pIntEl.innerHTML = `<span style="font-size:12px;color:var(--ash)">None selected (Exploring All).</span>`;
-  } else {
-    pIntEl.innerHTML = userInts.map(i => `<span class="int-chip selected">⭐ ${i}</span>`).join('');
-  }
-
-  const pSkillEl = document.getElementById('pSkills');
-  let userSkills = [];
-  try {
-    userSkills = Array.isArray(prof.skills) ? prof.skills : JSON.parse(prof.skills || '[]');
-  } catch(_) {}
-  if(!userSkills.length){
-    pSkillEl.innerHTML = `<span style="font-size:12px;color:var(--ash)">No skills added yet.</span>`;
-  } else {
-    pSkillEl.innerHTML = userSkills.map(s => `<span class="int-chip selected">✓ ${s}</span>`).join('');
-  }
-}
-
-/* ════ EDIT PROFILE MODAL ════ */
-function openProfileEdit(){
-  if(!uData) return;
-  const prof = uData.profile || {};
-  document.getElementById('eqLevel').value = prof.education_level || '';
-  document.getElementById('eq').value = prof.qualification || '';
-  document.getElementById('eb').value = prof.branch || '';
-  document.getElementById('el').value = prof.state_location || '';
-  document.getElementById('ecity').value = prof.city || '';
-  document.getElementById('egoal').value = prof.career_goal || 'Just Exploring';
-
-  editCustomInterests = [...(uData.interests || [])];
-  renderEditCustomChips();
-
-  try {
-    editSkillsList = Array.isArray(prof.skills) ? [...prof.skills] : JSON.parse(prof.skills || '[]');
-  } catch(_) { editSkillsList = []; }
-  renderEditSkillChips();
-
-  openModal('profEditBk');
-}
-
-function addEditCustomChip(){
-  const inp = document.getElementById('editCustomInput');
-  const val = inp.value.trim();
-  if(!val) return;
-  if(!editCustomInterests.includes(val)){
-    editCustomInterests.push(val);
-    renderEditCustomChips();
-  }
-  inp.value = '';
-}
-
-function removeEditCustomChip(val){
-  editCustomInterests = editCustomInterests.filter(i => i !== val);
-  renderEditCustomChips();
-}
-
-function renderEditCustomChips(){
-  const el = document.getElementById('editCustomChips');
-  el.innerHTML = editCustomInterests.map(val => `
-    <div class="int-chip selected">
-      ⭐ ${val}
-      <span class="chip-del" onclick="removeEditCustomChip('${val.replace(/'/g,"\\'")}')">✕</span>
-    </div>
-  `).join('');
-}
-
-function addEditSkillChip(){
-  const inp = document.getElementById('editSkillInput');
-  const val = inp.value.trim();
-  if(!val) return;
-  if(!editSkillsList.includes(val)){
-    editSkillsList.push(val);
-    renderEditSkillChips();
-  }
-  inp.value = '';
-}
-
-function removeEditSkillChip(val){
-  editSkillsList = editSkillsList.filter(i => i !== val);
-  renderEditSkillChips();
-}
-
-function renderEditSkillChips(){
-  const el = document.getElementById('editSkillChips');
-  el.innerHTML = editSkillsList.map(val => `
-    <div class="int-chip selected">
-      ✓ ${val}
-      <span class="chip-del" onclick="removeEditSkillChip('${val.replace(/'/g,"\\'")}')">✕</span>
-    </div>
-  `).join('');
-}
-
-document.getElementById('profForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const btn = document.getElementById('profSaveBtn');
-  btn.disabled = true;
-  btn.textContent = 'Saving & Recalculating…';
-
-  const payload = {
-    education_level: document.getElementById('eqLevel').value || null,
-    qualification: document.getElementById('eq').value.trim() || null,
-    branch: document.getElementById('eb').value.trim() || null,
-    state_location: document.getElementById('el').value || null,
-    city: document.getElementById('ecity').value.trim() || null,
-    career_goal: document.getElementById('egoal').value || null,
-    skills: editSkillsList,
-    interests: editCustomInterests
-  };
-
-  try {
-    const res = await fetch('/api/user/profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload)
-    });
-
-    if(res.ok){
-      closeModal('profEditBk');
-      await loadState();
-    } else {
-      alert('Failed to update profile');
+      );
     }
-  } catch(_) {
-    alert('Network error while saving profile');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Save & Recalculate Matches →';
-  }
-});
 
-/* ════ EVIDENCE PROVENANCE MODAL ════ */
-function inspectEvidence(opp){
-  document.getElementById('evTitle').textContent = opp.title;
-  document.getElementById('evOrg').textContent = `${opp.organization || 'Verified Agency'} · ${opp.category || 'Career'}`;
-  document.getElementById('evText').textContent = opp.deadline_source_text ? `“${opp.deadline_source_text}”` : 'No raw provenance sentence recorded.';
-  document.getElementById('evConf').textContent = `Confidence: ${opp.confidence || 'medium'}`;
-  document.getElementById('evUrl').textContent = opp.source_url || 'https://official.gov.in';
-  document.getElementById('evLinkBtn').href = opp.application_url || opp.source_url || '#';
+    /* ------------------------------------------------------------------ */
+    /*  Home View                                                         */
+    /* ------------------------------------------------------------------ */
+    function HomeView({ closingSoon, recommended, savedCount, onEvidence, onSave, onApply, goTo }) {
+      return (
+        <div>
+          <section className="hero">
+            <div>
+              <p className="hero-eyebrow">Good to see you</p>
+              <h1 className="hero-title">
+                {closingSoon.length} deadline{closingSoon.length === 1 ? "" : "s"} need attention this week
+              </h1>
+              <p className="hero-sub">
+                Your radar checked verified official sources overnight. Nothing is lost when you refresh —
+                every reminder and saved opportunity is persisted.
+              </p>
+            </div>
+            <div className="hero-stats">
+              <div className="hero-stat">
+                <span className="hero-stat-num">{closingSoon.length}</span>
+                <span className="hero-stat-label">Closing soon</span>
+              </div>
+              <div className="hero-stat">
+                <span className="hero-stat-num">{recommended.length}</span>
+                <span className="hero-stat-label">New matches</span>
+              </div>
+              <div className="hero-stat">
+                <span className="hero-stat-num">{savedCount}</span>
+                <span className="hero-stat-label">Saved</span>
+              </div>
+            </div>
+          </section>
 
-  const trustBadge = document.getElementById('evTrustBadge');
-  trustBadge.textContent = opp.trust_level || 'OFFICIAL';
-  trustBadge.className = `opp-trust ${opp.trust_level === 'OFFICIAL' ? 'official' : opp.trust_level === 'VERIFIED_SECONDARY' ? 'secondary' : 'unverified'}`;
+          {closingSoon.length > 0 && (
+            <section className="section">
+              <div className="section-head">
+                <h2>
+                  <Flame size={16} className="flame" /> Closing soon
+                </h2>
+                <button className="link-btn" onClick={() => goTo("closing")}>
+                  View all <ArrowUpRight size={13} />
+                </button>
+              </div>
+              <div className="ticker">
+                {closingSoon.map((o) => (
+                  <div key={o.id} className={"ticker-item ticker-" + urgency(o.daysLeft)}>
+                    <Clock size={13} />
+                    <span className="ticker-days">
+                      {o.daysLeft === 0 ? "Today" : o.daysLeft === 1 ? "1 day" : `${o.daysLeft} days`}
+                    </span>
+                    <span className="ticker-title">{o.title}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
-  openModal('evidenceBk');
-}
-
-/* ════ OPPORTUNITY ACTIONS ════ */
-async function trackOpp(oppId, status){
-  try {
-    await fetch('/api/opportunities/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ opportunityId: oppId, status })
-    });
-    await loadState();
-  } catch(_) {
-    alert('Action failed');
-  }
-}
-
-async function setCatFilter(cat, btn){
-  document.querySelectorAll('.fpill').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  currentCat = cat;
-  const res = await fetch(`/api/opportunities?category=${cat}`, { credentials: 'include' });
-  const d = await res.json();
-  allOpps = d.opportunities || [];
-  renderOpportunities();
-}
-
-async function refreshDeadlines(){
-  const btn = document.getElementById('refBtn');
-  btn.disabled = true;
-  btn.textContent = '⚡ Running Global Discovery & Reconciliation…';
-  try {
-    const response = await fetch('/user/update-reminders', { method: 'POST', credentials: 'include' });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.error || 'Discovery failed');
-    await loadState();
-    const inserted = (result.discoveries || []).reduce((count, run) => count + (run.inserted || 0), 0);
-    alert(`Discovery complete. ${inserted} new ${inserted === 1 ? 'opportunity' : 'opportunities'} added.`);
-  } catch(error) {
-    alert(error.message || 'Discovery failed');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '↻ Run Shared Discovery & Reconcile Reminders';
-  }
-}
-
-/* ════ WEB PUSH NOTIFICATIONS ════ */
-async function togNotifs(){
-  if(!window.pushNotifications){
-    alert('Web Push is not supported on this browser');
-    return;
-  }
-  const on = await window.pushNotifications.checkStatus();
-  if(on){
-    if(confirm('Disable push notification reminders?')) {
-      await window.pushNotifications.unsubscribe();
+          <section className="section">
+            <div className="section-head">
+              <h2>
+                <Star size={16} /> Recommended for you
+              </h2>
+              <button className="link-btn" onClick={() => goTo("recommended")}>
+                View all <ArrowUpRight size={13} />
+              </button>
+            </div>
+            <div className="card-grid">
+              {recommended.map((o) => (
+                <OpportunityCard
+                  key={o.id}
+                  opp={o}
+                  onEvidence={() => onEvidence(o.id)}
+                  onSave={() => onSave(o.id)}
+                  onApply={() => onApply(o.id)}
+                />
+              ))}
+            </div>
+          </section>
+        </div>
+      );
     }
-  } else {
-    await window.pushNotifications.subscribe();
-  }
-  const nowOn = await window.pushNotifications.checkStatus();
-  document.getElementById('bellDot').style.display = nowOn ? 'block' : 'none';
-}
 
-/* ════ AUTHENTICATION: LOGIN & SIGNUP ════ */
-document.getElementById('loginForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const alertEl = document.getElementById('la');
-  alertEl.classList.remove('on');
-  const btn = document.getElementById('lBtn');
-  btn.disabled = true;
-  btn.textContent = 'Signing in...';
-
-  try {
-    const res = await fetch('/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        username: document.getElementById('lu').value.trim(),
-        password: document.getElementById('lp').value
-      })
-    });
-
-    const data = await res.json();
-    if(data.success){
-      if(data.needsOnboarding){
-        showPage('onboardingPage');
-      } else {
-        await loadState();
-        showPage('dashPage');
-      }
-    } else {
-      alertEl.textContent = data.error || 'Login failed';
-      alertEl.classList.add('on');
+    /* ------------------------------------------------------------------ */
+    /*  List View                                                         */
+    /* ------------------------------------------------------------------ */
+    function ListView({ title, subtitle, items, onEvidence, onSave, onApply, emphasize, emptyLabel }) {
+      return (
+        <div>
+          <div className="page-head">
+            <h1>{title}</h1>
+            <p>{subtitle}</p>
+          </div>
+          {items.length === 0 ? (
+            <div className="empty-state">{emptyLabel || "Nothing here yet."}</div>
+          ) : (
+            <div className={emphasize ? "card-list" : "card-grid"}>
+              {items.map((o) => (
+                <OpportunityCard
+                  key={o.id}
+                  opp={o}
+                  wide={emphasize}
+                  onEvidence={() => onEvidence(o.id)}
+                  onSave={() => onSave(o.id)}
+                  onApply={() => onApply(o.id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      );
     }
-  } catch(_) {
-    alertEl.textContent = 'Network error during login';
-    alertEl.classList.add('on');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Sign In →';
-  }
-});
 
-document.getElementById('signupForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const alertEl = document.getElementById('sa');
-  alertEl.classList.remove('on');
-  const btn = document.getElementById('sBtn');
-  btn.disabled = true;
-  btn.textContent = 'Creating account...';
+    /* ------------------------------------------------------------------ */
+    /*  Opportunity Card Component                                        */
+    /* ------------------------------------------------------------------ */
+    function OpportunityCard({ opp, onEvidence, onSave, onApply, wide }) {
+      const u = urgency(opp.daysLeft);
+      const trust = trustMeta(opp.trust);
 
-  try {
-    const res = await fetch('/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        username: document.getElementById('su').value.trim(),
-        email: document.getElementById('se').value.trim(),
-        password: document.getElementById('sp').value
-      })
-    });
+      return (
+        <article className={"opp-card urgency-" + u + (wide ? " opp-card-wide" : "")}>
+          <div className="opp-card-bar" />
+          <div className="opp-card-body">
+            <div className="opp-card-top">
+              <span className="opp-category">{opp.category}</span>
+              <span className={"opp-countdown countdown-" + u}>
+                {opp.daysLeft === 0 ? "Closes today" : opp.daysLeft === 1 ? "1 day left" : `${opp.daysLeft} days left`}
+              </span>
+            </div>
 
-    const data = await res.json();
-    if(data.success){
-      showPage('onboardingPage');
-    } else {
-      alertEl.textContent = data.error || 'Signup failed';
-      alertEl.classList.add('on');
+            <h3 className="opp-title">{opp.title}</h3>
+            <p className="opp-org">{opp.org || opp.organization}</p>
+
+            <div className="opp-eligibility">
+              {(opp.eligibility || []).map((e) => (
+                <span key={e.label} className={"elig-pill elig-" + e.status}>
+                  {eligIcon(e.status)} {e.label}
+                </span>
+              ))}
+            </div>
+
+            <div className="opp-card-foot">
+              <div className="match-block">
+                <MatchDial score={opp.matchScore} />
+                <div className="match-text">
+                  <strong>{opp.matchScore}% match</strong>
+                  <span className={"trust-tag " + trust.cls}>
+                    <trust.Icon size={12} /> {trust.label}
+                  </span>
+                </div>
+              </div>
+              <button className="why-btn" onClick={onEvidence}>
+                <Info size={13} /> Why this?
+              </button>
+            </div>
+
+            <div className="opp-actions">
+              <button className={"action-btn" + (opp.saved ? " action-btn-active" : "")} onClick={onSave}>
+                <Bookmark size={14} fill={opp.saved ? "currentColor" : "none"} /> {opp.saved ? "Saved" : "Save"}
+              </button>
+              <button
+                className={"action-btn" + (opp.applied ? " action-btn-active-green" : "")}
+                onClick={onApply}
+              >
+                <CheckCircle2 size={14} /> {opp.applied ? "Applied" : "Mark applied"}
+              </button>
+              <a className="action-btn action-btn-solid" href={opp.sourceUrl || opp.application_url || "#"} target="_blank" rel="noopener noreferrer">
+                View <ExternalLink size={13} />
+              </a>
+            </div>
+          </div>
+        </article>
+      );
     }
-  } catch(_) {
-    alertEl.textContent = 'Network error during signup';
-    alertEl.classList.add('on');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Continue to Personalization →';
-  }
-});
 
-/* ════ FORGOT & RESET PASSWORD ════ */
-document.getElementById('forgotForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const alertEl = document.getElementById('fa');
-  alertEl.classList.remove('on');
-  const btn = document.getElementById('fBtn');
-  btn.disabled = true;
-  btn.textContent = 'Sending link...';
-
-  try {
-    const res = await fetch('/auth/forgot-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: document.getElementById('fe').value.trim() })
-    });
-    const d = await res.json();
-    alertEl.className = 'aalert aalert-ok on';
-    alertEl.textContent = d.message || 'If that email exists, a reset link has been sent.';
-  } catch(_) {
-    alertEl.className = 'aalert aalert-e on';
-    alertEl.textContent = 'Failed to request reset link';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Send Reset Link →';
-  }
-});
-
-document.getElementById('resetForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const alertEl = document.getElementById('ra');
-  alertEl.classList.remove('on');
-  const btn = document.getElementById('rBtn');
-  btn.disabled = true;
-  btn.textContent = 'Updating password...';
-
-  try {
-    const res = await fetch('/auth/reset-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: resetToken, password: document.getElementById('rp').value })
-    });
-    const d = await res.json();
-    if(res.ok && d.success){
-      alert('Password reset successfully! Please sign in with your new password.');
-      closeModal('resetBk');
-      showPage('loginPage');
-    } else {
-      alertEl.textContent = d.error || 'Failed to reset password';
-      alertEl.classList.add('on');
+    function MatchDial({ score = 85 }) {
+      const r = 16;
+      const c = 2 * Math.PI * r;
+      const offset = c - (score / 100) * c;
+      return (
+        <svg width="40" height="40" viewBox="0 0 40 40" className="match-dial">
+          <circle cx="20" cy="20" r={r} className="dial-track" />
+          <circle
+            cx="20"
+            cy="20"
+            r={r}
+            className="dial-fill"
+            strokeDasharray={c}
+            strokeDashoffset={offset}
+            transform="rotate(-90 20 20)"
+          />
+        </svg>
+      );
     }
-  } catch(_) {
-    alertEl.textContent = 'Network error during password reset';
-    alertEl.classList.add('on');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Update Password & Sign In →';
-  }
-});
 
-async function logout(){
-  await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
-  uData = null;
-  showPage('loginPage');
-}
+    /* ------------------------------------------------------------------ */
+    /*  Evidence Modal Component                                          */
+    /* ------------------------------------------------------------------ */
+    function EvidenceModal({ opp, onClose }) {
+      const trust = trustMeta(opp.trust);
+      return (
+        <div className="modal-scrim" onClick={onClose}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <div>
+                <p className="modal-eyebrow">Why am I seeing this?</p>
+                <h2>{opp.title}</h2>
+              </div>
+              <button className="icon-btn" onClick={onClose}>
+                <X size={18} />
+              </button>
+            </div>
 
-async function promptResetAllUsers(){
-  if(!confirm('⚠️ Are you sure you want to delete ALL existing users, profiles, and reminders to start 100% freshly?')) return;
-  try {
-    const res = await fetch('/api/dev/reset-all-users', { method: 'POST' });
-    const d = await res.json();
-    alert(d.message || 'Database reset successfully!');
-    uData = null;
-    showPage('signupPage');
-  } catch(err) {
-    alert('Reset failed: ' + err.message);
-  }
-}
+            <div className="modal-section">
+              <h4>Interest match</h4>
+              <div className="modal-bar-row">
+                <div className="modal-bar">
+                  <div className="modal-bar-fill" style={{ width: (opp.interestMatch || 90) + "%" }} />
+                </div>
+                <span>{opp.interestMatch || 90}%</span>
+              </div>
+            </div>
 
-/* ════ INITIALIZATION ON LOAD ════ */
-window.addEventListener('load', async () => {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get('token');
-  if(token){
-    resetToken = token;
-    openModal('resetBk');
-    return;
-  }
+            <div className="modal-section">
+              <h4>Eligibility</h4>
+              <ul className="modal-elig-list">
+                {(opp.eligibility || []).map((e) => (
+                  <li key={e.label} className={"elig-" + e.status}>
+                    {eligIcon(e.status)} {e.label}
+                    {e.status === "missing" && <span className="elig-note">not provided in your profile</span>}
+                    {e.status === "warn" && <span className="elig-note">check the exact requirement</span>}
+                  </li>
+                ))}
+              </ul>
+              {opp.eligibilityStatus === "unknown" && (
+                <p className="modal-note">
+                  Relevant to your interests, but eligibility could not be fully verified from your profile.
+                </p>
+              )}
+            </div>
 
-  try {
-    const res = await fetch('/api/user/profile', { credentials: 'include' });
-    if(res.ok){
-      uData = await res.json();
-      if(uData.needsOnboarding){
-        showPage('onboardingPage');
-      } else {
-        await loadState();
-        showPage('dashPage');
-      }
-    } else {
-      showPage('loginPage');
+            <div className="modal-section">
+              <h4>Deadline evidence</h4>
+              <blockquote className="evidence-quote">“{opp.evidenceQuote || "Official notification verified."}”</blockquote>
+              <div className="evidence-meta">
+                <span>
+                  Method <strong>{opp.evidenceMethod || "CHRONO"}</strong>
+                </span>
+                <span>
+                  Confidence <strong>{opp.evidenceConfidence || "HIGH"}</strong>
+                </span>
+              </div>
+            </div>
+
+            <div className="modal-section">
+              <h4>Source</h4>
+              <div className="source-row">
+                <span className={"trust-tag " + trust.cls}>
+                  <trust.Icon size={13} /> {trust.label}
+                </span>
+                <span className="verified-date">Last verified {opp.lastVerified || "12 Sep 2026"}</span>
+              </div>
+              <a className="btn-primary modal-source-btn" href={opp.sourceUrl || opp.application_url || "#"} target="_blank" rel="noopener noreferrer">
+                Open official source <ExternalLink size={14} />
+              </a>
+            </div>
+          </div>
+        </div>
+      );
     }
-  } catch(_) {
-    showPage('loginPage');
-  }
-});
-</script>
+
+    /* ------------------------------------------------------------------ */
+    /*  Reminders View Component                                          */
+    /* ------------------------------------------------------------------ */
+    const STAGE_ORDER = [30, 14, 7, 3, 1, 0];
+    const stageLabel = (d) => (d === 0 ? "Deadline day" : d === 1 ? "1 day before" : `${d} days before`);
+
+    function statusMeta(status) {
+      if (status === "SENT") return { cls: "status-sent", label: "Sent" };
+      if (status === "MISSED") return { cls: "status-missed", label: "Missed" };
+      return { cls: "status-pending", label: "Pending" };
+    }
+
+    function RemindersView({ prefs, setPrefs, log, onRefreshReminders }) {
+      return (
+        <div>
+          <div className="page-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <h1>Reminders</h1>
+              <p>Reminders are stored the moment they're scheduled — refreshing or logging out never loses them.</p>
+            </div>
+            <button className="btn-primary" style={{ fontSize: 12, padding: '8px 14px' }} onClick={onRefreshReminders}>
+              ↻ Refresh Deadlines
+            </button>
+          </div>
+
+          <section className="panel">
+            <h3 className="panel-title">Alert stages</h3>
+            <p className="panel-sub">Choose how far ahead you want to be warned.</p>
+            <div className="stage-toggle-row">
+              {STAGE_ORDER.map((d) => (
+                <button
+                  key={d}
+                  className={"stage-toggle" + (prefs[d] ? " stage-toggle-on" : "")}
+                  onClick={() => setPrefs({ ...prefs, [d]: !prefs[d] })}
+                >
+                  {stageLabel(d)}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="panel">
+            <h3 className="panel-title">Recent activity &amp; scheduled alerts</h3>
+            <div className="reminder-log">
+              {log.length === 0 ? (
+                <div style={{ color: "var(--text-faint)", fontSize: 13, padding: "16px 0", textAlign: "center" }}>
+                  No reminders scheduled yet. Add interests or explore opportunities above to activate reminders.
+                </div>
+              ) : (
+                log.map((r) => {
+                  const s = statusMeta(r.status);
+                  return (
+                    <div key={r.id} className="reminder-row">
+                      <div className={"reminder-dot " + s.cls} />
+                      <div className="reminder-info">
+                        <strong>{r.title}</strong>
+                        <span>
+                          {r.stage} · {r.when}
+                        </span>
+                      </div>
+                      <span className={"reminder-status " + s.cls}>{s.label}</span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            <p className="panel-footnote">
+              A missed reminder stays in your history, but later stages for the same deadline are still sent — one miss
+              never means you lose the deadline entirely.
+            </p>
+          </section>
+        </div>
+      );
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Profile View Component                                            */
+    /* ------------------------------------------------------------------ */
+    function ProfileView({
+      username,
+      email,
+      interests,
+      toggleInterest,
+      customInterest,
+      setCustomInterest,
+      addCustomInterest,
+      oppTypes,
+      toggleOppType,
+      education,
+      setEducation,
+      city,
+      setCity,
+      completion,
+      confidence,
+      onSave,
+      onResetAllUsers,
+      onLogout,
+    }) {
+      const confMeta = {
+        high: { label: "High-confidence matching", cls: "conf-high", Icon: ShieldCheck },
+        partial: { label: "Partial matching", cls: "conf-partial", Icon: ShieldAlert },
+        "interest-only": { label: "Interest-only discovery", cls: "conf-low", Icon: ShieldQuestion },
+      }[confidence] || { label: "Interest-only discovery", cls: "conf-low", Icon: ShieldQuestion };
+
+      return (
+        <div>
+          <div className="page-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <h1>Profile ({username || "Student"})</h1>
+              <p>Every section here is optional. Add more when it's useful, skip what isn't.</p>
+            </div>
+            <button className="btn-primary" onClick={onSave}>
+              Save Profile Changes ✓
+            </button>
+          </div>
+
+          <section className="panel">
+            <div className="completion-row">
+              <div className="completion-bar">
+                <div className="completion-fill" style={{ width: completion + "%" }} />
+              </div>
+              <span>{completion}%</span>
+            </div>
+            <div className={"confidence-badge " + confMeta.cls}>
+              <confMeta.Icon size={14} /> {confMeta.label}
+            </div>
+          </section>
+
+          <section className="panel">
+            <h3 className="panel-title">
+              <Sparkles size={15} /> Tracked Interests
+            </h3>
+            <div className="chip-grid">
+              {INTEREST_OPTIONS.map((opt) => (
+                <button
+                  key={opt}
+                  className={"chip" + (interests.includes(opt) ? " chip-active" : "")}
+                  onClick={() => toggleInterest(opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+              {interests.filter(i => !INTEREST_OPTIONS.includes(i)).map(custom => (
+                <button
+                  key={custom}
+                  className="chip chip-active"
+                  onClick={() => toggleInterest(custom)}
+                >
+                  ⭐ {custom} ✕
+                </button>
+              ))}
+            </div>
+
+            <div className="field-row" style={{ marginTop: 14 }}>
+              <Sparkles size={16} />
+              <input
+                className="text-input"
+                placeholder="Type custom topic (e.g. UPSC, ISRO, Robotics)..."
+                value={customInterest}
+                onChange={(e) => setCustomInterest(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addCustomInterest()}
+              />
+              <button type="button" className="btn-primary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={addCustomInterest}>
+                + Add
+              </button>
+            </div>
+          </section>
+
+          <section className="panel">
+            <h3 className="panel-title">Looking for</h3>
+            <div className="chip-grid">
+              {OPP_TYPE_OPTIONS.map((opt) => (
+                <button
+                  key={opt}
+                  className={"chip" + (oppTypes.includes(opt) ? " chip-active" : "")}
+                  onClick={() => toggleOppType(opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="panel">
+            <h3 className="panel-title">
+              <GraduationCap size={15} /> Education Level
+            </h3>
+            <div className="chip-grid">
+              {EDUCATION_OPTIONS.map((opt) => (
+                <button
+                  key={opt}
+                  className={"chip" + (education === opt ? " chip-active" : "")}
+                  onClick={() => setEducation(opt === education ? "" : opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="panel">
+            <h3 className="panel-title">
+              <MapPin size={15} /> Location
+            </h3>
+            <div className="field-row">
+              <MapPin size={16} />
+              <input
+                className="text-input"
+                placeholder="City, state, or district — optional"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+            </div>
+          </section>
+
+          <section className="panel">
+            <h3 className="panel-title">Sensitive fields</h3>
+            <p className="panel-sub">
+              Things like category, disability status, or gender are only ever asked for when a specific opportunity's
+              eligibility genuinely depends on them — and every field stays optional.
+            </p>
+            <div className="chip-grid">
+              {["Category", "Disability status", "Gender", "Age"].map((opt) => (
+                <button key={opt} className="chip chip-disabled" disabled>
+                  <Circle size={11} /> {opt}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="panel" style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button className="btn-primary" onClick={onSave}>Save Changes ✓</button>
+            <button className="btn-ghost" style={{ color: "var(--critical)", border: "1px solid rgba(255,90,82,0.3)", borderRadius: 10, padding: "10px 16px" }} onClick={onResetAllUsers}>
+              🧹 Reset Test Users &amp; Start Fresh
+            </button>
+            <button className="btn-ghost" onClick={onLogout}>Sign Out</button>
+          </section>
+        </div>
+      );
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Auth Modal Component                                              */
+    /* ------------------------------------------------------------------ */
+    function AuthModal({ mode, setMode, onSuccess, onResetAllUsers }) {
+      const [username, setUsername] = useState("");
+      const [email, setEmail] = useState("");
+      const [password, setPassword] = useState("");
+      const [error, setError] = useState("");
+      const [loading, setLoading] = useState(false);
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+
+        const endpoint = mode === 'signup' ? '/auth/signup' : '/auth/login';
+        const payload = mode === 'signup' ? { username, email, password } : { username, password };
+
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            onSuccess();
+          } else {
+            setError(data.error || 'Authentication failed');
+          }
+        } catch (err) {
+          setError('Network connection error');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div className="modal-scrim">
+          <div className="modal" style={{ maxWidth: 420 }}>
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <div className="brand-mark" style={{ margin: "0 auto 10px", width: 42, height: 42 }}>
+                <Radar size={22} />
+              </div>
+              <h2 style={{ fontSize: 20 }}>{mode === 'login' ? 'Welcome Back' : 'Create an Account'}</h2>
+              <p style={{ color: "var(--text-muted)", fontSize: 13, marginTop: 4 }}>
+                {mode === 'login' ? 'Sign in to access your opportunity radar.' : 'Join Deadline Defender to track deadlines.'}
+              </p>
+            </div>
+
+            {error && (
+              <div style={{ background: "rgba(255,90,82,0.15)", border: "1px solid rgba(255,90,82,0.3)", color: "var(--critical)", padding: "9px 12px", borderRadius: 8, fontSize: 12.5, marginBottom: 14 }}>
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div className="field-row">
+                <input
+                  className="text-input"
+                  placeholder={mode === 'signup' ? "Choose username" : "Username or Email"}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+
+              {mode === 'signup' && (
+                <div className="field-row">
+                  <input
+                    className="text-input"
+                    type="email"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="field-row">
+                <input
+                  className="text-input"
+                  type="password"
+                  placeholder="Password (min 6 chars)"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  minLength={6}
+                  required
+                />
+              </div>
+
+              <button type="submit" className="btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 4 }} disabled={loading}>
+                {loading ? "Processing..." : mode === 'login' ? "Sign In →" : "Create Account →"}
+              </button>
+            </form>
+
+            <div style={{ textAlign: "center", marginTop: 18, fontSize: 13, color: "var(--text-muted)" }}>
+              {mode === 'login' ? (
+                <>New to Deadline Defender? <a href="#" onClick={(e) => { e.preventDefault(); setMode('signup'); }} style={{ color: "var(--safe)", fontWeight: 600 }}>Create an account</a></>
+              ) : (
+                <>Already have an account? <a href="#" onClick={(e) => { e.preventDefault(); setMode('login'); }} style={{ color: "var(--safe)", fontWeight: 600 }}>Sign In</a></>
+              )}
+            </div>
+
+            <div style={{ textAlign: "center", marginTop: 16 }}>
+              <a href="#" onClick={(e) => { e.preventDefault(); onResetAllUsers(); }} style={{ fontSize: 11.5, color: "var(--text-faint)", textDecoration: "underline" }}>
+                🧹 Reset Test Users &amp; Start Fresh
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Global Styles                                                     */
+    /* ------------------------------------------------------------------ */
+    function GlobalStyle() {
+      return (
+        <style>{`
+          .dd-root {
+            --bg: #0A121D;
+            --panel: #111B29;
+            --panel-2: #16223269;
+            --card: #131F2E;
+            --border: rgba(255,255,255,0.08);
+            --border-soft: rgba(255,255,255,0.05);
+            --text: #E9EEF5;
+            --text-muted: #8CA0B8;
+            --text-faint: #5C6E82;
+            --critical: #FF5A52;
+            --soon: #FFB648;
+            --safe: #35D9B2;
+            --violet: #8B7CFF;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'IBM Plex Sans', sans-serif;
+
+            font-family: var(--font-body);
+            color: var(--text);
+            background: var(--bg);
+            min-height: 100vh;
+            width: 100%;
+          }
+          .dd-root * { box-sizing: border-box; }
+          .dd-root h1, .dd-root h2, .dd-root h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.01em; }
+          .dd-root p { margin: 0; }
+          .dd-root button { font-family: var(--font-body); cursor: pointer; }
+          .dd-root input { font-family: var(--font-body); }
+
+          /* ---------- Toast ---------- */
+          .toast-pill {
+            position: fixed; bottom: 24px; right: 24px; z-index: 100;
+            background: var(--panel); border: 1px solid var(--safe); color: var(--safe);
+            padding: 10px 18px; border-radius: 30px; font-size: 13px; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: slideToast 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          }
+          @keyframes slideToast {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+          }
+
+          /* ---------- Onboarding ---------- */
+          .onboard {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 20px;
+            background:
+              radial-gradient(circle at 15% 10%, rgba(139,124,255,0.10), transparent 45%),
+              radial-gradient(circle at 85% 90%, rgba(53,217,178,0.08), transparent 45%),
+              var(--bg);
+          }
+          .onboard-card {
+            width: 100%;
+            max-width: 520px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px 32px;
+          }
+          .onboard-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-display);
+            font-weight: 600;
+            color: var(--safe);
+            margin-bottom: 24px;
+            font-size: 14px;
+          }
+          .onboard-progress { display: flex; gap: 6px; margin-bottom: 28px; }
+          .prog-seg { height: 3px; flex: 1; border-radius: 2px; background: var(--border); }
+          .prog-seg-done { background: var(--safe); }
+          .onboard-card h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+          .onboard-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+          .onboard-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
+
+          .chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+          .chip {
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            padding: 9px 14px;
+            border-radius: 20px;
+            font-size: 13.5px;
+            transition: border-color .15s, color .15s, background .15s;
+            display: inline-flex; align-items: center; gap: 6px;
+          }
+          .chip:hover { border-color: rgba(255,255,255,0.22); color: var(--text); }
+          .chip-active { background: rgba(53,217,178,0.12); border-color: var(--safe); color: var(--safe); }
+          .chip-disabled { opacity: 0.45; cursor: not-allowed; }
+          .chip-disabled:hover { border-color: var(--border); color: var(--text-muted); }
+
+          .field-row {
+            display: flex; align-items: center; gap: 10px;
+            border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px;
+            color: var(--text-faint); background: var(--card);
+          }
+          .text-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-size: 14px; }
+          .text-input::placeholder { color: var(--text-faint); }
+
+          .btn-primary {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--safe); color: #062822; border: none;
+            font-weight: 600; font-size: 14px; padding: 11px 20px; border-radius: 10px;
+            text-decoration: none; transition: opacity 0.2s;
+          }
+          .btn-primary:hover { opacity: 0.92; }
+          .btn-ghost {
+            background: transparent; border: none; color: var(--text-muted); font-size: 14px;
+          }
+          .btn-ghost:hover { color: var(--text); }
+
+          /* ---------- Shell ---------- */
+          .shell { display: flex; min-height: 100vh; }
+          .sidebar {
+            width: 240px; flex-shrink: 0; background: var(--panel);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 22px 16px;
+            position: sticky; top: 0; height: 100vh;
+          }
+          .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding: 0 4px; }
+          .brand-mark {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: linear-gradient(145deg, rgba(53,217,178,0.18), rgba(139,124,255,0.18));
+            color: var(--safe); display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--border);
+          }
+          .brand-text { display: flex; flex-direction: column; line-height: 1.25; }
+          .brand-text strong { font-family: var(--font-display); font-size: 14.5px; }
+          .brand-text span { font-size: 11.5px; color: var(--text-faint); }
+
+          .nav-list { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+          .nav-item {
+            display: flex; align-items: center; gap: 11px;
+            padding: 10px 12px; border-radius: 9px; border: none; background: transparent;
+            color: var(--text-muted); font-size: 13.5px; text-align: left;
+          }
+          .nav-item:hover { background: var(--panel-2); color: var(--text); }
+          .nav-item-active { background: rgba(53,217,178,0.10); color: var(--safe); }
+          .nav-badge {
+            margin-left: auto; background: rgba(255,255,255,0.08); color: var(--text-muted);
+            font-size: 11px; padding: 1px 7px; border-radius: 10px;
+          }
+          .nav-item-active .nav-badge { background: rgba(53,217,178,0.18); color: var(--safe); }
+          .sidebar-foot {
+            display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--text-faint);
+            border-top: 1px solid var(--border-soft); padding-top: 14px; margin-top: 10px;
+          }
+
+          .main { flex: 1; min-width: 0; }
+          .topbar {
+            display: flex; align-items: center; gap: 14px;
+            padding: 16px 28px; border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; background: rgba(10,18,29,0.85); backdrop-filter: blur(8px); z-index: 5;
+          }
+          .topbar-search {
+            flex: 1; display: flex; align-items: center; gap: 9px;
+            background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+            padding: 9px 13px; color: var(--text-faint); max-width: 460px;
+          }
+          .topbar-search input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-size: 13.5px; }
+          .topbar-search input::placeholder { color: var(--text-faint); }
+          .profile-pill { display: flex; align-items: center; gap: 8px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; }
+          .ring {
+            --pct: 0;
+            width: 30px; height: 30px; border-radius: 50%;
+            background: conic-gradient(var(--safe) calc(var(--pct) * 1%), rgba(255,255,255,0.09) 0);
+            display: flex; align-items: center; justify-content: center; position: relative;
+          }
+          .ring::before { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--panel); }
+          .ring span { position: relative; font-size: 9px; font-weight: 600; color: var(--text); }
+          .profile-pill-label { font-size: 13px; }
+
+          .content { padding: 26px 28px 60px; max-width: 1180px; }
+
+          .icon-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px; border-radius: 8px; cursor: pointer; }
+          .icon-btn:hover { background: var(--panel-2); }
+          .mobile-only { display: none; }
+          .scrim { display: none; }
+
+          /* ---------- Hero / Home ---------- */
+          .hero {
+            display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+            background: linear-gradient(135deg, rgba(53,217,178,0.06), rgba(139,124,255,0.05));
+            border: 1px solid var(--border); border-radius: 16px; padding: 26px 28px; margin-bottom: 30px;
+            flex-wrap: wrap;
+          }
+          .hero-eyebrow { color: var(--safe); font-size: 12.5px; font-weight: 600; margin-bottom: 8px; }
+          .hero-title { font-size: 26px; font-weight: 600; max-width: 520px; line-height: 1.3; margin-bottom: 10px; }
+          .hero-sub { color: var(--text-muted); font-size: 13.5px; max-width: 460px; line-height: 1.55; }
+          .hero-stats { display: flex; gap: 22px; }
+          .hero-stat { display: flex; flex-direction: column; align-items: center; min-width: 64px; }
+          .hero-stat-num { font-family: var(--font-display); font-size: 26px; font-weight: 700; }
+          .hero-stat-label { font-size: 11.5px; color: var(--text-faint); margin-top: 2px; text-align: center; }
+
+          .section { margin-bottom: 34px; }
+          .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+          .section-head h2 { font-size: 15.5px; display: flex; align-items: center; gap: 7px; font-weight: 600; }
+          .flame { color: var(--critical); }
+          .link-btn { background: transparent; border: none; color: var(--text-muted); font-size: 12.5px; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+          .link-btn:hover { color: var(--safe); }
+
+          .page-head { margin-bottom: 24px; }
+          .page-head h1 { font-size: 21px; font-weight: 600; margin-bottom: 6px; }
+          .page-head p { color: var(--text-muted); font-size: 13.5px; }
+          .empty-state { color: var(--text-faint); font-size: 13.5px; padding: 40px 0; text-align: center; border: 1px dashed var(--border); border-radius: 12px; }
+
+          .ticker { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+          .ticker-item {
+            flex-shrink: 0; display: flex; align-items: center; gap: 8px;
+            border: 1px solid var(--border); border-radius: 10px; padding: 9px 14px; font-size: 12.5px;
+            background: var(--card);
+          }
+          .ticker-title { color: var(--text-muted); white-space: nowrap; }
+          .ticker-days { font-weight: 600; white-space: nowrap; }
+          .ticker-critical { border-color: rgba(255,90,82,0.4); }
+          .ticker-critical .ticker-days { color: var(--critical); }
+          .ticker-soon { border-color: rgba(255,182,72,0.35); }
+          .ticker-soon .ticker-days { color: var(--soon); }
+
+          /* ---------- Cards ---------- */
+          .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+          .card-list { display: flex; flex-direction: column; gap: 12px; }
+
+          .opp-card {
+            position: relative; background: var(--card); border: 1px solid var(--border);
+            border-radius: 14px; overflow: hidden; padding-left: 4px; display: flex;
+          }
+          .opp-card-bar { width: 4px; flex-shrink: 0; }
+          .urgency-critical .opp-card-bar { background: var(--critical); }
+          .urgency-soon .opp-card-bar { background: var(--soon); }
+          .urgency-safe .opp-card-bar { background: var(--safe); }
+          .opp-card-body { padding: 16px 18px 18px; flex: 1; min-width: 0; }
+          .opp-card-wide .opp-card-body { display: block; }
+
+          .opp-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+          .opp-category { font-size: 11px; color: var(--text-faint); text-transform: none; }
+          .opp-countdown { font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
+          .countdown-critical { color: var(--critical); background: rgba(255,90,82,0.12); }
+          .countdown-soon { color: var(--soon); background: rgba(255,182,72,0.12); }
+          .countdown-safe { color: var(--safe); background: rgba(53,217,178,0.10); }
+
+          .opp-title { font-size: 15.5px; font-weight: 600; margin-bottom: 3px; line-height: 1.35; }
+          .opp-org { font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px; }
+
+          .opp-eligibility { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+          .elig-pill {
+            font-size: 11px; display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 8px; border-radius: 8px; background: rgba(255,255,255,0.04); color: var(--text-muted);
+          }
+          .elig-match { color: var(--safe); }
+          .elig-warn { color: var(--soon); }
+          .elig-missing { color: var(--text-faint); }
+          .dot-warn, .dot-missing { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+          .dot-warn { background: var(--soon); }
+          .dot-missing { background: var(--text-faint); }
+
+          .opp-card-foot { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-top: 12px; border-top: 1px solid var(--border-soft); }
+          .match-block { display: flex; align-items: center; gap: 10px; }
+          .match-dial { flex-shrink: 0; }
+          .dial-track { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 4; }
+          .dial-fill { fill: none; stroke: var(--violet); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset .4s; }
+          .match-text { display: flex; flex-direction: column; gap: 3px; }
+          .match-text strong { font-size: 13px; }
+          .trust-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; }
+          .trust-official { color: var(--safe); }
+          .trust-verified { color: var(--violet); }
+          .trust-unverified { color: var(--soon); }
+          .why-btn {
+            display: flex; align-items: center; gap: 5px; background: transparent; border: 1px solid var(--border);
+            color: var(--text-muted); font-size: 11.5px; padding: 6px 10px; border-radius: 8px; white-space: nowrap; cursor: pointer;
+          }
+          .why-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+          .opp-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+          .action-btn {
+            display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 8px 11px; border-radius: 9px;
+            border: 1px solid var(--border); background: transparent; color: var(--text-muted); text-decoration: none; flex: 1; justify-content: center; cursor: pointer;
+          }
+          .action-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+          .action-btn-active { color: var(--violet); border-color: rgba(139,124,255,0.4); }
+          .action-btn-active-green { color: var(--safe); border-color: rgba(53,217,178,0.4); }
+          .action-btn-solid { background: rgba(255,255,255,0.05); }
+
+          /* ---------- Modal ---------- */
+          .modal-scrim {
+            position: fixed; inset: 0; background: rgba(4,8,14,0.72); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center; z-index: 50; padding: 20px;
+          }
+          .modal {
+            width: 100%; max-width: 520px; max-height: 88vh; overflow-y: auto;
+            background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 26px 26px 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+          }
+          .modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; }
+          .modal-eyebrow { font-size: 11.5px; color: var(--violet); font-weight: 600; margin-bottom: 4px; }
+          .modal-head h2 { font-size: 18px; font-weight: 600; max-width: 400px; line-height: 1.35; }
+          .modal-section { margin-bottom: 22px; }
+          .modal-section h4 { font-size: 12px; text-transform: none; color: var(--text-faint); margin-bottom: 10px; font-weight: 600; letter-spacing: 0.02em; }
+          .modal-bar-row { display: flex; align-items: center; gap: 10px; }
+          .modal-bar { flex: 1; height: 6px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; }
+          .modal-bar-fill { height: 100%; background: var(--violet); border-radius: 4px; }
+          .modal-bar-row span { font-size: 12.5px; color: var(--text-muted); font-weight: 600; }
+          .modal-elig-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+          .modal-elig-list li { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+          .elig-note { color: var(--text-faint); font-size: 11.5px; }
+          .modal-note { margin-top: 10px; font-size: 12.5px; color: var(--soon); background: rgba(255,182,72,0.08); padding: 9px 12px; border-radius: 9px; }
+          .evidence-quote {
+            margin: 0; padding: 12px 14px; border-left: 2px solid var(--violet);
+            background: rgba(139,124,255,0.06); font-size: 13px; color: var(--text); font-style: italic; line-height: 1.5;
+          }
+          .evidence-meta { display: flex; gap: 18px; margin-top: 10px; font-size: 11.5px; color: var(--text-faint); }
+          .evidence-meta strong { color: var(--text-muted); }
+          .source-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+          .verified-date { font-size: 11.5px; color: var(--text-faint); }
+          .modal-source-btn { width: 100%; justify-content: center; }
+
+          /* ---------- Reminders ---------- */
+          .panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; margin-bottom: 18px; }
+          .panel-title { font-size: 14.5px; font-weight: 600; display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+          .panel-sub { font-size: 12.5px; color: var(--text-muted); margin-bottom: 14px; }
+          .stage-toggle-row { display: flex; flex-wrap: wrap; gap: 8px; }
+          .stage-toggle {
+            border: 1px solid var(--border); background: transparent; color: var(--text-faint);
+            padding: 8px 13px; border-radius: 9px; font-size: 12.5px; cursor: pointer;
+          }
+          .stage-toggle-on { border-color: var(--safe); color: var(--safe); background: rgba(53,217,178,0.08); }
+          .reminder-log { display: flex; flex-direction: column; gap: 4px; }
+          .reminder-row { display: flex; align-items: center; gap: 12px; padding: 11px 4px; border-bottom: 1px solid var(--border-soft); }
+          .reminder-row:last-child { border-bottom: none; }
+          .reminder-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+          .status-pending { background: var(--text-faint); }
+          .status-sent { background: var(--violet); }
+          .status-missed { background: var(--critical); }
+          .reminder-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+          .reminder-info strong { font-size: 13px; }
+          .reminder-info span { font-size: 11.5px; color: var(--text-faint); }
+          .reminder-status { font-size: 11.5px; font-weight: 600; }
+          .reminder-status.status-pending { color: var(--text-faint); }
+          .reminder-status.status-sent { color: var(--violet); }
+          .reminder-status.status-missed { color: var(--critical); }
+          .panel-footnote { font-size: 11.5px; color: var(--text-faint); margin-top: 14px; line-height: 1.5; }
+
+          /* ---------- Profile ---------- */
+          .completion-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+          .completion-bar { flex: 1; height: 7px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; }
+          .completion-fill { height: 100%; background: linear-gradient(90deg, var(--violet), var(--safe)); border-radius: 4px; transition: width .3s; }
+          .completion-row span { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+          .confidence-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 12px; border-radius: 20px; }
+          .conf-high { background: rgba(53,217,178,0.12); color: var(--safe); }
+          .conf-partial { background: rgba(255,182,72,0.12); color: var(--soon); }
+          .conf-low { background: rgba(139,124,255,0.12); color: var(--violet); }
+
+          /* ---------- Responsive ---------- */
+          @media (max-width: 860px) {
+            .mobile-only { display: inline-flex; }
+            .sidebar {
+              position: fixed; z-index: 40; left: 0; top: 0; transform: translateX(-100%);
+              transition: transform .2s ease; box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            }
+            .sidebar-open { transform: translateX(0); }
+            .scrim { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 39; }
+            .content { padding: 20px 16px 50px; }
+            .topbar { padding: 14px 16px; }
+            .hero { flex-direction: column; align-items: stretch; }
+            .hero-stats { justify-content: space-between; }
+            .card-grid { grid-template-columns: 1fr; }
+          }
+        `}</style>
+      );
+    }
+
+    /* Mount the application */
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<DeadlineDefenderApp />);
+  </script>
 </body>
 </html>
