@@ -953,6 +953,106 @@ app.post('/api/user/delete-account', requireLogin, async (req, res) => {
   }
 });
 
+// ── PERSONALIZED NEWS FEED ──────────────────────────────────
+const CURATED_NEWS = [
+  {
+    id: "n1",
+    category: "Cybersecurity",
+    filter_tag: "Cybersecurity",
+    emoji: "🔐",
+    headline: "Major Cybersecurity Trends Students Should Know in 2026",
+    summary: "Five important cybersecurity developments and why they matter for aspiring security professionals.",
+    source: "TechEdu Daily",
+    time: "2h ago",
+    read: "5 min read",
+    url: "https://www.cert-in.org.in"
+  },
+  {
+    id: "n2",
+    category: "Internships",
+    filter_tag: "Internships",
+    emoji: "🤖",
+    headline: "New AI Internship Opportunities Open for Students",
+    summary: "Several organizations have announced new AI and machine learning internship opportunities this quarter.",
+    source: "CampusWire",
+    time: "4h ago",
+    read: "3 min read",
+    url: "https://pminternship.mca.gov.in"
+  },
+  {
+    id: "n3",
+    category: "Programming",
+    filter_tag: "Programming",
+    emoji: "💻",
+    headline: "Top Skills Expected from Software Engineers in 2027",
+    summary: "An overview of emerging technologies and skills students should start learning right now.",
+    source: "DevScope",
+    time: "6h ago",
+    read: "6 min read",
+    url: "https://github.blog"
+  },
+  {
+    id: "n4",
+    category: "Government Exams",
+    filter_tag: "Government Exams",
+    emoji: "📘",
+    headline: "GATE 2027 Notification Released — What's New This Year",
+    summary: "Changes to exam pattern, key dates, and eligibility that every engineering and science applicant should note.",
+    source: "ExamTrack",
+    time: "8h ago",
+    read: "4 min read",
+    url: "https://gate2026.iitg.ac.in"
+  },
+  {
+    id: "n5",
+    category: "Hackathons",
+    filter_tag: "Hackathons",
+    emoji: "🏆",
+    headline: "5 Hackathons With Big Prize Pools This Season",
+    summary: "A curated roundup of national hackathons opening registrations across October and November.",
+    source: "HackFeed",
+    time: "1d ago",
+    read: "4 min read",
+    url: "https://sih.gov.in"
+  },
+  {
+    id: "n6",
+    category: "Scholarships",
+    filter_tag: "Scholarships",
+    emoji: "🎓",
+    headline: "Government Expands Merit Scholarship Coverage",
+    summary: "More students become eligible under the revised income and qualification brackets this cycle.",
+    source: "EduPolicy Watch",
+    time: "1d ago",
+    read: "3 min read",
+    url: "https://scholarships.gov.in"
+  },
+  {
+    id: "n7",
+    category: "Technology",
+    filter_tag: "AI & ML",
+    emoji: "⚡",
+    headline: "Generative AI and Agentic Systems: Free Certification Programs",
+    summary: "Leading tech foundations have launched certified training modules for collegiate developers.",
+    source: "AI Frontiers",
+    time: "1d ago",
+    read: "4 min read",
+    url: "https://developers.google.com"
+  }
+];
+
+app.get('/api/news', (req, res) => {
+  const category = req.query.category;
+  if (!category || category === 'All') {
+    return res.json({ news: CURATED_NEWS });
+  }
+  const filtered = CURATED_NEWS.filter(n => 
+    n.category.toLowerCase() === category.toLowerCase() || 
+    n.filter_tag.toLowerCase() === category.toLowerCase()
+  );
+  res.json({ news: filtered });
+});
+
 // ── OPPORTUNITIES FEED & TRACKING ────────────────────────────
 app.get('/api/opportunities', requireLogin, async (req, res) => {
   try {

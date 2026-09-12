@@ -1,1792 +1,2101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>Deadline Defender — Academic Opportunity Intelligence</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
-<style>
-/* ════════════════════════════════════════
-   DESIGN SYSTEM & THEME
-════════════════════════════════════════ */
-:root {
-  --pit:       #06080c;
-  --void:      #0b0e14;
-  --deep:      #101520;
-  --well:      #161c2b;
-  --card:      #1c2336;
-  --ridge:     #28324a;
-  --line:      rgba(255,255,255,0.08);
-  --line-high: rgba(255,255,255,0.16);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Deadline Defenders — Never Miss a Deadline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* ═══════════════════════════════════════════════════════════════════
+       DESIGN SYSTEM & CSS VARIABLES (LIGHT / DARK)
+    ═══════════════════════════════════════════════════════════════════ */
+    :root {
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Space Grotesk', sans-serif;
 
-  --snow:      #f0f4fc;
-  --ash:       #8a99b5;
-  --fog:       #505f7c;
+      --pri: #4f46e5;
+      --pri-light: #eef2ff;
+      --pri-dark: #4338ca;
+      --pri-ring: rgba(79, 70, 229, 0.2);
 
-  --amber:     #f5a623;
-  --amber-g:   linear-gradient(135deg,#f5a623,#e8601c);
-  --coral:     #e8601c;
-  --jade:      #00c48c;
-  --jade2:     #00e5a3;
-  --ice:       #4fc3f7;
-  --crimson:   #ff4757;
-  --purple:    #9c88ff;
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-header: rgba(248, 250, 252, 0.92);
+      --border-card: #e2e8f0;
+      --border-subtle: #f1f5f9;
 
-  --fb: 'Plus Jakarta Sans',sans-serif;
-  --fd: 'Space Grotesk',sans-serif;
-  --fm: 'JetBrains Mono',monospace;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-sub: #94a3b8;
 
-  --r1: 12px;
-  --r2: 18px;
-  --r3: 24px;
+      --emerald: #10b981;
+      --emerald-bg: #ecfdf5;
+      --emerald-text: #047857;
 
-  --silk: cubic-bezier(0.16,1,0.3,1);
-}
+      --rose: #f43f5e;
+      --rose-bg: #fff1f2;
+      --rose-text: #e11d48;
 
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{
-  width:100%;height:100%;background:var(--pit);
-  font-family:var(--fb);color:var(--snow);
-  overflow:hidden;-webkit-font-smoothing:antialiased;
-}
+      --amber: #f59e0b;
+      --amber-bg: #fffbeb;
+      --amber-text: #d97706;
 
-#app{
-  width:100%;height:100%;max-width:480px;
-  margin:0 auto;position:relative;background:var(--void);
-  overflow:hidden;box-shadow:0 0 80px rgba(0,0,0,0.85);
-}
+      --sky: #0ea5e9;
+      --sky-bg: #f0f9ff;
+      --sky-text: #0284c7;
 
-.page{
-  position:absolute;inset:0;bottom:70px;
-  display:none;flex-direction:column;
-  overflow:hidden;background:var(--void);
-}
-.page.active{display:flex}
-.page.no-nav{bottom:0}
+      --r-sm: 8px;
+      --r-md: 14px;
+      --r-lg: 20px;
+      --r-xl: 26px;
+      --r-full: 9999px;
+    }
 
-.scrl{
-  flex:1;overflow-y:auto;overflow-x:hidden;
-  padding:20px 18px 28px;
-}
-.scrl::-webkit-scrollbar{width:4px}
-.scrl::-webkit-scrollbar-thumb{background:var(--ridge);border-radius:4px}
+    body.dark {
+      --bg-page: #020617;
+      --bg-card: #0f172a;
+      --bg-header: rgba(2, 6, 23, 0.92);
+      --border-card: #1e293b;
+      --border-subtle: #1e293b;
 
-/* ════ HEADER ════ */
-.d-top{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:16px;
-}
-.d-wm{display:flex;align-items:center;gap:10px}
-.d-wm-shield{
-  width:34px;height:34px;border-radius:10px;background:var(--amber-g);
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;box-shadow:0 0 16px rgba(245,166,35,0.35);
-}
-.d-wm-name{font-family:var(--fd);font-size:18px;font-weight:700;letter-spacing:-0.02em}
-.d-bell{
-  position:relative;width:38px;height:38px;border-radius:50%;
-  background:var(--well);border:1px solid var(--line);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:17px;transition:transform .2s;
-}
-.d-bell:active{transform:scale(0.92)}
-.d-bell-dot{
-  position:absolute;top:7px;right:7px;width:7px;height:7px;
-  border-radius:50%;background:var(--jade);box-shadow:0 0 6px var(--jade);
-}
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #64748b;
 
-/* ════ HERO ════ */
-.d-hero{margin-bottom:16px}
-.d-hi{font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:0.1em}
-.d-name{font-family:var(--fd);font-size:24px;font-weight:700;letter-spacing:-0.02em;margin:2px 0 3px}
-.d-sub{font-size:12px;color:var(--ash)}
+      --pri-light: rgba(79, 70, 229, 0.15);
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --rose-bg: rgba(244, 63, 94, 0.12);
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --sky-bg: rgba(14, 165, 233, 0.12);
+    }
 
-/* ════ PROFILE COMPLETENESS & CONFIDENCE STRIP ════ */
-.confidence-box{
-  background:var(--well);border:1px solid var(--line);border-radius:var(--r1);
-  padding:14px;margin-bottom:16px;
-}
-.conf-header{
-  display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
-}
-.conf-title{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--fog);letter-spacing:0.08em}
-.conf-badge{
-  font-family:var(--fd);font-size:10px;font-weight:700;padding:3px 8px;border-radius:var(--r3);letter-spacing:0.04em;text-transform:uppercase;
-}
-.conf-badge.full{background:rgba(0,196,140,0.15);color:var(--jade2);border:1px solid rgba(0,196,140,0.3)}
-.conf-badge.partial{background:rgba(245,166,35,0.15);color:var(--amber);border:1px solid rgba(245,166,35,0.3)}
-.conf-badge.discovery{background:rgba(79,195,247,0.15);color:var(--ice);border:1px solid rgba(79,195,247,0.3)}
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-.meter-track{
-  height:6px;width:100%;border-radius:3px;background:rgba(255,255,255,0.06);margin-bottom:10px;overflow:hidden;
-}
-.meter-fill{
-  height:100%;border-radius:3px;background:var(--amber-g);transition:width .4s ease;
-}
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: var(--font-body);
+      background: #e2e8f0;
+      color: var(--text-main);
+      overflow-x: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-.conf-checklist{
-  display:flex;flex-wrap:wrap;gap:6px;font-size:11px;
-}
-.chk-pill{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:2px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid var(--line);color:var(--ash);
-}
-.chk-pill.active{color:var(--jade2);border-color:rgba(0,196,140,0.25);background:rgba(0,196,140,0.06)}
-.chk-pill.warning{color:var(--amber);border-color:rgba(245,166,35,0.25)}
+    body.dark {
+      background: #090d16;
+    }
 
-/* ════ STATS STRIP ════ */
-.score-strip{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;
-}
-.score-item{
-  background:var(--well);border:1px solid var(--line);border-radius:var(--r1);
-  padding:12px 10px;text-align:center;
-}
-.score-n{font-family:var(--fd);font-size:20px;font-weight:700;margin-bottom:2px}
-.score-l{font-size:10px;font-weight:600;text-transform:uppercase;color:var(--ash);letter-spacing:0.06em}
-.c-amber{color:var(--amber)}
-.c-jade{color:var(--jade2)}
-.c-ice{color:var(--ice)}
-.c-purple{color:var(--purple)}
+    /* ════ PHONE SHELL / CONTAINER ════ */
+    #app-container {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      height: 100vh;
+      max-height: 890px;
+      background: var(--bg-page);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.25);
+    }
 
-/* ════ SECTION HEADINGS ════ */
-.sec-hd{
-  display:flex;align-items:center;justify-content:space-between;
-  margin:18px 0 12px;
-}
-.sec-ht{font-family:var(--fd);font-size:15px;font-weight:700;letter-spacing:-0.01em;display:flex;align-items:center;gap:6px}
-.sec-lnk{font-size:12px;color:var(--amber);text-decoration:none;font-weight:600;cursor:pointer}
-.sec-lnk:hover{text-decoration:underline}
+    @media (min-width: 480px) {
+      #app-container {
+        border-radius: 40px;
+        border: 8px solid #0f172a;
+      }
+      body.dark #app-container {
+        border-color: #1e293b;
+      }
+    }
 
-/* ════ INTERESTS & SKILLS CHIPS DISPLAY ════ */
-.int-tags-wrap{
-  display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;
-}
-.int-chip{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:6px 12px;border-radius:var(--r3);
-  background:var(--well);border:1px solid var(--line);
-  font-size:12px;font-weight:600;color:var(--snow);
-  cursor:pointer;transition:all .15s;user-select:none;
-}
-.int-chip:hover{border-color:var(--amber);transform:translateY(-1px)}
-.int-chip.selected{
-  background:rgba(245,166,35,0.15);border-color:var(--amber);color:var(--amber);
-}
-.int-chip .chip-del{
-  font-size:11px;color:var(--fog);cursor:pointer;margin-left:2px;
-}
-.int-chip .chip-del:hover{color:var(--crimson)}
+    .font-display { font-family: var(--font-display); }
 
-.chip-add-box{
-  display:flex;gap:8px;margin-top:8px;
-}
-.chip-add-box input{
-  flex:1;padding:10px 14px;background:var(--well);border:1px solid var(--line);
-  border-radius:var(--r1);font-family:var(--fb);font-size:13px;color:var(--snow);outline:none;
-}
-.chip-add-box input:focus{border-color:var(--amber)}
-.chip-add-btn{
-  padding:10px 16px;background:var(--well);border:1px solid var(--amber);
-  color:var(--amber);border-radius:var(--r1);font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;
-}
-.chip-add-btn:hover{background:rgba(245,166,35,0.12)}
+    /* ════ NOTCH ════ */
+    .phone-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 130px;
+      height: 22px;
+      background: #0f172a;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      z-index: 40;
+    }
+    body.dark .phone-notch { background: #1e293b; }
 
-/* ════ FILTER STRIP ════ */
-.fstrip{
-  display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:12px;
-}
-.fstrip::-webkit-scrollbar{display:none}
-.fpill{
-  padding:7px 14px;border-radius:var(--r3);
-  background:var(--well);border:1px solid var(--line);
-  font-size:12px;font-weight:600;color:var(--ash);cursor:pointer;
-  white-space:nowrap;transition:all .2s;
-}
-.fpill.on{
-  background:rgba(245,166,35,0.14);border-color:var(--amber);color:var(--amber);
-}
+    /* ════ TOP APP HEADER ════ */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--bg-header);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-card);
+      padding: 30px 18px 12px;
+    }
 
-/* ════ OPPORTUNITY CARD ════ */
-.opp-card{
-  background:var(--well);border:1px solid var(--line);
-  border-radius:var(--r2);padding:16px;margin-bottom:14px;
-  transition:all .2s;position:relative;overflow:hidden;
-}
-.opp-card:hover{border-color:rgba(245,166,35,0.35);transform:translateY(-2px)}
-.opp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.opp-trust{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:3px 10px;border-radius:var(--r3);
-  font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;
-}
-.opp-trust.official{background:rgba(0,196,140,0.12);color:var(--jade2);border:1px solid rgba(0,196,140,0.25)}
-.opp-trust.secondary{background:rgba(79,195,247,0.1);color:var(--ice);border:1px solid rgba(79,195,247,0.2)}
-.opp-trust.unverified{background:rgba(255,255,255,0.08);color:var(--ash);border:1px solid var(--line)}
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
 
-.opp-match-tag{
-  font-family:var(--fd);font-size:11px;font-weight:700;
-  padding:3px 10px;border-radius:var(--r3);
-  background:linear-gradient(135deg,rgba(245,166,35,0.2),rgba(232,96,28,0.2));
-  color:var(--amber);border:1px solid rgba(245,166,35,0.3);
-}
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-.opp-org{font-size:11px;font-weight:700;color:var(--fog);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
-.opp-title{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--snow);line-height:1.35;margin-bottom:8px}
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: var(--pri);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
 
-.opp-reasons{
-  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;
-}
-.opp-reason-tag{
-  font-size:11px;padding:2px 8px;border-radius:6px;
-  background:rgba(255,255,255,0.04);color:var(--ash);border:1px solid var(--line);
-}
-.opp-reason-tag.verified{color:var(--jade2);border-color:rgba(0,196,140,0.25);background:rgba(0,196,140,0.05)}
-.opp-reason-tag.unverified{color:var(--amber);border-color:rgba(245,166,35,0.25);background:rgba(245,166,35,0.05)}
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+    }
 
-.opp-foot{
-  display:flex;align-items:center;justify-content:space-between;
-  padding-top:12px;border-top:1px solid var(--line);
-}
-.opp-dl{font-size:12px;color:var(--ash)}
-.opp-dl-val{font-weight:700;color:var(--amber);margin-left:4px}
+    .brand-sub {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      margin-top: -2px;
+    }
 
-.opp-actions{display:flex;gap:6px}
-.opp-btn{
-  padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;
-  border:none;cursor:pointer;transition:all .15s;
-}
-.opp-btn-pri{background:var(--amber);color:var(--pit)}
-.opp-btn-pri:hover{opacity:0.9}
-.opp-btn-ghost{background:rgba(255,255,255,0.06);color:var(--snow);border:1px solid var(--line)}
-.opp-btn-ghost:hover{background:rgba(255,255,255,0.12)}
-.opp-btn-done{background:rgba(0,196,140,0.15);color:var(--jade2);border:1px solid rgba(0,196,140,0.3)}
+    .action-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-/* ════ REMINDER ITEM ════ */
-.rem-item{
-  background:var(--well);border:1px solid var(--line);
-  border-radius:var(--r1);padding:14px 16px;margin-bottom:10px;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.rem-main{flex:1;margin-right:12px}
-.rem-t{font-size:14px;font-weight:600;margin-bottom:3px;color:var(--snow)}
-.rem-s{font-size:11px;color:var(--ash)}
-.rem-badge{
-  padding:4px 10px;border-radius:var(--r3);
-  font-family:var(--fd);font-size:11px;font-weight:700;
-}
-.rem-badge.urgent{background:rgba(232,96,28,0.15);color:var(--coral);border:1px solid rgba(232,96,28,0.3)}
-.rem-badge.norm{background:rgba(79,195,247,0.1);color:var(--ice);border:1px solid rgba(79,195,247,0.2)}
+    .icon-btn {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      border-radius: var(--r-full);
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
 
-/* ════ BOTTOM NAV ════ */
-nav#nav{
-  position:absolute;bottom:0;left:0;right:0;height:70px;
-  background:rgba(16,21,32,0.96);backdrop-filter:blur(14px);
-  border-top:1px solid var(--line);display:none;z-index:200;
-}
-nav#nav.on{display:flex}
-.nav-inner{
-  display:grid;grid-template-columns:repeat(5,1fr);width:100%;height:100%;
-}
-.nb{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;background:none;border:none;cursor:pointer;color:var(--fog);transition:all .2s;
-}
-.nb.on{color:var(--amber)}
-.nb-icon{font-size:18px}
-.nb-lbl{font-size:10px;font-weight:700;letter-spacing:0.04em}
+    .icon-btn:hover { color: var(--pri); border-color: var(--pri); }
+    .icon-btn:active { transform: scale(0.92); }
 
-/* ════ BUTTONS & ACTIONS ════ */
-.abtn{
-  width:100%;padding:14px;border-radius:var(--r1);
-  font-family:var(--fd);font-size:13px;font-weight:700;
-  text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;
-  border:none;transition:all .2s;
-}
-.abtn-amber{background:var(--amber-g);color:var(--pit);box-shadow:0 4px 20px rgba(245,166,35,0.25)}
-.abtn-amber:hover{opacity:0.92;transform:scale(0.99)}
-.abtn-ghost{background:rgba(255,255,255,0.06);color:var(--snow);border:1px solid var(--line)}
-.abtn-ghost:hover{background:rgba(255,255,255,0.12)}
-.ref-btn{
-  width:100%;padding:13px;border-radius:var(--r1);margin-top:14px;
-  background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.18);
-  color:var(--ash);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;
-}
-.ref-btn:hover{border-color:var(--amber);color:var(--amber)}
+    .notif-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 15px;
+      height: 15px;
+      border-radius: var(--r-full);
+      background: var(--rose);
+      color: #fff;
+      font-size: 8.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--bg-card);
+    }
 
-/* ════ MODAL / BOTTOM SHEET ════ */
-.sheet-bk{
-  position:fixed;inset:0;z-index:500;
-  background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);
-  display:none;align-items:flex-end;justify-content:center;
-}
-.sheet-bk.open{display:flex}
-.sheet{
-  background:var(--deep);border:1px solid var(--line-high);
-  border-radius:24px 24px 0 0;padding:20px 22px max(32px,env(safe-area-inset-bottom));
-  width:100%;max-width:480px;max-height:85vh;overflow-y:auto;
-}
-.sheet-grip{width:36px;height:4px;border-radius:2px;background:var(--ridge);margin:0 auto 16px}
-.sheet-title{font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:6px}
-.sheet-sub{font-size:12px;color:var(--ash);margin-bottom:16px}
-.sheet-box{
-  background:var(--well);border:1px solid var(--line);border-radius:var(--r1);
-  padding:14px;margin-bottom:12px;
-}
-.sheet-box-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--fog);letter-spacing:0.08em;margin-bottom:6px}
-.sheet-box-val{font-size:13px;color:var(--snow);line-height:1.5}
-.sheet-close{
-  width:100%;padding:14px;border-radius:var(--r1);margin-top:12px;
-  background:var(--well);border:1px solid var(--line);color:var(--ash);
-  font-size:12px;font-weight:700;cursor:pointer;
-}
+    .avatar-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--r-full);
+      background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+    }
 
-/* ════ AUTH & ONBOARDING FORMS ════ */
-.auth-shell{padding:32px 20px}
-.wordmark{display:flex;align-items:center;gap:10px;margin-bottom:20px}
-.wm-shield{width:38px;height:38px;border-radius:10px;background:var(--amber-g);display:flex;align-items:center;justify-content:center;font-size:20px}
-.wm-top{font-family:var(--fd);font-size:18px;font-weight:700;line-height:1}
-.wm-bot{font-size:12px;color:var(--ash);letter-spacing:0.12em;text-transform:uppercase}
-.auth-headline{font-family:var(--fd);font-size:28px;font-weight:800;line-height:1.15;margin-bottom:8px}
-.auth-headline .tilt{color:var(--amber)}
-.auth-desc{font-size:13px;color:var(--ash);margin-bottom:20px;line-height:1.5}
-.fld{margin-bottom:14px}
-.fld label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--fog);margin-bottom:6px}
-.fld input,.fld select,.fld textarea{
-  width:100%;padding:12px 14px;background:var(--well);border:1px solid var(--line);
-  border-radius:var(--r1);font-family:var(--fb);font-size:13px;color:var(--snow);outline:none;
-}
-.fld input:focus,.fld select:focus{border-color:var(--amber)}
-.fld select option{background:var(--deep);color:var(--snow)}
+    .search-bar-trigger {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--r-md);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-sub);
+      font-size: 12.5px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
 
-.aalert{padding:12px;border-radius:var(--r1);font-size:12px;margin-bottom:16px;display:none}
-.aalert.on{display:block}
-.aalert-e{background:rgba(232,96,28,0.15);color:var(--coral);border:1px solid rgba(232,96,28,0.3)}
-.aalert-ok{background:rgba(0,196,140,0.15);color:var(--jade2);border:1px solid rgba(0,196,140,0.3)}
-.afoot{text-align:center;font-size:13px;color:var(--ash);margin-top:20px}
-.afoot a{color:var(--amber);text-decoration:none;font-weight:600}
-.afoot a:hover{text-decoration:underline}
+    .search-bar-trigger:hover { border-color: var(--pri); }
 
-/* ════ PROGRESSIVE WIZARD STYLES ════ */
-.prog-card{
-  background:var(--well);border:1px solid var(--line);border-radius:var(--r1);
-  padding:16px;margin-bottom:16px;
-}
-.prog-head{
-  display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
-}
-.prog-badge{
-  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
-  padding:3px 8px;border-radius:var(--r3);background:rgba(245,166,35,0.15);color:var(--amber);
-}
-.prog-opt-tag{
-  font-size:10px;font-weight:600;color:var(--fog);text-transform:uppercase;
-}
-.toggle-choice-bar{
-  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;
-}
-.tog-btn{
-  padding:10px;border-radius:var(--r1);background:rgba(255,255,255,0.04);border:1px solid var(--line);
-  font-family:var(--fb);font-size:12px;font-weight:600;color:var(--ash);cursor:pointer;text-align:center;transition:all .2s;
-}
-.tog-btn.selected{
-  background:rgba(245,166,35,0.15);border-color:var(--amber);color:var(--amber);
-}
+    /* ════ SCROLLABLE CONTENT BODY ════ */
+    .screen-content {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 90px;
+    }
+    .screen-content::-webkit-scrollbar { display: none; }
+    .screen-content { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ════ LOADING SPINNER ════ */
-.st-load{padding:40px 20px;text-align:center;color:var(--ash)}
-.spin{width:32px;height:32px;border-radius:50%;border:3px solid var(--well);border-top-color:var(--amber);animation:spin .7s linear infinite;margin:0 auto 12px}
-@keyframes spin{to{transform:rotate(360deg)}}
-</style>
+    .page-tab {
+      display: none;
+      padding-top: 16px;
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .page-tab.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ════ CARDS & GRIDS ════ */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--r-lg);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 0 18px;
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--r-lg);
+      padding: 14px;
+    }
+
+    .stat-icon-wrap {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .stat-num {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ════ SECTION HEADERS ════ */
+    .sec-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 18px;
+      margin-bottom: 12px;
+    }
+
+    .sec-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--pri);
+      margin-bottom: 2px;
+    }
+
+    .sec-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .sec-link {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--pri);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      cursor: pointer;
+    }
+
+    /* ════ HORIZONTAL SCROLL CAROUSEL ════ */
+    .urgent-carousel {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 0 18px 4px;
+      margin-bottom: 24px;
+    }
+    .urgent-carousel::-webkit-scrollbar { display: none; }
+    .urgent-carousel { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .urgent-card {
+      min-width: 240px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--r-lg);
+      padding: 16px;
+      flex-shrink: 0;
+    }
+
+    .urgent-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border-radius: var(--r-full);
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .pill-badge.urgent { background: var(--rose-bg); color: var(--rose-text); }
+    .pill-badge.approaching { background: var(--amber-bg); color: var(--amber-text); }
+    .pill-badge.upcoming { background: var(--emerald-bg); color: var(--emerald-text); }
+
+    .urgent-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 2px;
+      line-height: 1.3;
+    }
+
+    .urgent-org {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .urgent-countdown {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    /* ════ CHIP STRIPS ════ */
+    .chip-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 0 18px 4px;
+      margin-bottom: 16px;
+    }
+    .chip-strip::-webkit-scrollbar { display: none; }
+    .chip-strip { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .filter-chip {
+      white-space: nowrap;
+      border-radius: var(--r-full);
+      border: 1px solid var(--border-card);
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--bg-card);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-chip.active {
+      background: var(--pri);
+      border-color: var(--pri);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+    }
+
+    /* ════ MATCH RING SVG ════ */
+    .match-ring-box {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+    }
+
+    .match-ring-svg {
+      transform: rotate(-90deg);
+    }
+
+    .match-ring-bg {
+      stroke: var(--border-card);
+    }
+
+    .match-ring-val {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: var(--font-display);
+      color: var(--text-main);
+    }
+
+    /* ════ OPPORTUNITY CARD ════ */
+    .opp-item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--r-lg);
+      padding: 16px;
+      margin: 0 18px 12px;
+    }
+
+    .opp-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .opp-main-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .opp-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin: 6px 0;
+    }
+
+    .opp-tag-pill {
+      font-size: 9.5px;
+      font-weight: 600;
+      background: var(--pri-light);
+      color: var(--pri);
+      border-radius: var(--r-full);
+      padding: 2px 8px;
+    }
+
+    .opp-reason-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    .opp-card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .btn-pri {
+      flex: 1;
+      background: var(--pri);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-md);
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      text-align: center;
+    }
+    .btn-pri:active { opacity: 0.85; }
+
+    .btn-outline {
+      flex: 1;
+      background: transparent;
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+      border-radius: var(--r-md);
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .btn-outline.active {
+      background: var(--pri-light);
+      border-color: var(--pri);
+      color: var(--pri);
+    }
+
+    .info-callout {
+      background: rgba(79, 70, 229, 0.08);
+      border: 1px solid rgba(79, 70, 229, 0.18);
+      border-radius: var(--r-lg);
+      padding: 14px;
+      margin: 0 18px 18px;
+    }
+
+    .callout-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--pri);
+      margin-bottom: 4px;
+    }
+
+    .callout-desc {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* ════ NEWS CARD ════ */
+    .news-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--r-lg);
+      padding: 16px;
+      margin: 0 18px 12px;
+    }
+
+    .news-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .news-category-badge {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--pri);
+      background: var(--pri-light);
+      border-radius: var(--r-full);
+      padding: 3px 9px;
+    }
+
+    .news-headline {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      line-height: 1.35;
+    }
+
+    .news-summary {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+
+    .news-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: var(--text-sub);
+    }
+
+    .news-read-link {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--pri);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      cursor: pointer;
+    }
+
+    /* ════ CALENDAR WIDGET ════ */
+    .cal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--r-xl);
+      padding: 16px;
+      margin: 0 18px 20px;
+    }
+
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      row-gap: 6px;
+      text-align: center;
+    }
+
+    .cal-day-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-sub);
+      padding-bottom: 4px;
+    }
+
+    .cal-day-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3px 0;
+      cursor: pointer;
+    }
+
+    .cal-day-num {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--r-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .cal-day-num.has-urgent {
+      background: var(--rose-bg);
+      color: var(--rose-text);
+      font-weight: 700;
+    }
+    .cal-day-num.has-approaching {
+      background: var(--amber-bg);
+      color: var(--amber-text);
+      font-weight: 700;
+    }
+    .cal-day-num.has-upcoming {
+      background: var(--emerald-bg);
+      color: var(--emerald-text);
+      font-weight: 700;
+    }
+
+    .cal-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: var(--r-full);
+      margin-top: 2px;
+    }
+
+    /* ════ PROFILE SCREEN ════ */
+    .prof-hero {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 18px;
+      margin-bottom: 20px;
+    }
+
+    .prof-avatar-big {
+      width: 54px;
+      height: 54px;
+      border-radius: var(--r-lg);
+      background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.3);
+    }
+
+    .prof-name { font-size: 17px; font-weight: 700; color: var(--text-main); }
+    .prof-meta { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+
+    .ai-status-card {
+      background: var(--emerald-bg);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: var(--r-lg);
+      padding: 14px;
+      margin: 0 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ai-status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: var(--r-full);
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+      flex-shrink: 0;
+    }
+
+    .academic-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 0 18px;
+      margin-bottom: 20px;
+    }
+
+    .academic-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--r-md);
+      padding: 10px 12px;
+    }
+
+    .academic-lbl { font-size: 9.5px; color: var(--text-sub); }
+    .academic-val { font-size: 12px; font-weight: 600; color: var(--text-main); margin-top: 2px; }
+
+    .tag-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 18px;
+      margin-bottom: 20px;
+    }
+
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: var(--r-full);
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--border-card);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .tag-chip.active {
+      background: var(--pri);
+      border-color: var(--pri);
+      color: #fff;
+    }
+
+    /* ════ BOTTOM NAVIGATION (4 TABS) ════ */
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: var(--bg-header);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-card);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 12px 10px;
+      z-index: 30;
+    }
+
+    .nav-tab-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      flex: 1;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-sub);
+      transition: color 0.2s;
+    }
+
+    .nav-tab-btn.active { color: var(--pri); }
+
+    .nav-icon-wrap {
+      width: 38px;
+      height: 28px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .nav-tab-btn.active .nav-icon-wrap {
+      background: var(--pri);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
+    }
+
+    .nav-lbl {
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    /* ════ OVERLAYS & MODALS ════ */
+    .sheet-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+      display: none;
+      align-items: flex-end;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .sheet-overlay.open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .sheet-modal {
+      width: 100%;
+      max-height: 88%;
+      background: var(--bg-card);
+      border-top-left-radius: var(--r-xl);
+      border-top-right-radius: var(--r-xl);
+      padding: 20px 20px 36px;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sheet-overlay.open .sheet-modal {
+      transform: translateY(0);
+    }
+
+    .sheet-grip {
+      width: 40px;
+      height: 4px;
+      background: var(--border-card);
+      border-radius: var(--r-full);
+      margin: 0 auto 16px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 12px;
+    }
+
+    /* ════ TOAST NOTIFICATION ════ */
+    .toast-popup {
+      position: absolute;
+      bottom: 84px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: var(--r-full);
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 60;
+    }
+
+    .toast-popup.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ════ AUTH PAGES ════ */
+    .auth-page {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-page);
+      z-index: 35;
+      padding: 40px 20px;
+      overflow-y: auto;
+      display: none;
+    }
+    .auth-page.active { display: block; }
+
+    .input-field {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--r-md);
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--text-main);
+      margin-bottom: 12px;
+      outline: none;
+    }
+    .input-field:focus { border-color: var(--pri); }
+  </style>
 </head>
 <body>
-<div id="app">
 
-<!-- ══════════════════════════════════════════════════════════
-     1. LOGIN PAGE
-══════════════════════════════════════════════════════════ -->
-<div class="page no-nav active" id="loginPage">
-  <div class="scrl auth-shell">
-    <div class="wordmark">
-      <div class="wm-shield">⚡</div>
-      <div><div class="wm-top">Deadline Defender</div><div class="wm-bot">Academic Intelligence</div></div>
+<div id="app-container">
+  <div class="phone-notch"></div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       HEADER
+  ══════════════════════════════════════════════════════════ -->
+  <header class="top-bar">
+    <div class="header-top">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
+        </div>
+        <div>
+          <div class="brand-title font-display">Deadline Defenders</div>
+          <div class="brand-sub">Never miss a deadline</div>
+        </div>
+      </div>
+      <div class="action-icons">
+        <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme">
+          <i data-lucide="moon" id="themeIcon" style="width: 15px; height: 15px;"></i>
+        </button>
+        <button class="icon-btn" onclick="openModal('notifModal')" title="Notifications">
+          <i data-lucide="bell" style="width: 15px; height: 15px;"></i>
+          <span class="notif-badge">3</span>
+        </button>
+        <button class="avatar-btn font-display" id="headerAvatarBtn" onclick="switchTab('profile')">
+          H
+        </button>
+      </div>
     </div>
-    <h1 class="auth-headline">Welcome<br><span class="tilt">back.</span></h1>
-    <p class="auth-desc">Discovers opportunities, verifies sources &amp; tracks deadlines.</p>
-    <div id="la" class="aalert aalert-e"></div>
-    <form id="loginForm">
-      <div class="fld"><label>Username or Email</label><input id="lu" type="text" placeholder="Enter username or email" required autocomplete="username"/></div>
-      <div class="fld"><label>Password</label><input id="lp" type="password" placeholder="Password" required autocomplete="current-password"/></div>
-      <div style="text-align:right;margin:-6px 0 16px"><a href="#" onclick="openModal('forgotBk');return false" style="font-size:12px;color:var(--ash);text-decoration:none">Forgot password?</a></div>
-      <button type="submit" id="lBtn" class="abtn abtn-amber">Sign In →</button>
-    </form>
-    <div class="afoot">New to Deadline Defender? <a href="#" onclick="showPage('signupPage');return false">Create an account</a></div>
-    <div style="text-align:center;margin-top:18px"><a href="#" onclick="promptResetAllUsers();return false" style="font-size:11px;color:var(--ash);text-decoration:underline">🧹 Reset Test Users &amp; Start Fresh</a></div>
+
+    <!-- Quick Search trigger -->
+    <div class="search-bar-trigger" onclick="openModal('searchModal')">
+      <i data-lucide="search" style="width: 15px; height: 15px;"></i>
+      <span>Search opportunities, news, deadlines…</span>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MAIN CONTENT SCREENS
+  ══════════════════════════════════════════════════════════ -->
+  <main class="screen-content">
+
+    <!-- ── 1. HOME / DASHBOARD TAB ── -->
+    <section id="tab-home" class="page-tab active">
+      <div style="padding: 0 18px; margin-bottom: 16px;">
+        <h1 class="font-display" style="font-size: 20px; font-weight: 700;" id="homeGreeting">Good morning, Student 👋</h1>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Here's what matters to you today.</p>
+      </div>
+
+      <!-- 4 Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="background: var(--pri-light); color: var(--pri);">
+            <i data-lucide="calendar-days" style="width: 16px; height: 16px;"></i>
+          </div>
+          <div class="stat-num font-display" id="statUpcomingCount">8</div>
+          <div class="stat-label">Upcoming Deadlines</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="background: var(--rose-bg); color: var(--rose);">
+            <i data-lucide="flame" style="width: 16px; height: 16px;"></i>
+          </div>
+          <div class="stat-num font-display">3</div>
+          <div class="stat-label">Important This Week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="background: var(--emerald-bg); color: var(--emerald);">
+            <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i>
+          </div>
+          <div class="stat-num font-display" id="statOppsCount">14</div>
+          <div class="stat-label">New Opportunities</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap" style="background: var(--sky-bg); color: var(--sky);">
+            <i data-lucide="newspaper" style="width: 16px; height: 16px;"></i>
+          </div>
+          <div class="stat-num font-display">12</div>
+          <div class="stat-label">Personalized News</div>
+        </div>
+      </div>
+
+      <!-- Don't Miss These (Urgent Carousel) -->
+      <div class="sec-head">
+        <div>
+          <div class="sec-eyebrow">Priority</div>
+          <div class="sec-title font-display">🔴 Don't Miss These</div>
+        </div>
+        <a class="sec-link" onclick="switchTab('deadlines')">All <i data-lucide="chevron-right" style="width: 12px; height: 12px;"></i></a>
+      </div>
+      <div class="urgent-carousel" id="urgentListContainer">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Smart Deadline Intelligence (AI Ranked Matches) -->
+      <div class="sec-head">
+        <div>
+          <div class="sec-eyebrow">AI Powered</div>
+          <div class="sec-title font-display">🤖 Smart Deadline Intelligence</div>
+        </div>
+      </div>
+      <p style="padding: 0 18px; font-size: 11.5px; color: var(--text-muted); margin-bottom: 12px;">We found verified opportunities that match your interests &amp; academic profile.</p>
+
+      <div id="smartMatchesContainer">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Why am I seeing this card -->
+      <div class="info-callout">
+        <div class="callout-title font-display">
+          <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
+          <span>Why am I seeing this?</span>
+        </div>
+        <div class="callout-desc">
+          High priority because deadlines are approaching and these opportunities match your tracked profile topics &amp; eligibility window.
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 2. NEWS TAB ── -->
+    <section id="tab-news" class="page-tab">
+      <div style="padding: 0 18px; margin-bottom: 14px;">
+        <h1 class="font-display" style="font-size: 19px; font-weight: 700;">📰 Your News Feed</h1>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">News selected based on your interests.</p>
+      </div>
+
+      <!-- News Filter Chips -->
+      <div class="chip-strip" id="newsFiltersStrip">
+        <button class="filter-chip active" onclick="setNewsFilter('All', this)">All</button>
+        <button class="filter-chip" onclick="setNewsFilter('AI & ML', this)">AI &amp; ML</button>
+        <button class="filter-chip" onclick="setNewsFilter('Cybersecurity', this)">Cybersecurity</button>
+        <button class="filter-chip" onclick="setNewsFilter('Programming', this)">Programming</button>
+        <button class="filter-chip" onclick="setNewsFilter('Hackathons', this)">Hackathons</button>
+        <button class="filter-chip" onclick="setNewsFilter('Internships', this)">Internships</button>
+        <button class="filter-chip" onclick="setNewsFilter('Government Exams', this)">Government Exams</button>
+        <button class="filter-chip" onclick="setNewsFilter('Scholarships', this)">Scholarships</button>
+      </div>
+
+      <!-- News For You banner with active interests -->
+      <div class="card" style="margin: 0 18px 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 13px; font-weight: 700; color: var(--text-main);">News For You</span>
+          <button style="background: none; border: none; font-size: 11px; font-weight: 600; color: var(--pri); cursor: pointer;" onclick="switchTab('profile')">Edit Interests</button>
+        </div>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Based on your tracked profile interests</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;" id="newsInterestsList">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- News Articles Stream -->
+      <div id="newsFeedContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ── 3. DEADLINES & CALENDAR TAB ── -->
+    <section id="tab-deadlines" class="page-tab">
+      <div style="padding: 0 18px; margin-bottom: 14px;">
+        <h1 class="font-display" style="font-size: 19px; font-weight: 700;">📅 Deadline Calendar</h1>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Track everything in one unified calendar view.</p>
+      </div>
+
+      <!-- Interactive Calendar Widget -->
+      <div class="cal-box">
+        <div class="cal-nav">
+          <button class="icon-btn" onclick="shiftMonth(-1)"><i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i></button>
+          <span class="font-display" style="font-size: 14px; font-weight: 700; color: var(--text-main);" id="calMonthLabel">September 2026</span>
+          <button class="icon-btn" onclick="shiftMonth(1)"><i data-lucide="chevron-right" style="width: 14px; height: 14px;"></i></button>
+        </div>
+        <div class="cal-grid" id="calGridContainer">
+          <!-- Calendar Days generated dynamically -->
+        </div>
+      </div>
+
+      <!-- Upcoming Deadlines List -->
+      <div class="sec-head">
+        <div class="sec-title font-display">Upcoming Deadlines</div>
+      </div>
+      <div class="chip-strip" id="deadlinesFilterStrip">
+        <button class="filter-chip active" onclick="setDeadlineCat('All', this)">All</button>
+        <button class="filter-chip" onclick="setDeadlineCat('Exams', this)">Exams</button>
+        <button class="filter-chip" onclick="setDeadlineCat('Internships', this)">Internships</button>
+        <button class="filter-chip" onclick="setDeadlineCat('Scholarships', this)">Scholarships</button>
+        <button class="filter-chip" onclick="setDeadlineCat('Hackathons', this)">Hackathons</button>
+        <button class="filter-chip" onclick="setDeadlineCat('Jobs', this)">Jobs</button>
+      </div>
+
+      <div id="upcomingDeadlinesList" style="padding: 0 18px;">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ── 4. PROFILE TAB ── -->
+    <section id="tab-profile" class="page-tab">
+      <div class="prof-hero">
+        <div class="prof-avatar-big font-display" id="profAvatarBig">H</div>
+        <div>
+          <div class="prof-name" id="profFullName">Student Profile</div>
+          <div class="prof-meta" id="profSubtitle">Academic Profile · Verified</div>
+        </div>
+      </div>
+
+      <!-- AI Personalization Status Banner -->
+      <div class="ai-status-card">
+        <div class="ai-status-dot"></div>
+        <div>
+          <div style="font-size: 12px; font-weight: 700; color: var(--emerald-text);">AI Personalization Status: Active</div>
+          <div style="font-size: 10.5px; color: var(--emerald-text); opacity: 0.85; margin-top: 2px;">Your opportunity feed and deadlines are dynamically personalized.</div>
+        </div>
+      </div>
+
+      <!-- Academic Info Grid -->
+      <div style="padding: 0 18px; margin-bottom: 8px; font-size: 12.5px; font-weight: 700; color: var(--text-main);">Academic Profile</div>
+      <div class="academic-info-grid">
+        <div class="academic-box">
+          <div class="academic-lbl">Degree / Class</div>
+          <div class="academic-val" id="profDegree">B.Tech</div>
+        </div>
+        <div class="academic-box">
+          <div class="academic-lbl">Branch / Stream</div>
+          <div class="academic-val" id="profBranch">Computer Science</div>
+        </div>
+        <div class="academic-box">
+          <div class="academic-lbl">Location</div>
+          <div class="academic-val" id="profLoc">India</div>
+        </div>
+        <div class="academic-box">
+          <div class="academic-lbl">Target Goal</div>
+          <div class="academic-val" id="profGoal">Placement &amp; Jobs</div>
+        </div>
+      </div>
+
+      <!-- Tracked Interests -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 18px; margin-bottom: 8px;">
+        <span style="font-size: 12.5px; font-weight: 700; color: var(--text-main);">Interests</span>
+        <button id="editIntBtn" onclick="toggleEditInterests()" style="background: none; border: none; font-size: 11px; font-weight: 600; color: var(--pri); cursor: pointer;">Edit Interests</button>
+      </div>
+      <div class="tag-container" id="profileInterestsWrap">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Actions -->
+      <div style="padding: 0 18px 24px; display: flex; flex-direction: column; gap: 8px;">
+        <button class="btn-outline" style="border-color: var(--pri); color: var(--pri);" onclick="openModal('profEditModal')">✏️ Edit Complete Academic Criteria</button>
+        <button class="btn-outline" style="border-color: rgba(244, 63, 94, 0.4); color: var(--rose);" onclick="promptResetAllUsers()">🧹 Reset Test Users &amp; Start Fresh</button>
+        <button class="btn-outline" onclick="logout()">Sign Out</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════
+       BOTTOM NAVIGATION (4 TABS)
+  ══════════════════════════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <button class="nav-tab-btn active" data-tab="home" onclick="switchTab('home')">
+      <div class="nav-icon-wrap"><i data-lucide="home" style="width: 16px; height: 16px;"></i></div>
+      <span class="nav-lbl">Home</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="news" onclick="switchTab('news')">
+      <div class="nav-icon-wrap"><i data-lucide="newspaper" style="width: 16px; height: 16px;"></i></div>
+      <span class="nav-lbl">News</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="deadlines" onclick="switchTab('deadlines')">
+      <div class="nav-icon-wrap"><i data-lucide="calendar-days" style="width: 16px; height: 16px;"></i></div>
+      <span class="nav-lbl">Deadlines</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="profile" onclick="switchTab('profile')">
+      <div class="nav-icon-wrap"><i data-lucide="user" style="width: 16px; height: 16px;"></i></div>
+      <span class="nav-lbl">Profile</span>
+    </button>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MODAL: GLOBAL SEARCH OVERLAY
+  ══════════════════════════════════════════════════════════ -->
+  <div class="sheet-overlay" id="searchModal" onclick="closeModal('searchModal')">
+    <div class="sheet-modal" style="height: 85%;" onclick="event.stopPropagation()">
+      <div class="sheet-grip"></div>
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+        <div style="flex: 1; display: flex; align-items: center; gap: 8px; background: var(--bg-page); border: 1px solid var(--border-card); border-radius: var(--r-md); padding: 8px 12px;">
+          <i data-lucide="search" style="width: 14px; height: 14px; color: var(--text-sub);"></i>
+          <input type="text" id="globalSearchInput" placeholder="Try “AI internships”, “UPSC”, “GATE”..." oninput="handleSearch(this.value)" style="border: none; background: transparent; outline: none; width: 100%; font-size: 13px; color: var(--text-main);" />
+        </div>
+        <button onclick="closeModal('searchModal')" style="background: none; border: none; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer;">Cancel</button>
+      </div>
+
+      <div id="searchResultsContainer">
+        <div style="text-align: center; padding: 30px 0; color: var(--text-sub); font-size: 12px;">
+          Search across opportunities, deadlines, news &amp; organizations.
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 
-<!-- ══════════════════════════════════════════════════════════
-     2. SIGNUP PAGE
-══════════════════════════════════════════════════════════ -->
-<div class="page no-nav" id="signupPage">
-  <div class="scrl auth-shell">
-    <div class="wordmark">
-      <div class="wm-shield">⚡</div>
-      <div><div class="wm-top">Deadline Defender</div><div class="wm-bot">Join Free</div></div>
+  <!-- ══════════════════════════════════════════════════════════
+       MODAL: NOTIFICATIONS TRAY
+  ══════════════════════════════════════════════════════════ -->
+  <div class="sheet-overlay" id="notifModal" onclick="closeModal('notifModal')">
+    <div class="sheet-modal" onclick="event.stopPropagation()">
+      <div class="sheet-grip"></div>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <span class="font-display" style="font-size: 15px; font-weight: 700;">Notifications</span>
+        <button onclick="closeModal('notifModal')" class="icon-btn"><i data-lucide="x" style="width: 14px; height: 14px;"></i></button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="card" style="display: flex; gap: 12px; align-items: flex-start; padding: 12px; margin: 0;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--rose-bg); color: var(--rose); display: flex; align-items: center; justify-content: center; shrink-0;">
+            <i data-lucide="flame" style="width: 15px; height: 15px;"></i>
+          </div>
+          <div>
+            <div style="font-size: 12.5px; font-weight: 700;">Deadline approaching</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">GATE application registration closes soon.</div>
+            <div style="font-size: 9.5px; color: var(--text-sub); margin-top: 4px;">Just now</div>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; gap: 12px; align-items: flex-start; padding: 12px; margin: 0;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--sky-bg); color: var(--sky); display: flex; align-items: center; justify-content: center; shrink-0;">
+            <i data-lucide="newspaper" style="width: 15px; height: 15px;"></i>
+          </div>
+          <div>
+            <div style="font-size: 12.5px; font-weight: 700;">New personalized article</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">5 new tech &amp; cybersecurity updates match your profile.</div>
+            <div style="font-size: 9.5px; color: var(--text-sub); margin-top: 4px;">3h ago</div>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; gap: 12px; align-items: flex-start; padding: 12px; margin: 0;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--emerald-bg); color: var(--emerald); display: flex; align-items: center; justify-content: center; shrink-0;">
+            <i data-lucide="sparkles" style="width: 15px; height: 15px;"></i>
+          </div>
+          <div>
+            <div style="font-size: 12.5px; font-weight: 700;">New opportunity discovered</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Smart India Hackathon matches your profile with 92% confidence.</div>
+            <div style="font-size: 9.5px; color: var(--text-sub); margin-top: 4px;">1d ago</div>
+          </div>
+        </div>
+      </div>
     </div>
-    <h1 class="auth-headline">Create<br><span class="tilt">Account.</span></h1>
-    <p class="auth-desc">Enter your credentials below. Next, you can optionally personalize what opportunities you wish to track.</p>
-    <div id="sa" class="aalert aalert-e"></div>
-    <form id="signupForm">
-      <div class="fld"><label>Username</label><input id="su" type="text" placeholder="Choose a username" required autocomplete="username"/></div>
-      <div class="fld"><label>Email Address</label><input id="se" type="email" placeholder="name@college.edu.in" required autocomplete="email"/></div>
-      <div class="fld"><label>Password</label><input id="sp" type="password" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password"/></div>
-      <button type="submit" id="sBtn" class="abtn abtn-amber">Continue to Personalization →</button>
-    </form>
-    <div class="afoot">Already have an account? <a href="#" onclick="showPage('loginPage');return false">Sign In</a></div>
   </div>
-</div>
 
-<!-- ══════════════════════════════════════════════════════════
-     3. PROGRESSIVE ONBOARDING WIZARD (100% OPTIONAL & INCLUSIVE)
-══════════════════════════════════════════════════════════ -->
-<div class="page no-nav" id="onboardingPage">
-  <div class="scrl auth-shell">
-    <div class="wordmark">
-      <div class="wm-shield">🎯</div>
-      <div><div class="wm-top">Deadline Defender</div><div class="wm-bot">Personalize Opportunities</div></div>
-    </div>
-
-    <h1 class="auth-headline">Let's Tailor <span class="tilt">Your Feed.</span></h1>
-    <p class="auth-desc">You control what you share. You can skip anything you don't want to provide and update it anytime.</p>
-
-    <div id="oba" class="aalert aalert-e"></div>
-
-    <form id="onboardingForm">
+  <!-- ══════════════════════════════════════════════════════════
+       MODAL: OPPORTUNITY DETAIL & AI MATCH INSPECTOR
+  ══════════════════════════════════════════════════════════ -->
+  <div class="sheet-overlay" id="oppDetailModal" onclick="closeModal('oppDetailModal')">
+    <div class="sheet-modal" onclick="event.stopPropagation()">
+      <div class="sheet-grip"></div>
       
-      <!-- ── STEP 1: WHAT ARE YOU LOOKING FOR? (PRIMARY ⭐) ── -->
-      <div class="prog-card">
-        <div class="prog-head">
-          <span class="prog-badge">⭐ Step 1: Interests</span>
-          <span class="prog-opt-tag" style="color:var(--amber)">Recommended</span>
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
+        <div>
+          <span class="pill-badge upcoming" id="dtCategoryBadge" style="margin-bottom: 6px;">Exams</span>
+          <div class="font-display" style="font-size: 16px; font-weight: 700; color: var(--text-main);" id="dtTitle">GATE 2027 Application</div>
+          <div style="font-size: 11.5px; color: var(--text-muted);" id="dtOrg">IIT National Coordination Board</div>
         </div>
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">What are you interested in?</h3>
-        <p style="font-size:12px;color:var(--ash);margin-bottom:12px">Select categories you wish to track, or type your own custom topics:</p>
-
-        <!-- Category Presets -->
-        <div style="font-size:10px;font-weight:700;color:var(--fog);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Opportunity Categories</div>
-        <div class="int-tags-wrap" id="obCatChips">
-          <div class="int-chip selected" data-val="Government Jobs">🏛️ Govt Jobs</div>
-          <div class="int-chip selected" data-val="Private Jobs">💼 Private Jobs</div>
-          <div class="int-chip selected" data-val="Internships">🎓 Internships</div>
-          <div class="int-chip selected" data-val="Scholarships">💰 Scholarships</div>
-          <div class="int-chip selected" data-val="Government Exams">🏛️ Govt Exams</div>
-          <div class="int-chip" data-val="Apprenticeships">⚙️ Apprenticeships</div>
-          <div class="int-chip selected" data-val="Hackathons">⚡ Hackathons</div>
-          <div class="int-chip" data-val="Competitions">🏆 Competitions</div>
-          <div class="int-chip" data-val="Fellowships">🎗️ Fellowships</div>
-          <div class="int-chip" data-val="Certifications">📜 Certifications</div>
-          <div class="int-chip" data-val="Research">🔬 Research</div>
-          <div class="int-chip" data-val="Training Programs">🛠️ Training Programs</div>
-        </div>
-
-        <!-- Technical & Domain Topics -->
-        <div style="font-size:10px;font-weight:700;color:var(--fog);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Technical &amp; Domain Interests</div>
-        <div class="int-tags-wrap" id="obTechChips">
-          <div class="int-chip" data-val="AI & Machine Learning">🤖 AI / Machine Learning</div>
-          <div class="int-chip" data-val="Data Science">📊 Data Science</div>
-          <div class="int-chip" data-val="Cybersecurity">🔒 Cybersecurity</div>
-          <div class="int-chip" data-val="Web Development">🌐 Web Development</div>
-          <div class="int-chip" data-val="Robotics">🦾 Robotics &amp; Automation</div>
-          <div class="int-chip" data-val="Electronics">🔌 Electronics &amp; IoT</div>
-          <div class="int-chip" data-val="Cloud Computing">☁️ Cloud &amp; DevOps</div>
-          <div class="int-chip" data-val="Programming">💻 Competitive Coding</div>
-        </div>
-
-        <!-- Custom Interest Adder -->
-        <div style="margin-top:8px">
-          <div class="chip-add-box">
-            <input type="text" id="obCustomInput" placeholder="+ Add your own custom interest (e.g. UPSC, ISRO, AWS, Python)" onkeydown="if(event.key==='Enter'){event.preventDefault();addObCustomChip();}"/>
-            <button type="button" class="chip-add-btn" onclick="addObCustomChip()">+ Add</button>
-          </div>
-          <div class="int-tags-wrap" id="obCustomChips" style="margin-top:8px"></div>
-        </div>
+        <button onclick="closeModal('oppDetailModal')" class="icon-btn"><i data-lucide="x" style="width: 14px; height: 14px;"></i></button>
       </div>
 
-      <!-- ── STEP 2: EDUCATION (OPTIONAL & INCLUSIVE) ── -->
-      <div class="prog-card">
-        <div class="prog-head">
-          <span class="prog-badge">Step 2: Education</span>
-          <span class="prog-opt-tag">Optional</span>
-        </div>
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">Would you like to provide education details?</h3>
-        <p style="font-size:12px;color:var(--ash);margin-bottom:12px">Helps verify exact eligibility requirements (Works for 10th, 12th, Diploma, Degree, or skip):</p>
+      <div style="display: flex; gap: 16px; font-size: 11px; color: var(--text-muted); margin-bottom: 16px;">
+        <span style="display: flex; align-items: center; gap: 4px;"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> <span id="dtDeadline">Sep 15, 2026</span></span>
+        <span style="display: flex; align-items: center; gap: 4px;"><i data-lucide="shield-check" style="width: 12px; height: 12px; color: var(--pri);"></i> <span id="dtTrust">Official .gov.in</span></span>
+      </div>
 
-        <div class="toggle-choice-bar">
-          <button type="button" class="tog-btn selected" id="togEduYes" onclick="toggleEduSection(true)">➕ Yes, add details</button>
-          <button type="button" class="tog-btn" id="togEduNo" onclick="toggleEduSection(false)">⏭️ Skip for now</button>
+      <!-- AI Opportunity Match Card -->
+      <div class="card" style="margin: 0 0 14px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <span class="font-display" style="font-size: 13.5px; font-weight: 700; color: var(--text-main);">AI Opportunity Match</span>
+          <div id="dtMatchRingWrap"></div>
         </div>
 
-        <div id="eduDetailsBox">
-          <div class="fld">
-            <label>Current Education Level</label>
-            <select id="obEduLevel" onchange="onEduLevelChange(this.value)">
-              <option value="10th">10th Standard / Matriculation</option>
-              <option value="12th">11th / 12th / Intermediate</option>
-              <option value="Diploma">Diploma / ITI (Polytechnic / Vocational)</option>
-              <option value="Undergraduate" selected>Undergraduate (B.Tech, B.Sc, B.Com, BCA, etc.)</option>
-              <option value="Postgraduate">Postgraduate (M.Tech, MCA, MBA, M.Sc, etc.)</option>
-              <option value="PhD">Ph.D. / Doctorate</option>
-              <option value="Completed">Completed Education / Working Professional</option>
-              <option value="Below 10th">Below 10th Standard</option>
-              <option value="Other">Other / Self-Learner</option>
-            </select>
+        <div id="dtChecksList">
+          <div class="check-row">
+            <span style="color: var(--text-muted);">Skills &amp; Field Alignment</span>
+            <span style="color: var(--emerald); font-weight: 700;">✓ Verified Match</span>
           </div>
-
-          <!-- Dynamic Qualification/Degree Input -->
-          <div class="fld" id="fldQual">
-            <label id="lblQual">Degree / Course Name</label>
-            <input type="text" id="obQual" placeholder="e.g. B.Tech, B.Sc, 10th Standard, ITI Electrician" value="B.Tech"/>
+          <div class="check-row">
+            <span style="color: var(--text-muted);">Educational Level</span>
+            <span style="color: var(--emerald); font-weight: 700;">✓ Applicable</span>
           </div>
-
-          <!-- Dynamic Stream / Specialization Input -->
-          <div class="fld" id="fldBranch">
-            <label id="lblBranch">Branch / Major / Stream</label>
-            <input type="text" id="obBranch" placeholder="e.g. Computer Science, MPC, Mechanical, Commerce" value="Computer Science"/>
-          </div>
-
-          <div class="fld">
-            <label>Study Status</label>
-            <select id="obStatus">
-              <option value="Currently Studying">Currently Studying</option>
-              <option value="Completed">Completed</option>
-              <option value="Preparing for Entrance/Competitive">Preparing for Further Studies / Exams</option>
-            </select>
-          </div>
-
-          <div class="fld">
-            <label>Passing / Graduation Year (Optional)</label>
-            <input type="number" id="obYear" placeholder="e.g. 2026" min="1990" max="2035" value="2026"/>
+          <div class="check-row">
+            <span style="color: var(--text-muted);">Tracked Interest Match</span>
+            <span style="color: var(--emerald); font-weight: 700;">✓ Matched</span>
           </div>
         </div>
+        <div style="font-size: 11px; font-weight: 600; color: var(--pri); margin-top: 10px;">✓ Highly Recommended for you</div>
       </div>
 
-      <!-- ── STEP 3: LOCATION (OPTIONAL) ── -->
-      <div class="prog-card">
-        <div class="prog-head">
-          <span class="prog-badge">Step 3: Location</span>
-          <span class="prog-opt-tag">Optional</span>
-        </div>
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">Would you like location-based opportunities?</h3>
-        <p style="font-size:12px;color:var(--ash);margin-bottom:12px">Helps filter state &amp; regional exams/jobs:</p>
-
-        <div class="toggle-choice-bar">
-          <button type="button" class="tog-btn selected" id="togLocYes" onclick="toggleLocSection(true)">➕ Yes, add location</button>
-          <button type="button" class="tog-btn" id="togLocNo" onclick="toggleLocSection(false)">⏭️ Skip</button>
-        </div>
-
-        <div id="locDetailsBox">
-          <div class="fld">
-            <label>State / Region</label>
-            <select id="obLoc">
-              <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
-              <option value="Telangana">Telangana</option>
-              <option value="Karnataka">Karnataka</option>
-              <option value="Tamil Nadu">Tamil Nadu</option>
-              <option value="Maharashtra">Maharashtra</option>
-              <option value="Delhi NCR">Delhi / NCR</option>
-              <option value="Uttar Pradesh">Uttar Pradesh</option>
-              <option value="All India">All India / Pan-India</option>
-            </select>
-          </div>
-          <div class="fld" style="margin-bottom:0">
-            <label>City / District (Optional)</label>
-            <input type="text" id="obCity" placeholder="e.g. Visakhapatnam, Hyderabad, Bengaluru"/>
-          </div>
-        </div>
+      <!-- Why am I seeing this card -->
+      <div class="info-callout" style="margin: 0 0 18px;">
+        <div class="callout-title font-display">🧠 Why am I seeing this?</div>
+        <div class="callout-desc" id="dtReasonText">Matches your academic profile and selected focus topics.</div>
       </div>
 
-      <!-- ── STEP 4: ADDITIONAL PREFERENCES & SKILLS (OPTIONAL) ── -->
-      <div class="prog-card">
-        <div class="prog-head">
-          <span class="prog-badge">Step 4: Skills &amp; Goals</span>
-          <span class="prog-opt-tag">Optional</span>
-        </div>
-        <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">Skills &amp; Career Aspirations</h3>
-        <p style="font-size:12px;color:var(--ash);margin-bottom:12px">Tag your skills and career focus:</p>
-
-        <div class="fld">
-          <label>Skills (e.g. Python, Excel, AutoCAD, Robotics, Tally)</label>
-          <div class="chip-add-box">
-            <input type="text" id="obSkillInput" placeholder="Type a skill and press + Add" onkeydown="if(event.key==='Enter'){event.preventDefault();addObSkillChip();}"/>
-            <button type="button" class="chip-add-btn" onclick="addObSkillChip()">+ Add</button>
-          </div>
-          <div class="int-tags-wrap" id="obSkillChips" style="margin-top:8px"></div>
-        </div>
-
-        <div class="fld">
-          <label>Career Goal / Focus</label>
-          <select id="obGoal">
-            <option value="Job / Placement">Get a Job / Placement</option>
-            <option value="Internship">Secure an Internship</option>
-            <option value="Government Exam">Crack a Government / Public Exam</option>
-            <option value="Scholarship">Find Scholarships &amp; Aid</option>
-            <option value="Higher Education">Higher Education &amp; Research</option>
-            <option value="Competitions & Hackathons">Win Competitions &amp; Hackathons</option>
-            <option value="Learn Skills">Learn New Skills</option>
-            <option value="Just Exploring" selected>Just Exploring Opportunities</option>
-          </select>
-        </div>
-
-        <div class="fld" style="margin-bottom:0">
-          <label>Gender (Optional)</label>
-          <select id="obGender">
-            <option value="Prefer not to say">Prefer not to say</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 10px;">
+        <a id="dtOfficialLink" href="#" target="_blank" class="btn-outline" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px;">
+          Official Link <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
+        </a>
+        <button id="dtSaveBtn" class="btn-outline" onclick="toggleCurrentOppSave()">Bookmark</button>
+        <button id="dtReminderBtn" class="btn-pri" onclick="toggleCurrentOppReminder()">Set Reminder</button>
       </div>
-
-      <button type="submit" id="obBtn" class="abtn abtn-amber">Complete Setup &amp; Launch Dashboard ⚡</button>
-      <div style="text-align:center;margin-top:14px">
-        <a href="#" onclick="skipOnboardingToDash();return false" style="font-size:12px;color:var(--ash);text-decoration:none">Skip all &amp; explore general opportunities →</a>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     4. DASHBOARD (HOME)
-══════════════════════════════════════════════════════════ -->
-<div class="page" id="dashPage">
-  <div class="scrl">
-    <div class="d-top">
-      <div class="d-wm">
-        <div class="d-wm-shield">⚡</div>
-        <div class="d-wm-name">Deadline Defender</div>
-      </div>
-      <div class="d-bell" id="bellBtn" onclick="togNotifs()" title="Toggle Web Push Notifications">🔔<div class="d-bell-dot" id="bellDot" style="display:none"></div></div>
-    </div>
-    
-    <div class="d-hero">
-      <div class="d-hi">Academic Opportunity Intelligence</div>
-      <div class="d-name" id="dName">Welcome 👋</div>
-      <div class="d-sub" id="dSub">Multi-Source Intelligence Feed</div>
-    </div>
-
-    <!-- ── Profile Completeness & Matching Confidence Bar ── -->
-    <div class="confidence-box">
-      <div class="conf-header">
-        <span class="conf-title">🎯 Profile Completeness</span>
-        <span class="conf-badge discovery" id="dConfBadge">Interest Match</span>
-      </div>
-      <div class="meter-track">
-        <div class="meter-fill" id="dMeterFill" style="width:50%"></div>
-      </div>
-      <div class="conf-checklist" id="dChecklist">
-        <span class="chk-pill" id="chkInt">⭐ Interests</span>
-        <span class="chk-pill" id="chkEdu">🎓 Education</span>
-        <span class="chk-pill" id="chkLoc">📍 Location</span>
-        <span class="chk-pill" id="chkAge">🎂 Age</span>
-      </div>
-      <div style="margin-top:8px;text-align:right">
-        <a href="#" class="sec-lnk" onclick="openProfileEdit();return false" style="font-size:11px">✏️ Edit Profile Criteria ↗</a>
-      </div>
-    </div>
-
-    <!-- Active Interests Strip -->
-    <div class="sheet-box" style="padding:10px 14px;margin-bottom:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <span class="sheet-box-lbl" style="margin-bottom:0">⭐ Tracked Topics</span>
-        <a href="#" class="sec-lnk" onclick="openProfileEdit();return false">+ Add Topic</a>
-      </div>
-      <div class="int-tags-wrap" id="dInterests" style="margin-bottom:0"></div>
-    </div>
-
-    <!-- Metrics Strip -->
-    <div class="score-strip">
-      <div class="score-item"><div class="score-n c-amber" id="stO">0</div><div class="score-l">Matches</div></div>
-      <div class="score-item"><div class="score-n c-jade" id="stR">0</div><div class="score-l">Reminders</div></div>
-      <div class="score-item"><div class="score-n c-ice" id="stS">12+</div><div class="score-l">Sources</div></div>
-    </div>
-
-    <div class="sec-hd">
-      <div class="sec-ht">🎯 Recommended For You</div>
-      <a href="#" class="sec-lnk" onclick="navTo('oppPage');return false">View All</a>
-    </div>
-    
-    <div id="dFeed">
-      <div class="st-load"><div class="spin"></div>Loading personalized opportunities…</div>
-    </div>
-
-    <button class="ref-btn" id="refBtn" onclick="refreshDeadlines()">↻ &nbsp;Run Shared Discovery &amp; Reconcile Reminders</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     5. OPPORTUNITY INTELLIGENCE FEED
-══════════════════════════════════════════════════════════ -->
-<div class="page" id="oppPage">
-  <div class="scrl">
-    <div class="sec-hd" style="margin-top:0">
-      <div class="sec-ht">Opportunity Intelligence</div>
-      <span style="font-size:11px;color:var(--fog)">Shared Pipeline</span>
-    </div>
-
-    <div class="fstrip">
-      <button class="fpill on" data-cat="all" onclick="setCatFilter('all',this)">All</button>
-      <button class="fpill" data-cat="Government Exam" onclick="setCatFilter('Government Exam',this)">🏛️ Govt Exams</button>
-      <button class="fpill" data-cat="Job" onclick="setCatFilter('Job',this)">💼 Jobs</button>
-      <button class="fpill" data-cat="Internship" onclick="setCatFilter('Internship',this)">🎓 Internships</button>
-      <button class="fpill" data-cat="Scholarship" onclick="setCatFilter('Scholarship',this)">💰 Scholarships</button>
-      <button class="fpill" data-cat="Hackathon" onclick="setCatFilter('Hackathon',this)">⚡ Hackathons</button>
-    </div>
-
-    <div id="oppList">
-      <div class="st-load"><div class="spin"></div>Loading master opportunities…</div>
     </div>
   </div>
-</div>
 
-<!-- ══════════════════════════════════════════════════════════
-     6. PERSISTENT REMINDERS
-══════════════════════════════════════════════════════════ -->
-<div class="page" id="remPage">
-  <div class="scrl">
-    <div class="sec-hd" style="margin-top:0">
-      <div class="sec-ht">Scheduled Reminders</div>
-      <span style="font-size:11px;color:var(--jade2)">Idempotent</span>
-    </div>
-    <p style="font-size:12px;color:var(--ash);margin-bottom:16px">Multi-stage reminders at 30, 14, 7, 3, 1 &amp; 0 days before closing date.</p>
-    <div id="remList">
-      <div class="st-load"><div class="spin"></div>Loading reminders…</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     7. TIMELINE VIEW
-══════════════════════════════════════════════════════════ -->
-<div class="page" id="calPage">
-  <div class="scrl">
-    <div class="sec-hd" style="margin-top:0"><div class="sec-ht">Deadline Timeline</div></div>
-    <p style="font-size:12px;color:var(--ash);margin-bottom:16px">Chronological timeline of upcoming opportunity deadlines.</p>
-    <div id="calList">
-      <div class="st-load"><div class="spin"></div>Loading timeline…</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     8. STUDENT PROFILE & ACADEMIC SETTINGS
-══════════════════════════════════════════════════════════ -->
-<div class="page" id="profPage">
-  <div class="scrl">
-    <div class="sec-hd" style="margin-top:0"><div class="sec-ht">User Profile &amp; Preferences</div></div>
-    
-    <div class="sheet-box">
-      <div class="sheet-box-lbl">User Account</div>
-      <div style="font-size:16px;font-weight:700;color:var(--snow)" id="puName">–</div>
-      <div style="font-size:12px;color:var(--ash)" id="puEmail">–</div>
-    </div>
-
-    <div class="sheet-box">
-      <div class="sheet-box-lbl">Eligibility Matching Profile</div>
-      <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:var(--fog)">Education Level:</span>
-        <div style="font-weight:600;color:var(--snow)" id="pEduLevel">Not Provided</div>
+  <!-- ══════════════════════════════════════════════════════════
+       MODAL: EDIT PROFILE
+  ══════════════════════════════════════════════════════════ -->
+  <div class="sheet-overlay" id="profEditModal" onclick="closeModal('profEditModal')">
+    <div class="sheet-modal" onclick="event.stopPropagation()">
+      <div class="sheet-grip"></div>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+        <span class="font-display" style="font-size: 15px; font-weight: 700;">Edit Profile Criteria</span>
+        <button onclick="closeModal('profEditModal')" class="icon-btn"><i data-lucide="x" style="width: 14px; height: 14px;"></i></button>
       </div>
-      <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:var(--fog)">Degree / Qualification:</span>
-        <div style="font-weight:600;color:var(--snow)" id="pQual">Not Provided</div>
-      </div>
-      <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:var(--fog)">Branch / Stream / Trade:</span>
-        <div style="font-weight:600;color:var(--snow)" id="pBranch">Not Provided</div>
-      </div>
-      <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:var(--fog)">State Location:</span>
-        <div style="font-weight:600;color:var(--snow)" id="pLoc">Not Provided</div>
-      </div>
-      <div style="margin-bottom:8px">
-        <span style="font-size:11px;color:var(--fog)">Career Focus:</span>
-        <div style="font-weight:600;color:var(--snow)" id="pGoal">Exploring</div>
-      </div>
-    </div>
 
-    <div class="sheet-box">
-      <div class="sheet-box-lbl">Tracked Interests &amp; Topics</div>
-      <div class="int-tags-wrap" id="pInterests" style="margin-top:8px;margin-bottom:0"></div>
-    </div>
-
-    <div class="sheet-box">
-      <div class="sheet-box-lbl">Skills</div>
-      <div class="int-tags-wrap" id="pSkills" style="margin-top:8px;margin-bottom:0"></div>
-    </div>
-
-    <button class="abtn abtn-ghost" style="margin-top:10px" onclick="openProfileEdit()">Edit Profile Criteria &amp; Interests →</button>
-    <button class="abtn abtn-ghost" style="margin-top:10px;color:var(--coral)" onclick="logout()">Sign Out</button>
-    <button class="abtn abtn-ghost" style="margin-top:10px;color:var(--crimson);border-color:rgba(255,71,87,0.3)" onclick="promptResetAllUsers()">🧹 Delete All Test Users &amp; Start Fresh</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     BOTTOM NAVIGATION BAR
-══════════════════════════════════════════════════════════ -->
-<nav id="nav">
-  <div class="nav-inner">
-    <button class="nb on" data-page="dashPage" onclick="navTo('dashPage')"><span class="nb-icon">⚡</span><span class="nb-lbl">Home</span></button>
-    <button class="nb" data-page="oppPage" onclick="navTo('oppPage')"><span class="nb-icon">🎯</span><span class="nb-lbl">Opps</span></button>
-    <button class="nb" data-page="remPage" onclick="navTo('remPage')"><span class="nb-icon">📋</span><span class="nb-lbl">Reminders</span></button>
-    <button class="nb" data-page="calPage" onclick="navTo('calPage')"><span class="nb-icon">📅</span><span class="nb-lbl">Timeline</span></button>
-    <button class="nb" data-page="profPage" onclick="navTo('profPage')"><span class="nb-icon">👤</span><span class="nb-lbl">Profile</span></button>
-  </div>
-</nav>
-
-<!-- ══════════════════════════════════════════════════════════
-     MODAL: EVIDENCE / PROVENANCE INSPECTOR
-══════════════════════════════════════════════════════════ -->
-<div class="sheet-bk" id="evidenceBk" onclick="closeModal('evidenceBk')">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <div class="sheet-grip"></div>
-    <div class="sheet-title" id="evTitle">Official Provenance Evidence</div>
-    <div class="sheet-sub" id="evOrg">Verified Source Evidence</div>
-    
-    <div class="sheet-box">
-      <div class="sheet-box-lbl">Exact Extracted Sentence Evidence</div>
-      <div class="sheet-box-val" id="evText" style="font-family:var(--fm);font-size:12px;color:var(--amber)">“...”</div>
-    </div>
-
-    <div class="sheet-box">
-      <div class="sheet-box-lbl">Source Provenance &amp; Verification</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span id="evTrustBadge" class="opp-trust official">OFFICIAL</span>
-        <span style="font-size:11px;color:var(--ash)" id="evConf">High Confidence</span>
-      </div>
-      <div style="font-size:11px;color:var(--fog);word-break:break-all" id="evUrl">https://...</div>
-    </div>
-
-    <a href="#" target="_blank" rel="noopener" id="evLinkBtn" class="abtn abtn-amber" style="display:block;text-align:center;text-decoration:none">Open Official Notice ↗</a>
-    <button class="sheet-close" onclick="closeModal('evidenceBk')">Close</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     MODAL: EDIT PROFILE & INTERESTS
-══════════════════════════════════════════════════════════ -->
-<div class="sheet-bk" id="profEditBk" onclick="closeModal('profEditBk')">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <div class="sheet-grip"></div>
-    <div class="sheet-title">Edit Profile &amp; Preferences</div>
-    <div class="sheet-sub">Update education, location, skills, or tracked interests</div>
-    
-    <form id="profForm">
-      <div class="fld">
-        <label>Education Level</label>
-        <select id="eqLevel">
-          <option value="">(None / Skip)</option>
+      <form id="profileEditForm" onsubmit="saveProfileDetails(event)">
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Education Level</label>
+        <select class="input-field" id="editEduLevel">
           <option value="10th">10th Standard</option>
           <option value="12th">12th / Intermediate</option>
           <option value="Diploma">Diploma / ITI</option>
-          <option value="Undergraduate">Undergraduate (B.Tech, B.Sc, B.Com, etc.)</option>
-          <option value="Postgraduate">Postgraduate (M.Tech, MCA, MBA, etc.)</option>
-          <option value="PhD">Ph.D.</option>
-          <option value="Completed">Completed / Working</option>
+          <option value="Undergraduate" selected>Undergraduate (B.Tech, B.Sc, B.Com)</option>
+          <option value="Postgraduate">Postgraduate (M.Tech, MCA, MBA)</option>
           <option value="Other">Other</option>
         </select>
-      </div>
 
-      <div class="fld">
-        <label>Qualification / Degree</label>
-        <input type="text" id="eq" placeholder="e.g. B.Tech, 10th Standard, MPC, Diploma"/>
-      </div>
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Qualification / Degree</label>
+        <input class="input-field" id="editQual" type="text" placeholder="e.g. B.Tech, 10th Standard, MPC" />
 
-      <div class="fld">
-        <label>Branch / Stream / Trade</label>
-        <input type="text" id="eb" placeholder="e.g. Computer Science, Mechanical, BiPC"/>
-      </div>
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Branch / Stream</label>
+        <input class="input-field" id="editBranch" type="text" placeholder="e.g. Computer Science, Mechanical" />
 
-      <div class="fld">
-        <label>State / Region</label>
-        <select id="el">
-          <option value="">(None / Skip)</option>
-          <option value="Andhra Pradesh">Andhra Pradesh</option>
-          <option value="Telangana">Telangana</option>
-          <option value="Karnataka">Karnataka</option>
-          <option value="Tamil Nadu">Tamil Nadu</option>
-          <option value="Maharashtra">Maharashtra</option>
-          <option value="Delhi NCR">Delhi / NCR</option>
-          <option value="Uttar Pradesh">Uttar Pradesh</option>
-          <option value="All India">All India</option>
-        </select>
-      </div>
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">State / Location</label>
+        <input class="input-field" id="editLoc" type="text" placeholder="e.g. Andhra Pradesh, Delhi, India" />
 
-      <div class="fld">
-        <label>City / District</label>
-        <input type="text" id="ecity" placeholder="e.g. Visakhapatnam"/>
-      </div>
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Career Goal</label>
+        <input class="input-field" id="editGoal" type="text" placeholder="e.g. Tech Job, Higher Studies, UPSC" />
 
-      <div class="fld">
-        <label>Career Goal</label>
-        <select id="egoal">
-          <option value="Job / Placement">Get a Job / Placement</option>
-          <option value="Internship">Secure an Internship</option>
-          <option value="Government Exam">Crack a Government / Public Exam</option>
-          <option value="Scholarship">Find Scholarships &amp; Aid</option>
-          <option value="Higher Education">Higher Education &amp; Research</option>
-          <option value="Competitions & Hackathons">Win Competitions &amp; Hackathons</option>
-          <option value="Learn Skills">Learn New Skills</option>
-          <option value="Just Exploring">Just Exploring</option>
-        </select>
-      </div>
-
-      <!-- Interests in Modal -->
-      <div style="margin:16px 0 12px">
-        <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--fog);letter-spacing:0.08em">Manage Tracked Topics</label>
-        <div class="chip-add-box">
-          <input type="text" id="editCustomInput" placeholder="Add custom topic (e.g. UPSC, AI, Python)" onkeydown="if(event.key==='Enter'){event.preventDefault();addEditCustomChip();}"/>
-          <button type="button" class="chip-add-btn" onclick="addEditCustomChip()">+ Add</button>
-        </div>
-        <div class="int-tags-wrap" id="editCustomChips" style="margin-top:10px"></div>
-      </div>
-
-      <!-- Skills in Modal -->
-      <div style="margin:16px 0 12px">
-        <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--fog);letter-spacing:0.08em">Manage Skills</label>
-        <div class="chip-add-box">
-          <input type="text" id="editSkillInput" placeholder="Add skill (e.g. Python, Excel)" onkeydown="if(event.key==='Enter'){event.preventDefault();addEditSkillChip();}"/>
-          <button type="button" class="chip-add-btn" onclick="addEditSkillChip()">+ Add</button>
-        </div>
-        <div class="int-tags-wrap" id="editSkillChips" style="margin-top:10px"></div>
-      </div>
-
-      <button type="submit" id="profSaveBtn" class="abtn abtn-amber">Save &amp; Recalculate Matches →</button>
-    </form>
-    <button class="sheet-close" onclick="closeModal('profEditBk')">Cancel</button>
+        <button type="submit" class="btn-pri" style="width: 100%; padding: 12px; margin-top: 10px;">Save Profile Criteria →</button>
+      </form>
+    </div>
   </div>
-</div>
 
-<!-- ══════════════════════════════════════════════════════════
-     MODAL: FORGOT PASSWORD
-══════════════════════════════════════════════════════════ -->
-<div class="sheet-bk" id="forgotBk" onclick="closeModal('forgotBk')">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <div class="sheet-grip"></div>
-    <div class="sheet-title">Reset Password</div>
-    <div class="sheet-sub">Enter your email address to receive a password reset link.</div>
-    <div id="fa" class="aalert aalert-e"></div>
-    <form id="forgotForm">
-      <div class="fld"><label>Email Address</label><input type="email" id="fe" placeholder="name@college.edu.in" required/></div>
-      <button type="submit" id="fBtn" class="abtn abtn-amber">Send Reset Link →</button>
+  <!-- ══════════════════════════════════════════════════════════
+       AUTH & ONBOARDING SCREENS (SPA OVERLAYS)
+  ══════════════════════════════════════════════════════════ -->
+  <div class="auth-page" id="authScreen">
+    <div style="text-align: center; margin-bottom: 28px;">
+      <div class="brand-icon" style="margin: 0 auto 12px; width: 44px; height: 44px;">
+        <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+      </div>
+      <h2 class="font-display" style="font-size: 22px; font-weight: 700;" id="authTitle">Welcome to Deadline Defenders</h2>
+      <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Never miss career, exam &amp; scholarship opportunities.</p>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Username or Email</label>
+      <input class="input-field" id="loginUsername" type="text" placeholder="Enter username or email" required />
+
+      <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Password</label>
+      <input class="input-field" id="loginPassword" type="password" placeholder="Password" required />
+
+      <button type="submit" class="btn-pri" style="width: 100%; padding: 12px; margin-top: 6px;">Sign In →</button>
+      <p style="text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 14px;">
+        New to Deadline Defender? <a href="#" onclick="showAuthMode('signup')" style="color: var(--pri); font-weight: 600;">Create an account</a>
+      </p>
+      <div style="text-align: center; margin-top: 16px;">
+        <a href="#" onclick="promptResetAllUsers()" style="font-size: 11px; color: var(--rose); text-decoration: underline;">🧹 Reset Test Users &amp; Start Fresh</a>
+      </div>
     </form>
-    <button class="sheet-close" onclick="closeModal('forgotBk')">Cancel</button>
-  </div>
-</div>
 
-<!-- ══════════════════════════════════════════════════════════
-     MODAL: SET NEW PASSWORD (TOKEN FLOW)
-══════════════════════════════════════════════════════════ -->
-<div class="sheet-bk" id="resetBk">
-  <div class="sheet" onclick="event.stopPropagation()">
-    <div class="sheet-grip"></div>
-    <div class="sheet-title">Create New Password</div>
-    <div class="sheet-sub">Enter your new secure password below.</div>
-    <div id="ra" class="aalert aalert-e"></div>
-    <form id="resetForm">
-      <div class="fld"><label>New Password</label><input type="password" id="rp" placeholder="At least 6 characters" required minlength="6"/></div>
-      <button type="submit" id="rBtn" class="abtn abtn-amber">Update Password &amp; Sign In →</button>
+    <!-- Signup Form -->
+    <form id="signupForm" style="display: none;" onsubmit="handleSignup(event)">
+      <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Username</label>
+      <input class="input-field" id="suUsername" type="text" placeholder="Choose a username" required />
+
+      <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Email</label>
+      <input class="input-field" id="suEmail" type="email" placeholder="name@college.edu.in" required />
+
+      <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Password</label>
+      <input class="input-field" id="suPassword" type="password" placeholder="At least 6 characters" minlength="6" required />
+
+      <button type="submit" class="btn-pri" style="width: 100%; padding: 12px; margin-top: 6px;">Create Account &amp; Continue →</button>
+      <p style="text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 14px;">
+        Already have an account? <a href="#" onclick="showAuthMode('login')" style="color: var(--pri); font-weight: 600;">Sign In</a>
+      </p>
     </form>
   </div>
-</div>
 
-</div><!-- /app -->
+  <!-- Micro Toast -->
+  <div class="toast-popup" id="toastBox">
+    <i data-lucide="check-circle-2" style="width: 15px; height: 15px; color: var(--emerald);"></i>
+    <span id="toastMsg">Action completed</span>
+  </div>
 
-<script src="push-notification-client.js"></script>
+</div><!-- /#app-container -->
+
 <script>
-let uData = null, allOpps = [], allRem = [], currentCat = 'all';
-let obCustomInterests = [];
-let obSkillsList = [];
-let editCustomInterests = [];
-let editSkillsList = [];
-let includeEdu = true;
-let includeLoc = true;
-let resetToken = null;
+/* ═══════════════════════════════════════════════════════════════════
+   APP STATE & DATA STORES
+═══════════════════════════════════════════════════════════════════ */
+let currentUser = null;
+let currentTab = 'home';
+let isDark = false;
+let isEditingInterests = false;
 
-/* ════ NAVIGATION & PAGE MANAGEMENT ════ */
-function showPage(id){
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const target = document.getElementById(id);
-  if(target) target.classList.add('active');
+let opportunitiesList = [];
+let newsArticlesList = [];
+let savedOppIds = new Set();
+let reminderOppIds = new Set();
+let bookmarkedNewsIds = new Set();
+let activeInterests = new Set(["Artificial Intelligence", "Cybersecurity", "Web Development", "Hackathons", "Internships"]);
 
-  const n = document.getElementById('nav');
-  if(['loginPage','signupPage','onboardingPage'].includes(id)){
-    n.classList.remove('on');
+let selectedNewsFilter = 'All';
+let selectedDeadlineCat = 'All';
+let currentMonthIndex = 8; // September (0-indexed: 8 = Sep 2026)
+
+let activeDetailOpp = null;
+
+const ALL_INTEREST_OPTIONS = [
+  "Artificial Intelligence", "Cybersecurity", "Web Development",
+  "Competitive Programming", "Hackathons", "Internships", "Scholarships",
+  "Government Exams", "Higher Education", "Robotics", "Cloud Computing"
+];
+
+/* ═══════════════════════════════════════════════════════════════════
+   LUCIDE ICON RENDERING HELPER
+═══════════════════════════════════════════════════════════════════ */
+function refreshIcons() {
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOAST HELPER
+═══════════════════════════════════════════════════════════════════ */
+function showToast(msg) {
+  const t = document.getElementById('toastBox');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   THEME TOGGLE
+═══════════════════════════════════════════════════════════════════ */
+function toggleTheme() {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+  const icon = document.getElementById('themeIcon');
+  if (isDark) {
+    icon.setAttribute('data-lucide', 'sun');
   } else {
-    n.classList.add('on');
-    document.querySelectorAll('#nav .nb').forEach(b => b.classList.toggle('on', b.dataset.page === id));
+    icon.setAttribute('data-lucide', 'moon');
   }
+  refreshIcons();
 }
 
-function navTo(pageId){ showPage(pageId); }
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+/* ═══════════════════════════════════════════════════════════════════
+   TAB SWITCHING (HOME, NEWS, DEADLINES, PROFILE)
+═══════════════════════════════════════════════════════════════════ */
+function switchTab(tabId) {
+  currentTab = tabId;
+  document.querySelectorAll('.page-tab').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
 
-/* ════ DYNAMIC ONBOARDING BEHAVIORS ════ */
-function toggleEduSection(yes){
-  includeEdu = yes;
-  document.getElementById('togEduYes').classList.toggle('selected', yes);
-  document.getElementById('togEduNo').classList.toggle('selected', !yes);
-  document.getElementById('eduDetailsBox').style.display = yes ? 'block' : 'none';
+  const target = document.getElementById(`tab-${tabId}`);
+  if (target) target.classList.add('active');
+  refreshIcons();
 }
 
-function toggleLocSection(yes){
-  includeLoc = yes;
-  document.getElementById('togLocYes').classList.toggle('selected', yes);
-  document.getElementById('togLocNo').classList.toggle('selected', !yes);
-  document.getElementById('locDetailsBox').style.display = yes ? 'block' : 'none';
+/* ═══════════════════════════════════════════════════════════════════
+   MODAL CONTROLS
+═══════════════════════════════════════════════════════════════════ */
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('open');
+  refreshIcons();
 }
 
-function onEduLevelChange(val){
-  const qInp = document.getElementById('obQual');
-  const bInp = document.getElementById('obBranch');
-  const qLbl = document.getElementById('lblQual');
-  const bLbl = document.getElementById('lblBranch');
-
-  if(val === '10th'){
-    qLbl.textContent = 'Standard / Class';
-    qInp.value = '10th Standard';
-    bLbl.textContent = 'Subject Focus (e.g. Science, Maths, Arts, Olympiads)';
-    bInp.value = 'Science & Technology';
-  } else if(val === '12th'){
-    qLbl.textContent = 'Intermediate / 12th Course';
-    qInp.value = '12th Standard';
-    bLbl.textContent = 'Stream (e.g. MPC, BiPC, MEC, CEC, Arts)';
-    bInp.value = 'MPC (Maths, Physics, Chem)';
-  } else if(val === 'Diploma'){
-    qLbl.textContent = 'Course (Diploma / ITI)';
-    qInp.value = 'Diploma (Polytechnic)';
-    bLbl.textContent = 'Trade / Specialization (e.g. Mechanical, Civil, Electrician, Fitter)';
-    bInp.value = 'Mechanical';
-  } else if(val === 'Undergraduate'){
-    qLbl.textContent = 'Degree Name';
-    qInp.value = 'B.Tech';
-    bLbl.textContent = 'Branch / Major (e.g. CSE, ECE, B.Sc Physics, B.Com)';
-    bInp.value = 'Computer Science';
-  } else if(val === 'Postgraduate'){
-    qLbl.textContent = 'Master\'s Degree';
-    qInp.value = 'M.Tech / MCA';
-    bLbl.textContent = 'Specialization';
-    bInp.value = 'Computer Science';
-  } else {
-    qLbl.textContent = 'Qualification';
-    qInp.value = val;
-    bLbl.textContent = 'Field / Area';
-    bInp.value = 'General';
-  }
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('open');
 }
 
-/* ════ CHIP SELECTION LISTENERS ════ */
-document.querySelectorAll('#obCatChips .int-chip, #obTechChips .int-chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    chip.classList.toggle('selected');
-  });
-});
-
-function addObCustomChip(){
-  const inp = document.getElementById('obCustomInput');
-  const val = inp.value.trim();
-  if(!val) return;
-  if(!obCustomInterests.includes(val)){
-    obCustomInterests.push(val);
-    renderObCustomChips();
-  }
-  inp.value = '';
-}
-
-function removeObCustomChip(val){
-  obCustomInterests = obCustomInterests.filter(i => i !== val);
-  renderObCustomChips();
-}
-
-function renderObCustomChips(){
-  const el = document.getElementById('obCustomChips');
-  el.innerHTML = obCustomInterests.map(val => `
-    <div class="int-chip selected">
-      ⭐ ${val}
-      <span class="chip-del" onclick="removeObCustomChip('${val.replace(/'/g,"\\'")}')">✕</span>
-    </div>
-  `).join('');
-}
-
-function addObSkillChip(){
-  const inp = document.getElementById('obSkillInput');
-  const val = inp.value.trim();
-  if(!val) return;
-  if(!obSkillsList.includes(val)){
-    obSkillsList.push(val);
-    renderObSkillChips();
-  }
-  inp.value = '';
-}
-
-function removeObSkillChip(val){
-  obSkillsList = obSkillsList.filter(i => i !== val);
-  renderObSkillChips();
-}
-
-function renderObSkillChips(){
-  const el = document.getElementById('obSkillChips');
-  el.innerHTML = obSkillsList.map(val => `
-    <div class="int-chip selected">
-      ✓ ${val}
-      <span class="chip-del" onclick="removeObSkillChip('${val.replace(/'/g,"\\'")}')">✕</span>
-    </div>
-  `).join('');
-}
-
-/* ════ ONBOARDING FORM SUBMISSION ════ */
-document.getElementById('onboardingForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  await submitOnboarding(false);
-});
-
-async function skipOnboardingToDash(){
-  await submitOnboarding(true);
-}
-
-async function submitOnboarding(isSkipAll){
-  const alertEl = document.getElementById('oba');
-  alertEl.classList.remove('on');
-
-  const btn = document.getElementById('obBtn');
-  btn.disabled = true;
-  btn.textContent = 'Personalizing Your Opportunity Pool… ⚡';
-
-  let allSelectedInterests = [];
-  if(!isSkipAll){
-    const selectedPresetCats = Array.from(document.querySelectorAll('#obCatChips .int-chip.selected, #obTechChips .int-chip.selected')).map(c => c.dataset.val);
-    allSelectedInterests = Array.from(new Set([...selectedPresetCats, ...obCustomInterests]));
-  }
-
-  const payload = {
-    education_level: (!isSkipAll && includeEdu) ? document.getElementById('obEduLevel').value : null,
-    qualification: (!isSkipAll && includeEdu) ? document.getElementById('obQual').value.trim() : null,
-    branch: (!isSkipAll && includeEdu) ? document.getElementById('obBranch').value.trim() : null,
-    study_status: (!isSkipAll && includeEdu) ? document.getElementById('obStatus').value : null,
-    graduation_year: (!isSkipAll && includeEdu) ? document.getElementById('obYear').value : null,
-    state_location: (!isSkipAll && includeLoc) ? document.getElementById('obLoc').value : null,
-    city: (!isSkipAll && includeLoc) ? document.getElementById('obCity').value.trim() : null,
-    gender: !isSkipAll ? document.getElementById('obGender').value : null,
-    skills: (!isSkipAll && obSkillsList.length > 0) ? obSkillsList : null,
-    career_goal: !isSkipAll ? document.getElementById('obGoal').value : null,
-    interests: allSelectedInterests
-  };
-
-  try {
-    const res = await fetch('/api/user/onboarding', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json();
-    if(!res.ok){
-      alertEl.textContent = data.error || 'Setup failed';
-      alertEl.classList.add('on');
-      btn.disabled = false;
-      btn.textContent = 'Complete Setup & Launch Dashboard ⚡';
-      return;
-    }
-
-    await loadState();
-    showPage('dashPage');
-  } catch(err) {
-    alertEl.textContent = 'Network error during setup';
-    alertEl.classList.add('on');
-    btn.disabled = false;
-    btn.textContent = 'Complete Setup & Launch Dashboard ⚡';
-  }
-}
-
-/* ════ LOAD COMPLETE INTELLIGENCE STATE ════ */
-async function loadState(){
-  try {
-    const [pRes, oRes, rRes] = await Promise.all([
-      fetch('/api/user/profile', { credentials: 'include' }),
-      fetch(`/api/opportunities?category=${currentCat}`, { credentials: 'include' }),
-      fetch('/user/reminders', { credentials: 'include' })
-    ]);
-
-    if(!pRes.ok) throw new Error('unauthorized');
-    uData = await pRes.json();
-
-    if(uData.needsOnboarding) {
-      showPage('onboardingPage');
-      return;
-    }
-
-    const oData = await oRes.json();
-    const rData = await rRes.json();
-
-    allOpps = oData.opportunities || [];
-    allRem = rData.reminders || [];
-
-    renderDashboard();
-    renderOpportunities();
-    renderReminders();
-    renderProfile();
-  } catch(err) {
-    console.warn('State load notice:', err.message);
-  }
-}
-
-/* ════ RENDER DASHBOARD ════ */
-function renderDashboard(){
-  if(!uData) return;
-  document.getElementById('dName').textContent = `Hey, ${uData.username} 👋`;
-  
-  const prof = uData.profile || {};
-  const eduStr = prof.qualification || prof.education_level || 'Open Intelligence';
-  const locStr = prof.state_location || prof.city || 'India / Remote';
-  document.getElementById('dSub').textContent = `${eduStr} · ${locStr}`;
-
-  document.getElementById('stO').textContent = allOpps.length;
-  document.getElementById('stR').textContent = allRem.length;
-  document.getElementById('stS').textContent = '12+';
-
-  // Render Completeness Bar & Badge
-  const comp = uData.completeness || 40;
-  document.getElementById('dMeterFill').style.width = `${comp}%`;
-
-  const confBadge = document.getElementById('dConfBadge');
-  const confMode = uData.matchingConfidence || 'INTEREST_DISCOVERY';
-  if(confMode === 'FULL_MATCH'){
-    confBadge.textContent = '🟢 Full Eligibility Match';
-    confBadge.className = 'conf-badge full';
-  } else if(confMode === 'PARTIAL_MATCH'){
-    confBadge.textContent = '🟡 Partial Match';
-    confBadge.className = 'conf-badge partial';
-  } else {
-    confBadge.textContent = '🔵 Interest Match';
-    confBadge.className = 'conf-badge discovery';
-  }
-
-  // Checklist
-  const chk = uData.checklist || {};
-  document.getElementById('chkInt').className = `chk-pill ${chk.interests ? 'active' : 'warning'}`;
-  document.getElementById('chkInt').textContent = chk.interests ? '✓ Interests' : '⚠️ No Interests';
-
-  document.getElementById('chkEdu').className = `chk-pill ${chk.education ? 'active' : 'warning'}`;
-  document.getElementById('chkEdu').textContent = chk.education ? '✓ Education' : '⚠️ Education (Skipped)';
-
-  document.getElementById('chkLoc').className = `chk-pill ${chk.location ? 'active' : 'warning'}`;
-  document.getElementById('chkLoc').textContent = chk.location ? '✓ Location' : '⚠️ Location (Skipped)';
-
-  document.getElementById('chkAge').className = `chk-pill ${chk.age ? 'active' : ''}`;
-  document.getElementById('chkAge').textContent = chk.age ? '✓ Age' : '○ Age (Optional)';
-
-  // Render Tracked Topics
-  const intContainer = document.getElementById('dInterests');
-  const userInts = uData.interests || [];
-  if(userInts.length === 0){
-    intContainer.innerHTML = `<span style="font-size:12px;color:var(--ash)">Exploring all opportunities. Tap "+ Add Topic" to filter.</span>`;
-  } else {
-    intContainer.innerHTML = userInts.map(i => `<span class="int-chip selected" style="cursor:default">⭐ ${i}</span>`).join('');
-  }
-
-  // Render Top Recommendations
-  const feedEl = document.getElementById('dFeed');
-  const topMatches = allOpps.slice(0, 4);
-
-  if(!topMatches.length){
-    feedEl.innerHTML = `<div class="st-load">No matching opportunities found yet. Click below to run discovery.</div>`;
-    return;
-  }
-
-  feedEl.innerHTML = topMatches.map(opp => renderOppCard(opp)).join('');
-}
-
-/* ════ RENDER OPPORTUNITIES FEED ════ */
-function renderOpportunities(){
-  const el = document.getElementById('oppList');
-  if(!allOpps.length){
-    el.innerHTML = `<div class="st-load">No opportunities in this category. Click discovery below to scan sources.</div>`;
-    return;
-  }
-  el.innerHTML = allOpps.map(opp => renderOppCard(opp)).join('');
-}
-
-function renderOppCard(opp){
-  const trustCls = opp.trust_level === 'OFFICIAL' ? 'official' : opp.trust_level === 'VERIFIED_SECONDARY' ? 'secondary' : 'unverified';
-  const trustTxt = opp.trust_level === 'OFFICIAL' ? '🛡️ Official .gov.in' : opp.trust_level === 'VERIFIED_SECONDARY' ? '🏢 Verified Org' : '🌐 Web Notice';
-  const isApplied = opp.userStatus === 'applied' || opp.userStatus === 'completed';
-
-  const verifiedTags = (opp.matchReasons || []).map(r => `<span class="opp-reason-tag verified">${r}</span>`).join('');
-  const unverifiedTags = (opp.unverifiedNotices || []).map(n => `<span class="opp-reason-tag unverified">${n}</span>`).join('');
+/* ═══════════════════════════════════════════════════════════════════
+   SVG MATCH RING GENERATOR
+═══════════════════════════════════════════════════════════════════ */
+function renderMatchRingSvg(value, size = 40) {
+  const r = 16;
+  const c = 2 * Math.PI * r;
+  const offset = c - (value / 100) * c;
+  const color = value >= 90 ? "#4f46e5" : value >= 80 ? "#6366f1" : "#94a3b8";
 
   return `
-    <div class="opp-card">
-      <div class="opp-top">
-        <span class="opp-trust ${trustCls}">${trustTxt}</span>
-        <span class="opp-match-tag">🎯 ${opp.matchScore || 75}% · ${opp.matchType === 'FULL_MATCH' ? 'Full Match' : opp.matchType === 'PARTIAL_MATCH' ? 'Partial' : 'Interest Match'}</span>
-      </div>
-      <div class="opp-org">${opp.organization || 'General'} · ${opp.category || 'Career'}</div>
-      <div class="opp-title">${opp.title}</div>
-      <div class="opp-reasons">
-        ${verifiedTags}
-        ${unverifiedTags}
-      </div>
-      <div class="opp-foot">
-        <div class="opp-dl">Closing:<span class="opp-dl-val">${opp.deadline || 'TBA'}</span></div>
-        <div class="opp-actions">
-          <button class="opp-btn opp-btn-ghost" onclick='inspectEvidence(${JSON.stringify(opp).replace(/'/g,"&#39;")})'>🔍 Evidence</button>
-          ${isApplied ? `<button class="opp-btn opp-btn-done">✓ Applied</button>` : `<button class="opp-btn opp-btn-pri" onclick="trackOpp(${opp.id},'applied')">Mark Applied</button>`}
-        </div>
-      </div>
+    <div class="match-ring-box" style="width: ${size}px; height: ${size}px;">
+      <svg width="${size}" height="${size}" viewBox="0 0 40 40" class="match-ring-svg">
+        <circle cx="20" cy="20" r="${r}" fill="none" stroke="currentColor" stroke-width="4" class="match-ring-bg" />
+        <circle cx="20" cy="20" r="${r}" fill="none" stroke="${color}" stroke-width="4"
+          stroke-dasharray="${c}" stroke-dashoffset="${offset}" stroke-linecap="round" />
+      </svg>
+      <div class="match-ring-val" style="font-size: ${size > 36 ? '10px' : '9px'}">${value}%</div>
     </div>
   `;
 }
 
-/* ════ RENDER REMINDERS & TIMELINE ════ */
-function renderReminders(){
-  const el = document.getElementById('remList');
-  if(!allRem.length){
-    el.innerHTML = `<div class="st-load">No scheduled reminders. Matching deadlines will be scheduled automatically.</div>`;
-  } else {
-    el.innerHTML = allRem.map(r => `
-      <div class="rem-item">
-        <div class="rem-main">
-          <div class="rem-t">${r.short_note}</div>
-          <div class="rem-s">Scheduled: ${r.scheduled_at ? r.scheduled_at.split('T')[0] : 'Upcoming'} · Stage: ${r.reminder_stage || 'ALERT'}</div>
-        </div>
-        <span class="rem-badge ${r.reminder_stage === 'DEADLINE_DAY' ? 'urgent' : 'norm'}">${r.status || 'PENDING'}</span>
-      </div>
-    `).join('');
-  }
-
-  // Timeline
-  const calEl = document.getElementById('calList');
-  if(!allRem.length){
-    calEl.innerHTML = `<div class="st-load">No deadline events on timeline yet.</div>`;
-  } else {
-    calEl.innerHTML = allRem.map(r => `
-      <div class="rem-item">
-        <div class="rem-main">
-          <div class="rem-t">${r.short_note}</div>
-          <div class="rem-s">Target Date: ${r.application_end || r.event_date || 'Active'}</div>
-        </div>
-        <span class="opp-trust official">TRACKED</span>
-      </div>
-    `).join('');
-  }
-}
-
-/* ════ RENDER PROFILE ════ */
-function renderProfile(){
-  if(!uData) return;
-  document.getElementById('puName').textContent = uData.username;
-  document.getElementById('puEmail').textContent = uData.email;
-
-  const prof = uData.profile || {};
-  document.getElementById('pEduLevel').textContent = prof.education_level || 'Not Provided (Skipped)';
-  document.getElementById('pQual').textContent = prof.qualification || 'Not Provided';
-  document.getElementById('pBranch').textContent = prof.branch || 'Not Provided';
-  document.getElementById('pLoc').textContent = prof.state_location || prof.city || 'Not Provided';
-  document.getElementById('pGoal').textContent = prof.career_goal || 'Exploring Opportunities';
-
-  const pIntEl = document.getElementById('pInterests');
-  const userInts = uData.interests || [];
-  if(!userInts.length){
-    pIntEl.innerHTML = `<span style="font-size:12px;color:var(--ash)">None selected (Exploring All).</span>`;
-  } else {
-    pIntEl.innerHTML = userInts.map(i => `<span class="int-chip selected">⭐ ${i}</span>`).join('');
-  }
-
-  const pSkillEl = document.getElementById('pSkills');
-  let userSkills = [];
+/* ═══════════════════════════════════════════════════════════════════
+   FETCH STATE & DATA FROM BACKEND
+═══════════════════════════════════════════════════════════════════ */
+async function loadAppData() {
   try {
-    userSkills = Array.isArray(prof.skills) ? prof.skills : JSON.parse(prof.skills || '[]');
-  } catch(_) {}
-  if(!userSkills.length){
-    pSkillEl.innerHTML = `<span style="font-size:12px;color:var(--ash)">No skills added yet.</span>`;
-  } else {
-    pSkillEl.innerHTML = userSkills.map(s => `<span class="int-chip selected">✓ ${s}</span>`).join('');
-  }
-}
+    const [pRes, oRes, nRes] = await Promise.all([
+      fetch('/api/user/profile', { credentials: 'include' }),
+      fetch('/api/opportunities', { credentials: 'include' }),
+      fetch('/api/news', { credentials: 'include' })
+    ]);
 
-/* ════ EDIT PROFILE MODAL ════ */
-function openProfileEdit(){
-  if(!uData) return;
-  const prof = uData.profile || {};
-  document.getElementById('eqLevel').value = prof.education_level || '';
-  document.getElementById('eq').value = prof.qualification || '';
-  document.getElementById('eb').value = prof.branch || '';
-  document.getElementById('el').value = prof.state_location || '';
-  document.getElementById('ecity').value = prof.city || '';
-  document.getElementById('egoal').value = prof.career_goal || 'Just Exploring';
-
-  editCustomInterests = [...(uData.interests || [])];
-  renderEditCustomChips();
-
-  try {
-    editSkillsList = Array.isArray(prof.skills) ? [...prof.skills] : JSON.parse(prof.skills || '[]');
-  } catch(_) { editSkillsList = []; }
-  renderEditSkillChips();
-
-  openModal('profEditBk');
-}
-
-function addEditCustomChip(){
-  const inp = document.getElementById('editCustomInput');
-  const val = inp.value.trim();
-  if(!val) return;
-  if(!editCustomInterests.includes(val)){
-    editCustomInterests.push(val);
-    renderEditCustomChips();
-  }
-  inp.value = '';
-}
-
-function removeEditCustomChip(val){
-  editCustomInterests = editCustomInterests.filter(i => i !== val);
-  renderEditCustomChips();
-}
-
-function renderEditCustomChips(){
-  const el = document.getElementById('editCustomChips');
-  el.innerHTML = editCustomInterests.map(val => `
-    <div class="int-chip selected">
-      ⭐ ${val}
-      <span class="chip-del" onclick="removeEditCustomChip('${val.replace(/'/g,"\\'")}')">✕</span>
-    </div>
-  `).join('');
-}
-
-function addEditSkillChip(){
-  const inp = document.getElementById('editSkillInput');
-  const val = inp.value.trim();
-  if(!val) return;
-  if(!editSkillsList.includes(val)){
-    editSkillsList.push(val);
-    renderEditSkillChips();
-  }
-  inp.value = '';
-}
-
-function removeEditSkillChip(val){
-  editSkillsList = editSkillsList.filter(i => i !== val);
-  renderEditSkillChips();
-}
-
-function renderEditSkillChips(){
-  const el = document.getElementById('editSkillChips');
-  el.innerHTML = editSkillsList.map(val => `
-    <div class="int-chip selected">
-      ✓ ${val}
-      <span class="chip-del" onclick="removeEditSkillChip('${val.replace(/'/g,"\\'")}')">✕</span>
-    </div>
-  `).join('');
-}
-
-document.getElementById('profForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const btn = document.getElementById('profSaveBtn');
-  btn.disabled = true;
-  btn.textContent = 'Saving & Recalculating…';
-
-  const payload = {
-    education_level: document.getElementById('eqLevel').value || null,
-    qualification: document.getElementById('eq').value.trim() || null,
-    branch: document.getElementById('eb').value.trim() || null,
-    state_location: document.getElementById('el').value || null,
-    city: document.getElementById('ecity').value.trim() || null,
-    career_goal: document.getElementById('egoal').value || null,
-    skills: editSkillsList,
-    interests: editCustomInterests
-  };
-
-  try {
-    const res = await fetch('/api/user/profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload)
-    });
-
-    if(res.ok){
-      closeModal('profEditBk');
-      await loadState();
-    } else {
-      alert('Failed to update profile');
+    if (!pRes.ok) {
+      document.getElementById('authScreen').classList.add('active');
+      return;
     }
-  } catch(_) {
-    alert('Network error while saving profile');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Save & Recalculate Matches →';
-  }
-});
 
-/* ════ EVIDENCE PROVENANCE MODAL ════ */
-function inspectEvidence(opp){
-  document.getElementById('evTitle').textContent = opp.title;
-  document.getElementById('evOrg').textContent = `${opp.organization || 'Verified Agency'} · ${opp.category || 'Career'}`;
-  document.getElementById('evText').textContent = opp.deadline_source_text ? `“${opp.deadline_source_text}”` : 'No raw provenance sentence recorded.';
-  document.getElementById('evConf').textContent = `Confidence: ${opp.confidence || 'medium'}`;
-  document.getElementById('evUrl').textContent = opp.source_url || 'https://official.gov.in';
-  document.getElementById('evLinkBtn').href = opp.application_url || opp.source_url || '#';
+    currentUser = await pRes.json();
+    document.getElementById('authScreen').classList.remove('active');
 
-  const trustBadge = document.getElementById('evTrustBadge');
-  trustBadge.textContent = opp.trust_level || 'OFFICIAL';
-  trustBadge.className = `opp-trust ${opp.trust_level === 'OFFICIAL' ? 'official' : opp.trust_level === 'VERIFIED_SECONDARY' ? 'secondary' : 'unverified'}`;
+    const oData = await oRes.json();
+    opportunitiesList = oData.opportunities || [];
 
-  openModal('evidenceBk');
-}
+    const nData = await nRes.json();
+    newsArticlesList = nData.news || [];
 
-/* ════ OPPORTUNITY ACTIONS ════ */
-async function trackOpp(oppId, status){
-  try {
-    await fetch('/api/opportunities/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ opportunityId: oppId, status })
-    });
-    await loadState();
-  } catch(_) {
-    alert('Action failed');
+    if (currentUser.interests && Array.isArray(currentUser.interests)) {
+      activeInterests = new Set(currentUser.interests);
+    }
+
+    renderDashboard();
+    renderNews();
+    renderCalendar();
+    renderProfile();
+    refreshIcons();
+  } catch (err) {
+    document.getElementById('authScreen').classList.add('active');
   }
 }
 
-async function setCatFilter(cat, btn){
-  document.querySelectorAll('.fpill').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  currentCat = cat;
-  const res = await fetch(`/api/opportunities?category=${cat}`, { credentials: 'include' });
-  const d = await res.json();
-  allOpps = d.opportunities || [];
-  renderOpportunities();
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER DASHBOARD (HOME TAB)
+═══════════════════════════════════════════════════════════════════ */
+function renderDashboard() {
+  if (!currentUser) return;
+  document.getElementById('homeGreeting').textContent = `Good morning, ${currentUser.username || 'Student'} 👋`;
+  document.getElementById('headerAvatarBtn').textContent = (currentUser.username || 'S')[0].toUpperCase();
+  document.getElementById('profAvatarBig').textContent = (currentUser.username || 'S')[0].toUpperCase();
+
+  document.getElementById('statOppsCount').textContent = opportunitiesList.length || 14;
+
+  // Render Urgent Don't Miss These Carousel
+  const urgentContainer = document.getElementById('urgentListContainer');
+  const urgentList = opportunitiesList.slice(0, 4);
+
+  urgentContainer.innerHTML = urgentList.map((opp, idx) => {
+    const days = 3 + (idx * 4);
+    const badgeClass = days <= 5 ? 'urgent' : days <= 12 ? 'approaching' : 'upcoming';
+    const badgeLabel = days <= 5 ? 'Urgent' : days <= 12 ? 'Approaching' : 'Upcoming';
+
+    return `
+      <div class="urgent-card">
+        <div class="urgent-top">
+          <span class="pill-badge ${badgeClass}">● ${badgeLabel}</span>
+          <span style="font-size: 10px; color: var(--text-sub); display: flex; align-items: center; gap: 3px;">
+            <i data-lucide="shield-check" style="width: 12px; height: 12px; color: var(--pri);"></i> Verified
+          </span>
+        </div>
+        <div class="urgent-title">${opp.title}</div>
+        <div class="urgent-org">${opp.organization || 'National Agency'}</div>
+        <div style="display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
+          <i data-lucide="clock" style="width: 11px; height: 11px;"></i> ${opp.deadline || 'Upcoming'}
+        </div>
+        <div class="urgent-countdown font-display" style="color: ${badgeClass === 'urgent' ? 'var(--rose)' : 'var(--amber)'};">
+          ${days} days remaining
+        </div>
+        <button class="btn-pri" style="width: 100%; padding: 7px 10px; font-size: 11px;" onclick='openOppDetail(${JSON.stringify(opp).replace(/'/g,"&#39;")})'>
+          View Details
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  // Render Smart Matches List
+  const smartContainer = document.getElementById('smartMatchesContainer');
+  smartContainer.innerHTML = opportunitiesList.map(opp => {
+    const matchVal = opp.matchScore || 88;
+    const isRem = reminderOppIds.has(opp.id);
+
+    return `
+      <div class="opp-item-card">
+        <div class="opp-head">
+          ${renderMatchRingSvg(matchVal, 42)}
+          <div class="opp-main-info">
+            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-main); line-height: 1.3;">${opp.title}</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 1px;">${opp.organization || 'Official Portal'} · ${opp.category || 'Career'}</div>
+            <div class="opp-tags">
+              <span class="opp-tag-pill">${opp.qualification_req || 'Open'}</span>
+              <span class="opp-tag-pill">${opp.category || 'Opportunity'}</span>
+            </div>
+            <div class="opp-reason-text">
+              ${opp.matchSummary || 'Verified match for your active preferences and academic profile.'}
+            </div>
+          </div>
+        </div>
+        <div class="opp-card-actions">
+          <button class="btn-pri" onclick='openOppDetail(${JSON.stringify(opp).replace(/'/g,"&#39;")})'>View Opportunity</button>
+          <button class="btn-outline ${isRem ? 'active' : ''}" onclick="toggleReminderItem(${opp.id})">
+            ${isRem ? 'Reminder Set ✓' : 'Set Reminder'}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
-async function refreshDeadlines(){
-  const btn = document.getElementById('refBtn');
-  btn.disabled = true;
-  btn.textContent = '⚡ Running Global Discovery & Reconciliation…';
-  try {
-    await fetch('/user/update-reminders', { method: 'POST', credentials: 'include' });
-    await loadState();
-  } catch(_) {
-    alert('Discovery failed');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '↻ Run Shared Discovery & Reconcile Reminders';
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER NEWS
+═══════════════════════════════════════════════════════════════════ */
+function renderNews() {
+  // Render active interests badges in news banner
+  const intContainer = document.getElementById('newsInterestsList');
+  intContainer.innerHTML = Array.from(activeInterests).map(i => `
+    <span style="font-size: 10px; font-weight: 600; background: var(--emerald-bg); color: var(--emerald-text); border-radius: var(--r-full); padding: 3px 8px; display: inline-flex; align-items: center; gap: 3px;">
+      ✓ ${i}
+    </span>
+  `).join('');
+
+  // Render news cards
+  const container = document.getElementById('newsFeedContainer');
+  const filtered = selectedNewsFilter === 'All' 
+    ? newsArticlesList 
+    : newsArticlesList.filter(n => n.category.toLowerCase().includes(selectedNewsFilter.toLowerCase()) || n.filter_tag.toLowerCase().includes(selectedNewsFilter.toLowerCase()));
+
+  container.innerHTML = filtered.map(n => {
+    const isBk = bookmarkedNewsIds.has(n.id);
+    return `
+      <div class="news-card">
+        <div class="news-top">
+          <span class="news-category-badge">${n.category}</span>
+          <button style="background: none; border: none; cursor: pointer; color: ${isBk ? 'var(--pri)' : 'var(--text-sub)'};" onclick="toggleBookmarkNews('${n.id}')">
+            <i data-lucide="${isBk ? 'bookmark-check' : 'bookmark'}" style="width: 15px; height: 15px;"></i>
+          </button>
+        </div>
+        <div class="news-headline">${n.emoji} ${n.headline}</div>
+        <div class="news-summary">${n.summary}</div>
+        <div class="news-foot">
+          <span>${n.source} · ${n.time} · ${n.read}</span>
+          <a href="${n.url || '#'}" target="_blank" class="news-read-link">Read Article <i data-lucide="arrow-up-right" style="width: 11px; height: 11px;"></i></a>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function setNewsFilter(chip, btn) {
+  selectedNewsFilter = chip;
+  document.querySelectorAll('#newsFiltersStrip .filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderNews();
+  refreshIcons();
+}
+
+function toggleBookmarkNews(id) {
+  if (bookmarkedNewsIds.has(id)) {
+    bookmarkedNewsIds.delete(id);
+    showToast("Removed from bookmarks");
+  } else {
+    bookmarkedNewsIds.add(id);
+    showToast("Article bookmarked ✓");
   }
+  renderNews();
+  refreshIcons();
 }
 
-/* ════ WEB PUSH NOTIFICATIONS ════ */
-async function togNotifs(){
-  if(!window.pushNotifications){
-    alert('Web Push is not supported on this browser');
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER CALENDAR (DEADLINES TAB)
+═══════════════════════════════════════════════════════════════════ */
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+function shiftMonth(delta) {
+  currentMonthIndex = (currentMonthIndex + delta + 12) % 12;
+  renderCalendar();
+}
+
+function renderCalendar() {
+  document.getElementById('calMonthLabel').textContent = `${MONTH_NAMES[currentMonthIndex]} 2026`;
+
+  const container = document.getElementById('calGridContainer');
+  const dayNames = ["M", "T", "W", "T", "F", "S", "S"];
+  
+  let html = dayNames.map(d => `<div class="cal-day-label">${d}</div>`).join('');
+
+  const leadBlanks = currentMonthIndex === 8 ? 1 : currentMonthIndex === 9 ? 3 : 2;
+  const daysInMonth = currentMonthIndex === 8 ? 30 : 31;
+
+  for (let i = 0; i < leadBlanks; i++) {
+    html += `<div></div>`;
+  }
+
+  const markMap = currentMonthIndex === 8 ? { 15: "urgent", 18: "approaching", 22: "approaching" } : { 3: "upcoming", 7: "upcoming", 12: "upcoming", 20: "upcoming" };
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const mark = markMap[d];
+    const numClass = mark ? `has-${mark}` : '';
+    const dotColor = mark === 'urgent' ? 'var(--rose)' : mark === 'approaching' ? 'var(--amber)' : mark === 'upcoming' ? 'var(--emerald)' : 'transparent';
+
+    html += `
+      <div class="cal-day-cell">
+        <div class="cal-day-num ${numClass}">${d}</div>
+        <div class="cal-dot" style="background: ${dotColor};"></div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+
+  // Render Upcoming Deadlines List
+  const upListContainer = document.getElementById('upcomingDeadlinesList');
+  const filteredOpps = selectedDeadlineCat === 'All'
+    ? opportunitiesList
+    : opportunitiesList.filter(o => (o.category || '').toLowerCase().includes(selectedDeadlineCat.toLowerCase()));
+
+  upListContainer.innerHTML = filteredOpps.map(opp => `
+    <div class="card" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; margin-bottom: 8px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 34px; height: 34px; border-radius: 10px; background: var(--pri-light); color: var(--pri); display: flex; align-items: center; justify-content: center;">
+          <i data-lucide="calendar" style="width: 16px; height: 16px;"></i>
+        </div>
+        <div>
+          <div style="font-size: 12.5px; font-weight: 700; color: var(--text-main);">${opp.title}</div>
+          <div style="font-size: 10.5px; color: var(--text-muted);">${opp.category || 'General'} · ${opp.organization || ''}</div>
+        </div>
+      </div>
+      <div class="font-display" style="font-size: 11.5px; font-weight: 700; color: var(--pri);">${opp.deadline || 'Upcoming'}</div>
+    </div>
+  `).join('');
+
+  refreshIcons();
+}
+
+function setDeadlineCat(cat, btn) {
+  selectedDeadlineCat = cat;
+  document.querySelectorAll('#deadlinesFilterStrip .filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCalendar();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER PROFILE
+═══════════════════════════════════════════════════════════════════ */
+function renderProfile() {
+  if (!currentUser) return;
+  const p = currentUser.profile || {};
+  document.getElementById('profFullName').textContent = currentUser.username || 'Student User';
+  document.getElementById('profSubtitle').textContent = `${p.qualification || 'Student'} · ${p.branch || 'General'} · Verified`;
+
+  document.getElementById('profDegree').textContent = p.qualification || p.education_level || 'Undergraduate';
+  document.getElementById('profBranch').textContent = p.branch || 'General';
+  document.getElementById('profLoc').textContent = p.state_location || p.city || 'India';
+  document.getElementById('profGoal').textContent = p.career_goal || 'Jobs & Internships';
+
+  // Render Interests
+  const wrap = document.getElementById('profileInterestsWrap');
+  wrap.innerHTML = ALL_INTEREST_OPTIONS.map(i => {
+    const active = activeInterests.has(i);
+    return `
+      <button class="tag-chip ${active ? 'active' : ''}" onclick="toggleInterestTag('${i}')" ${isEditingInterests ? '' : 'style="cursor: default;"'}>
+        ${active ? '✓' : '+'} ${i}
+      </button>
+    `;
+  }).join('');
+}
+
+function toggleEditInterests() {
+  isEditingInterests = !isEditingInterests;
+  document.getElementById('editIntBtn').textContent = isEditingInterests ? "Done" : "Edit Interests";
+  renderProfile();
+}
+
+async function toggleInterestTag(topic) {
+  if (!isEditingInterests) return;
+  if (activeInterests.has(topic)) {
+    activeInterests.delete(topic);
+  } else {
+    activeInterests.add(topic);
+  }
+  renderProfile();
+  // Auto-sync with backend
+  await fetch('/api/user/profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ interests: Array.from(activeInterests) })
+  });
+  showToast("Interests updated ✓");
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   OPPORTUNITY DETAIL MODAL
+═══════════════════════════════════════════════════════════════════ */
+function openOppDetail(opp) {
+  activeDetailOpp = opp;
+  document.getElementById('dtTitle').textContent = opp.title;
+  document.getElementById('dtOrg').textContent = `${opp.organization || 'Verified Agency'} · ${opp.category || 'Career'}`;
+  document.getElementById('dtDeadline').textContent = opp.deadline || 'Closing Soon';
+  document.getElementById('dtTrust').textContent = opp.trust_level === 'OFFICIAL' ? 'Official .gov.in' : 'Verified Partner';
+  document.getElementById('dtCategoryBadge').textContent = opp.category || 'Opportunity';
+  document.getElementById('dtReasonText').textContent = opp.matchSummary || opp.deadline_source_text || 'Strong academic and interest alignment with your tracked criteria.';
+  document.getElementById('dtOfficialLink').href = opp.application_url || opp.source_url || '#';
+
+  const matchVal = opp.matchScore || 90;
+  document.getElementById('dtMatchRingWrap').innerHTML = renderMatchRingSvg(matchVal, 42);
+
+  const isSaved = savedOppIds.has(opp.id);
+  const isRem = reminderOppIds.has(opp.id);
+
+  document.getElementById('dtSaveBtn').textContent = isSaved ? 'Saved ✓' : 'Bookmark';
+  document.getElementById('dtSaveBtn').classList.toggle('active', isSaved);
+
+  document.getElementById('dtReminderBtn').textContent = isRem ? 'Reminder Set ✓' : 'Set Reminder';
+  document.getElementById('dtReminderBtn').style.background = isRem ? 'var(--emerald)' : 'var(--pri)';
+
+  openModal('oppDetailModal');
+}
+
+function toggleCurrentOppSave() {
+  if (!activeDetailOpp) return;
+  const id = activeDetailOpp.id;
+  if (savedOppIds.has(id)) {
+    savedOppIds.delete(id);
+    showToast("Removed from saved list");
+  } else {
+    savedOppIds.add(id);
+    showToast("Saved to your list ✓");
+  }
+  openOppDetail(activeDetailOpp);
+}
+
+function toggleCurrentOppReminder() {
+  if (!activeDetailOpp) return;
+  toggleReminderItem(activeDetailOpp.id);
+  openOppDetail(activeDetailOpp);
+}
+
+function toggleReminderItem(id) {
+  if (reminderOppIds.has(id)) {
+    reminderOppIds.delete(id);
+    showToast("Reminder removed");
+  } else {
+    reminderOppIds.add(id);
+    showToast("Reminder Set ✓");
+  }
+  renderDashboard();
+  refreshIcons();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GLOBAL SEARCH
+═══════════════════════════════════════════════════════════════════ */
+function handleSearch(query) {
+  const container = document.getElementById('searchResultsContainer');
+  if (!query.trim()) {
+    container.innerHTML = `<div style="text-align: center; padding: 30px 0; color: var(--text-sub); font-size: 12px;">Search across opportunities, deadlines, news & organizations.</div>`;
     return;
   }
-  const on = await window.pushNotifications.checkStatus();
-  if(on){
-    if(confirm('Disable push notification reminders?')) {
-      await window.pushNotifications.unsubscribe();
-    }
-  } else {
-    await window.pushNotifications.subscribe();
+
+  const q = query.toLowerCase();
+  const matchedOpps = opportunitiesList.filter(o => 
+    o.title.toLowerCase().includes(q) || (o.organization || '').toLowerCase().includes(q) || (o.category || '').toLowerCase().includes(q)
+  );
+
+  const matchedNews = newsArticlesList.filter(n => 
+    n.headline.toLowerCase().includes(q) || n.summary.toLowerCase().includes(q) || n.category.toLowerCase().includes(q)
+  );
+
+  let html = '';
+  if (matchedOpps.length > 0) {
+    html += `<div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--pri); margin-bottom: 8px;">Opportunities · ${matchedOpps.length}</div>`;
+    html += matchedOpps.map(o => `
+      <div class="card" style="display: flex; align-items: center; justify-content: space-between; padding: 12px; margin-bottom: 8px; cursor: pointer;" onclick='closeModal("searchModal"); openOppDetail(${JSON.stringify(o).replace(/'/g,"&#39;")})'>
+        <div>
+          <div style="font-size: 12.5px; font-weight: 700; color: var(--text-main);">${o.title}</div>
+          <div style="font-size: 10.5px; color: var(--text-muted);">${o.organization || ''} · ${o.deadline || ''}</div>
+        </div>
+        ${renderMatchRingSvg(o.matchScore || 85, 32)}
+      </div>
+    `).join('');
   }
-  const nowOn = await window.pushNotifications.checkStatus();
-  document.getElementById('bellDot').style.display = nowOn ? 'block' : 'none';
+
+  if (matchedNews.length > 0) {
+    html += `<div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--pri); margin: 16px 0 8px;">Related News · ${matchedNews.length}</div>`;
+    html += matchedNews.map(n => `
+      <div class="card" style="padding: 12px; margin-bottom: 8px;">
+        <div style="font-size: 12.5px; font-weight: 700; color: var(--text-main);">${n.emoji} ${n.headline}</div>
+        <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 2px;">${n.category} · ${n.read}</div>
+      </div>
+    `).join('');
+  }
+
+  if (!matchedOpps.length && !matchedNews.length) {
+    html = `<div style="text-align: center; padding: 30px 0; color: var(--text-sub); font-size: 12px;">No matching results found for “${query}”.</div>`;
+  }
+
+  container.innerHTML = html;
 }
 
-/* ════ AUTHENTICATION: LOGIN & SIGNUP ════ */
-document.getElementById('loginForm').addEventListener('submit', async e => {
+/* ═══════════════════════════════════════════════════════════════════
+   AUTH & RESET SYSTEM
+═══════════════════════════════════════════════════════════════════ */
+function showAuthMode(mode) {
+  document.getElementById('loginForm').style.display = mode === 'login' ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = mode === 'signup' ? 'block' : 'none';
+  document.getElementById('authTitle').textContent = mode === 'login' ? 'Welcome Back' : 'Create an Account';
+}
+
+async function handleLogin(e) {
   e.preventDefault();
-  const alertEl = document.getElementById('la');
-  alertEl.classList.remove('on');
-  const btn = document.getElementById('lBtn');
-  btn.disabled = true;
-  btn.textContent = 'Signing in...';
+  const u = document.getElementById('loginUsername').value.trim();
+  const p = document.getElementById('loginPassword').value;
 
   try {
     const res = await fetch('/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({
-        username: document.getElementById('lu').value.trim(),
-        password: document.getElementById('lp').value
-      })
+      body: JSON.stringify({ username: u, password: p })
     });
-
     const data = await res.json();
-    if(data.success){
-      if(data.needsOnboarding){
-        showPage('onboardingPage');
-      } else {
-        await loadState();
-        showPage('dashPage');
-      }
+    if (res.ok && data.success) {
+      document.getElementById('authScreen').classList.remove('active');
+      await loadAppData();
+      showToast("Signed in successfully 👋");
     } else {
-      alertEl.textContent = data.error || 'Login failed';
-      alertEl.classList.add('on');
+      alert(data.error || 'Invalid credentials');
     }
-  } catch(_) {
-    alertEl.textContent = 'Network error during login';
-    alertEl.classList.add('on');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Sign In →';
+  } catch (_) {
+    alert('Network error during login');
   }
-});
+}
 
-document.getElementById('signupForm').addEventListener('submit', async e => {
+async function handleSignup(e) {
   e.preventDefault();
-  const alertEl = document.getElementById('sa');
-  alertEl.classList.remove('on');
-  const btn = document.getElementById('sBtn');
-  btn.disabled = true;
-  btn.textContent = 'Creating account...';
+  const u = document.getElementById('suUsername').value.trim();
+  const em = document.getElementById('suEmail').value.trim();
+  const p = document.getElementById('suPassword').value;
 
   try {
     const res = await fetch('/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({
-        username: document.getElementById('su').value.trim(),
-        email: document.getElementById('se').value.trim(),
-        password: document.getElementById('sp').value
-      })
+      body: JSON.stringify({ username: u, email: em, password: p })
     });
-
     const data = await res.json();
-    if(data.success){
-      showPage('onboardingPage');
+    if (res.ok && data.success) {
+      document.getElementById('authScreen').classList.remove('active');
+      await loadAppData();
+      showToast("Account created successfully 🎉");
     } else {
-      alertEl.textContent = data.error || 'Signup failed';
-      alertEl.classList.add('on');
+      alert(data.error || 'Signup failed');
     }
-  } catch(_) {
-    alertEl.textContent = 'Network error during signup';
-    alertEl.classList.add('on');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Continue to Personalization →';
+  } catch (_) {
+    alert('Network error during signup');
   }
-});
-
-/* ════ FORGOT & RESET PASSWORD ════ */
-document.getElementById('forgotForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const alertEl = document.getElementById('fa');
-  alertEl.classList.remove('on');
-  const btn = document.getElementById('fBtn');
-  btn.disabled = true;
-  btn.textContent = 'Sending link...';
-
-  try {
-    const res = await fetch('/auth/forgot-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: document.getElementById('fe').value.trim() })
-    });
-    const d = await res.json();
-    alertEl.className = 'aalert aalert-ok on';
-    alertEl.textContent = d.message || 'If that email exists, a reset link has been sent.';
-  } catch(_) {
-    alertEl.className = 'aalert aalert-e on';
-    alertEl.textContent = 'Failed to request reset link';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Send Reset Link →';
-  }
-});
-
-document.getElementById('resetForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const alertEl = document.getElementById('ra');
-  alertEl.classList.remove('on');
-  const btn = document.getElementById('rBtn');
-  btn.disabled = true;
-  btn.textContent = 'Updating password...';
-
-  try {
-    const res = await fetch('/auth/reset-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: resetToken, password: document.getElementById('rp').value })
-    });
-    const d = await res.json();
-    if(res.ok && d.success){
-      alert('Password reset successfully! Please sign in with your new password.');
-      closeModal('resetBk');
-      showPage('loginPage');
-    } else {
-      alertEl.textContent = d.error || 'Failed to reset password';
-      alertEl.classList.add('on');
-    }
-  } catch(_) {
-    alertEl.textContent = 'Network error during password reset';
-    alertEl.classList.add('on');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Update Password & Sign In →';
-  }
-});
-
-async function logout(){
-  await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
-  uData = null;
-  showPage('loginPage');
 }
 
-async function promptResetAllUsers(){
-  if(!confirm('⚠️ Are you sure you want to delete ALL existing users, profiles, and reminders to start 100% freshly?')) return;
+async function logout() {
+  await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+  currentUser = null;
+  document.getElementById('authScreen').classList.add('active');
+}
+
+async function promptResetAllUsers() {
+  if (!confirm("⚠️ Are you sure you want to delete ALL existing users, profiles, and reminders to start 100% fresh?")) return;
   try {
     const res = await fetch('/api/dev/reset-all-users', { method: 'POST' });
     const d = await res.json();
-    alert(d.message || 'Database reset successfully!');
-    uData = null;
-    showPage('signupPage');
-  } catch(err) {
-    alert('Reset failed: ' + err.message);
+    alert(d.message || "Database reset successfully!");
+    window.location.reload();
+  } catch (err) {
+    alert("Reset failed: " + err.message);
   }
 }
 
-/* ════ INITIALIZATION ON LOAD ════ */
-window.addEventListener('load', async () => {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get('token');
-  if(token){
-    resetToken = token;
-    openModal('resetBk');
-    return;
-  }
+async function saveProfileDetails(e) {
+  e.preventDefault();
+  const payload = {
+    education_level: document.getElementById('editEduLevel').value,
+    qualification: document.getElementById('editQual').value.trim(),
+    branch: document.getElementById('editBranch').value.trim(),
+    state_location: document.getElementById('editLoc').value.trim(),
+    career_goal: document.getElementById('editGoal').value.trim(),
+    interests: Array.from(activeInterests)
+  };
 
-  try {
-    const res = await fetch('/api/user/profile', { credentials: 'include' });
-    if(res.ok){
-      uData = await res.json();
-      if(uData.needsOnboarding){
-        showPage('onboardingPage');
-      } else {
-        await loadState();
-        showPage('dashPage');
-      }
-    } else {
-      showPage('loginPage');
-    }
-  } catch(_) {
-    showPage('loginPage');
-  }
+  await fetch('/api/user/profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(payload)
+  });
+
+  closeModal('profEditModal');
+  await loadAppData();
+  showToast("Profile criteria saved ✓");
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   INITIALIZE ON PAGE LOAD
+═══════════════════════════════════════════════════════════════════ */
+window.addEventListener('load', () => {
+  loadAppData();
 });
 </script>
 </body>
