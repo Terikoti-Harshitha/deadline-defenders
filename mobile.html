@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Deadline Defenders — Never Miss a Deadline</title>
+  <title>Deadline Defenders — Academic & Career Intelligence</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -11,7 +11,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     /* ═══════════════════════════════════════════════════════════════════
-       DESIGN SYSTEM & CSS VARIABLES (LIGHT / DARK)
+       DESIGN SYSTEM & CSS THEME
     ═══════════════════════════════════════════════════════════════════ */
     :root {
       --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -24,7 +24,7 @@
 
       --bg-page: #f8fafc;
       --bg-card: #ffffff;
-      --bg-header: rgba(248, 250, 252, 0.92);
+      --bg-header: rgba(248, 250, 252, 0.94);
       --border-card: #e2e8f0;
       --border-subtle: #f1f5f9;
 
@@ -58,7 +58,7 @@
     body.dark {
       --bg-page: #020617;
       --bg-card: #0f172a;
-      --bg-header: rgba(2, 6, 23, 0.92);
+      --bg-header: rgba(2, 6, 23, 0.94);
       --border-card: #1e293b;
       --border-subtle: #1e293b;
 
@@ -92,11 +92,8 @@
       justify-content: center;
     }
 
-    body.dark {
-      background: #090d16;
-    }
+    body.dark { background: #090d16; }
 
-    /* ════ PHONE SHELL / CONTAINER ════ */
     #app-container {
       position: relative;
       width: 100%;
@@ -115,14 +112,11 @@
         border-radius: 40px;
         border: 8px solid #0f172a;
       }
-      body.dark #app-container {
-        border-color: #1e293b;
-      }
+      body.dark #app-container { border-color: #1e293b; }
     }
 
     .font-display { font-family: var(--font-display); }
 
-    /* ════ NOTCH ════ */
     .phone-notch {
       position: absolute;
       top: 0;
@@ -256,7 +250,6 @@
       cursor: pointer;
       transition: border-color 0.2s;
     }
-
     .search-bar-trigger:hover { border-color: var(--pri); }
 
     /* ════ SCROLLABLE CONTENT BODY ════ */
@@ -289,12 +282,83 @@
       margin-bottom: 12px;
     }
 
+    /* ════ PROFILE CONFIDENCE & COMPLETENESS BOX ════ */
+    .confidence-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--r-lg);
+      padding: 14px;
+      margin: 0 18px 18px;
+    }
+
+    .conf-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .conf-lbl {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .conf-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--r-full);
+      text-transform: uppercase;
+    }
+    .conf-badge.full { background: var(--emerald-bg); color: var(--emerald-text); }
+    .conf-badge.partial { background: var(--amber-bg); color: var(--amber-text); }
+    .conf-badge.discovery { background: var(--sky-bg); color: var(--sky-text); }
+
+    .meter-track {
+      height: 6px;
+      width: 100%;
+      border-radius: 3px;
+      background: var(--border-subtle);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .meter-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+      transition: width 0.4s ease;
+    }
+
+    .conf-checklist {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      font-size: 10.5px;
+    }
+
+    .chk-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--bg-page);
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+    }
+    .chk-pill.active { color: var(--emerald-text); border-color: rgba(16, 185, 129, 0.3); background: var(--emerald-bg); }
+    .chk-pill.warning { color: var(--amber-text); border-color: rgba(245, 158, 11, 0.3); background: var(--amber-bg); }
+
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 10px;
       padding: 0 18px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .stat-card {
@@ -462,13 +526,8 @@
       flex-shrink: 0;
     }
 
-    .match-ring-svg {
-      transform: rotate(-90deg);
-    }
-
-    .match-ring-bg {
-      stroke: var(--border-card);
-    }
+    .match-ring-svg { transform: rotate(-90deg); }
+    .match-ring-bg { stroke: var(--border-card); }
 
     .match-ring-val {
       position: absolute;
@@ -495,7 +554,7 @@
       display: flex;
       align-items: flex-start;
       gap: 12px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .opp-main-info {
@@ -503,28 +562,21 @@
       min-width: 0;
     }
 
-    .opp-tags {
+    .opp-reasons-list {
       display: flex;
       flex-wrap: wrap;
       gap: 4px;
       margin: 6px 0;
     }
 
-    .opp-tag-pill {
+    .opp-reason-pill {
       font-size: 9.5px;
       font-weight: 600;
-      background: var(--pri-light);
-      color: var(--pri);
       border-radius: var(--r-full);
       padding: 2px 8px;
     }
-
-    .opp-reason-text {
-      font-size: 11px;
-      color: var(--text-muted);
-      line-height: 1.4;
-      margin-top: 4px;
-    }
+    .opp-reason-pill.verified { background: var(--emerald-bg); color: var(--emerald-text); }
+    .opp-reason-pill.unverified { background: var(--amber-bg); color: var(--amber-text); }
 
     .opp-card-actions {
       display: flex;
@@ -698,29 +750,11 @@
       font-weight: 600;
       color: var(--text-main);
     }
+    .cal-day-num.has-urgent { background: var(--rose-bg); color: var(--rose-text); font-weight: 700; }
+    .cal-day-num.has-approaching { background: var(--amber-bg); color: var(--amber-text); font-weight: 700; }
+    .cal-day-num.has-upcoming { background: var(--emerald-bg); color: var(--emerald-text); font-weight: 700; }
 
-    .cal-day-num.has-urgent {
-      background: var(--rose-bg);
-      color: var(--rose-text);
-      font-weight: 700;
-    }
-    .cal-day-num.has-approaching {
-      background: var(--amber-bg);
-      color: var(--amber-text);
-      font-weight: 700;
-    }
-    .cal-day-num.has-upcoming {
-      background: var(--emerald-bg);
-      color: var(--emerald-text);
-      font-weight: 700;
-    }
-
-    .cal-dot {
-      width: 4px;
-      height: 4px;
-      border-radius: var(--r-full);
-      margin-top: 2px;
-    }
+    .cal-dot { width: 4px; height: 4px; border-radius: var(--r-full); margin-top: 2px; }
 
     /* ════ PROFILE SCREEN ════ */
     .prof-hero {
@@ -728,7 +762,7 @@
       align-items: center;
       gap: 14px;
       padding: 0 18px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .prof-avatar-big {
@@ -747,26 +781,6 @@
 
     .prof-name { font-size: 17px; font-weight: 700; color: var(--text-main); }
     .prof-meta { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
-
-    .ai-status-card {
-      background: var(--emerald-bg);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      border-radius: var(--r-lg);
-      padding: 14px;
-      margin: 0 18px 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .ai-status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: var(--r-full);
-      background: var(--emerald);
-      box-shadow: 0 0 8px var(--emerald);
-      flex-shrink: 0;
-    }
 
     .academic-info-grid {
       display: grid;
@@ -791,7 +805,7 @@
       flex-wrap: wrap;
       gap: 6px;
       padding: 0 18px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .tag-chip {
@@ -807,12 +821,7 @@
       color: var(--text-muted);
       cursor: pointer;
     }
-
-    .tag-chip.active {
-      background: var(--pri);
-      border-color: var(--pri);
-      color: #fff;
-    }
+    .tag-chip.active { background: var(--pri); border-color: var(--pri); color: #fff; }
 
     /* ════ BOTTOM NAVIGATION (4 TABS) ════ */
     .bottom-nav {
@@ -843,7 +852,6 @@
       color: var(--text-sub);
       transition: color 0.2s;
     }
-
     .nav-tab-btn.active { color: var(--pri); }
 
     .nav-icon-wrap {
@@ -855,17 +863,13 @@
       justify-content: center;
       transition: all 0.2s;
     }
-
     .nav-tab-btn.active .nav-icon-wrap {
       background: var(--pri);
       color: #fff;
       box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
     }
 
-    .nav-lbl {
-      font-size: 10px;
-      font-weight: 600;
-    }
+    .nav-lbl { font-size: 10px; font-weight: 600; }
 
     /* ════ OVERLAYS & MODALS ════ */
     .sheet-overlay {
@@ -879,15 +883,11 @@
       opacity: 0;
       transition: opacity 0.25s ease;
     }
-
-    .sheet-overlay.open {
-      display: flex;
-      opacity: 1;
-    }
+    .sheet-overlay.open { display: flex; opacity: 1; }
 
     .sheet-modal {
       width: 100%;
-      max-height: 88%;
+      max-height: 90%;
       background: var(--bg-card);
       border-top-left-radius: var(--r-xl);
       border-top-right-radius: var(--r-xl);
@@ -896,10 +896,7 @@
       transform: translateY(100%);
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
-    .sheet-overlay.open .sheet-modal {
-      transform: translateY(0);
-    }
+    .sheet-overlay.open .sheet-modal { transform: translateY(0); }
 
     .sheet-grip {
       width: 40px;
@@ -939,19 +936,15 @@
       transition: all 0.25s ease;
       z-index: 60;
     }
+    .toast-popup.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    .toast-popup.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* ════ AUTH PAGES ════ */
+    /* ════ FULLSCREEN AUTH & ONBOARDING ════ */
     .auth-page {
       position: absolute;
       inset: 0;
       background: var(--bg-page);
-      z-index: 35;
-      padding: 40px 20px;
+      z-index: 45;
+      padding: 36px 20px;
       overflow-y: auto;
       display: none;
     }
@@ -962,13 +955,45 @@
       background: var(--bg-card);
       border: 1px solid var(--border-card);
       border-radius: var(--r-md);
-      padding: 12px 14px;
+      padding: 11px 14px;
       font-size: 13px;
       color: var(--text-main);
       margin-bottom: 12px;
       outline: none;
     }
     .input-field:focus { border-color: var(--pri); }
+
+    /* Progressive Wizard Cards */
+    .wiz-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--r-lg);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .wiz-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .wiz-card-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .wiz-opt-tag {
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--bg-page);
+      color: var(--text-muted);
+      padding: 2px 7px;
+      border-radius: var(--r-full);
+      border: 1px solid var(--border-card);
+    }
   </style>
 </head>
 <body>
@@ -1012,15 +1037,32 @@
   </header>
 
   <!-- ══════════════════════════════════════════════════════════
-       MAIN CONTENT SCREENS
+       MAIN CONTENT SCREENS (4 TABS)
   ══════════════════════════════════════════════════════════ -->
   <main class="screen-content">
 
     <!-- ── 1. HOME / DASHBOARD TAB ── -->
     <section id="tab-home" class="page-tab active">
-      <div style="padding: 0 18px; margin-bottom: 16px;">
+      <div style="padding: 0 18px; margin-bottom: 12px;">
         <h1 class="font-display" style="font-size: 20px; font-weight: 700;" id="homeGreeting">Good morning, Student 👋</h1>
-        <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Here's what matters to you today.</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;" id="homeSubtitle">Personalized Career &amp; Educational Intelligence</p>
+      </div>
+
+      <!-- Profile Completeness & Confidence Box -->
+      <div class="confidence-card">
+        <div class="conf-head">
+          <span class="conf-lbl">Profile Completeness</span>
+          <span class="conf-badge full" id="dConfBadge">🟢 Full Match</span>
+        </div>
+        <div class="meter-track">
+          <div class="meter-fill" id="dMeterFill" style="width: 80%;"></div>
+        </div>
+        <div class="conf-checklist">
+          <span class="chk-pill active" id="chkInt">✓ Interests</span>
+          <span class="chk-pill active" id="chkEdu">✓ Education</span>
+          <span class="chk-pill active" id="chkLoc">✓ Location</span>
+          <span class="chk-pill" id="chkAge">○ Age</span>
+        </div>
       </div>
 
       <!-- 4 Stats Cards -->
@@ -1050,7 +1092,7 @@
           <div class="stat-icon-wrap" style="background: var(--sky-bg); color: var(--sky);">
             <i data-lucide="newspaper" style="width: 16px; height: 16px;"></i>
           </div>
-          <div class="stat-num font-display">12</div>
+          <div class="stat-num font-display" id="statNewsCount">7</div>
           <div class="stat-label">Personalized News</div>
         </div>
       </div>
@@ -1074,7 +1116,7 @@
           <div class="sec-title font-display">🤖 Smart Deadline Intelligence</div>
         </div>
       </div>
-      <p style="padding: 0 18px; font-size: 11.5px; color: var(--text-muted); margin-bottom: 12px;">We found verified opportunities that match your interests &amp; academic profile.</p>
+      <p style="padding: 0 18px; font-size: 11.5px; color: var(--text-muted); margin-bottom: 12px;">Verified opportunities matching your educational background &amp; interests.</p>
 
       <div id="smartMatchesContainer">
         <!-- Rendered dynamically -->
@@ -1087,16 +1129,16 @@
           <span>Why am I seeing this?</span>
         </div>
         <div class="callout-desc">
-          High priority because deadlines are approaching and these opportunities match your tracked profile topics &amp; eligibility window.
+          Recommendations and deadlines are calculated dynamically from your verified academic qualification, streams, and tracked focus areas.
         </div>
       </div>
     </section>
 
-    <!-- ── 2. NEWS TAB ── -->
+    <!-- ── 2. NEWS TAB (PERSONALIZED BASED ON USER) ── -->
     <section id="tab-news" class="page-tab">
       <div style="padding: 0 18px; margin-bottom: 14px;">
         <h1 class="font-display" style="font-size: 19px; font-weight: 700;">📰 Your News Feed</h1>
-        <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">News selected based on your interests.</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Filtered and personalized based on your tracked interests.</p>
       </div>
 
       <!-- News Filter Chips -->
@@ -1114,10 +1156,10 @@
       <!-- News For You banner with active interests -->
       <div class="card" style="margin: 0 18px 16px;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-          <span style="font-size: 13px; font-weight: 700; color: var(--text-main);">News For You</span>
+          <span style="font-size: 13px; font-weight: 700; color: var(--text-main);">Personalized News</span>
           <button style="background: none; border: none; font-size: 11px; font-weight: 600; color: var(--pri); cursor: pointer;" onclick="switchTab('profile')">Edit Interests</button>
         </div>
-        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Based on your tracked profile interests</p>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Tailored to your tracked profile interests:</p>
         <div style="display: flex; flex-wrap: wrap; gap: 6px;" id="newsInterestsList">
           <!-- Rendered dynamically -->
         </div>
@@ -1133,7 +1175,7 @@
     <section id="tab-deadlines" class="page-tab">
       <div style="padding: 0 18px; margin-bottom: 14px;">
         <h1 class="font-display" style="font-size: 19px; font-weight: 700;">📅 Deadline Calendar</h1>
-        <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Track everything in one unified calendar view.</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Track all closing dates in one unified calendar.</p>
       </div>
 
       <!-- Interactive Calendar Widget -->
@@ -1154,11 +1196,11 @@
       </div>
       <div class="chip-strip" id="deadlinesFilterStrip">
         <button class="filter-chip active" onclick="setDeadlineCat('All', this)">All</button>
-        <button class="filter-chip" onclick="setDeadlineCat('Exams', this)">Exams</button>
-        <button class="filter-chip" onclick="setDeadlineCat('Internships', this)">Internships</button>
-        <button class="filter-chip" onclick="setDeadlineCat('Scholarships', this)">Scholarships</button>
-        <button class="filter-chip" onclick="setDeadlineCat('Hackathons', this)">Hackathons</button>
-        <button class="filter-chip" onclick="setDeadlineCat('Jobs', this)">Jobs</button>
+        <button class="filter-chip" onclick="setDeadlineCat('Government Exam', this)">Exams</button>
+        <button class="filter-chip" onclick="setDeadlineCat('Internship', this)">Internships</button>
+        <button class="filter-chip" onclick="setDeadlineCat('Scholarship', this)">Scholarships</button>
+        <button class="filter-chip" onclick="setDeadlineCat('Hackathon', this)">Hackathons</button>
+        <button class="filter-chip" onclick="setDeadlineCat('Job', this)">Jobs</button>
       </div>
 
       <div id="upcomingDeadlinesList" style="padding: 0 18px;">
@@ -1177,47 +1219,55 @@
       </div>
 
       <!-- AI Personalization Status Banner -->
-      <div class="ai-status-card">
-        <div class="ai-status-dot"></div>
-        <div>
-          <div style="font-size: 12px; font-weight: 700; color: var(--emerald-text);">AI Personalization Status: Active</div>
-          <div style="font-size: 10.5px; color: var(--emerald-text); opacity: 0.85; margin-top: 2px;">Your opportunity feed and deadlines are dynamically personalized.</div>
+      <div class="card" style="margin: 0 18px 16px; background: var(--emerald-bg); border-color: rgba(16, 185, 129, 0.25);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 6px var(--emerald);"></div>
+          <span style="font-size: 12px; font-weight: 700; color: var(--emerald-text);">AI Personalization: Active</span>
         </div>
+        <p style="font-size: 11px; color: var(--emerald-text); margin-top: 4px;">Recommendations &amp; reminders match your qualification and interests.</p>
       </div>
 
       <!-- Academic Info Grid -->
       <div style="padding: 0 18px; margin-bottom: 8px; font-size: 12.5px; font-weight: 700; color: var(--text-main);">Academic Profile</div>
       <div class="academic-info-grid">
         <div class="academic-box">
+          <div class="academic-lbl">Education Level</div>
+          <div class="academic-val" id="profEduLevel">Undergraduate</div>
+        </div>
+        <div class="academic-box">
           <div class="academic-lbl">Degree / Class</div>
           <div class="academic-val" id="profDegree">B.Tech</div>
         </div>
         <div class="academic-box">
-          <div class="academic-lbl">Branch / Stream</div>
+          <div class="academic-lbl">Branch / Focus</div>
           <div class="academic-val" id="profBranch">Computer Science</div>
         </div>
         <div class="academic-box">
           <div class="academic-lbl">Location</div>
           <div class="academic-val" id="profLoc">India</div>
         </div>
-        <div class="academic-box">
-          <div class="academic-lbl">Target Goal</div>
-          <div class="academic-val" id="profGoal">Placement &amp; Jobs</div>
-        </div>
       </div>
 
-      <!-- Tracked Interests -->
+      <!-- Tracked Interests & Topics -->
       <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 18px; margin-bottom: 8px;">
-        <span style="font-size: 12.5px; font-weight: 700; color: var(--text-main);">Interests</span>
-        <button id="editIntBtn" onclick="toggleEditInterests()" style="background: none; border: none; font-size: 11px; font-weight: 600; color: var(--pri); cursor: pointer;">Edit Interests</button>
+        <span style="font-size: 12.5px; font-weight: 700; color: var(--text-main);">Tracked Interests</span>
+        <button onclick="openModal('profEditModal')" style="background: none; border: none; font-size: 11px; font-weight: 600; color: var(--pri); cursor: pointer;">+ Add / Edit</button>
       </div>
       <div class="tag-container" id="profileInterestsWrap">
         <!-- Rendered dynamically -->
       </div>
 
+      <!-- Skills -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 18px; margin-bottom: 8px;">
+        <span style="font-size: 12.5px; font-weight: 700; color: var(--text-main);">Skills &amp; Expertise</span>
+      </div>
+      <div class="tag-container" id="profileSkillsWrap">
+        <!-- Rendered dynamically -->
+      </div>
+
       <!-- Actions -->
       <div style="padding: 0 18px 24px; display: flex; flex-direction: column; gap: 8px;">
-        <button class="btn-outline" style="border-color: var(--pri); color: var(--pri);" onclick="openModal('profEditModal')">✏️ Edit Complete Academic Criteria</button>
+        <button class="btn-pri" onclick="openModal('profEditModal')">✏️ Edit Complete Academic Criteria</button>
         <button class="btn-outline" style="border-color: rgba(244, 63, 94, 0.4); color: var(--rose);" onclick="promptResetAllUsers()">🧹 Reset Test Users &amp; Start Fresh</button>
         <button class="btn-outline" onclick="logout()">Sign Out</button>
       </div>
@@ -1256,7 +1306,7 @@
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
         <div style="flex: 1; display: flex; align-items: center; gap: 8px; background: var(--bg-page); border: 1px solid var(--border-card); border-radius: var(--r-md); padding: 8px 12px;">
           <i data-lucide="search" style="width: 14px; height: 14px; color: var(--text-sub);"></i>
-          <input type="text" id="globalSearchInput" placeholder="Try “AI internships”, “UPSC”, “GATE”..." oninput="handleSearch(this.value)" style="border: none; background: transparent; outline: none; width: 100%; font-size: 13px; color: var(--text-main);" />
+          <input type="text" id="globalSearchInput" placeholder="Try “AI”, “UPSC”, “10th”, “Scholarship”..." oninput="handleSearch(this.value)" style="border: none; background: transparent; outline: none; width: 100%; font-size: 13px; color: var(--text-main);" />
         </div>
         <button onclick="closeModal('searchModal')" style="background: none; border: none; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer;">Cancel</button>
       </div>
@@ -1276,7 +1326,7 @@
     <div class="sheet-modal" onclick="event.stopPropagation()">
       <div class="sheet-grip"></div>
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-        <span class="font-display" style="font-size: 15px; font-weight: 700;">Notifications</span>
+        <span class="font-display" style="font-size: 15px; font-weight: 700;">Notifications &amp; Alerts</span>
         <button onclick="closeModal('notifModal')" class="icon-btn"><i data-lucide="x" style="width: 14px; height: 14px;"></i></button>
       </div>
 
@@ -1286,8 +1336,8 @@
             <i data-lucide="flame" style="width: 15px; height: 15px;"></i>
           </div>
           <div>
-            <div style="font-size: 12.5px; font-weight: 700;">Deadline approaching</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">GATE application registration closes soon.</div>
+            <div style="font-size: 12.5px; font-weight: 700;">Approaching Deadline</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">GATE / National Registration deadline closing soon.</div>
             <div style="font-size: 9.5px; color: var(--text-sub); margin-top: 4px;">Just now</div>
           </div>
         </div>
@@ -1297,20 +1347,9 @@
             <i data-lucide="newspaper" style="width: 15px; height: 15px;"></i>
           </div>
           <div>
-            <div style="font-size: 12.5px; font-weight: 700;">New personalized article</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">5 new tech &amp; cybersecurity updates match your profile.</div>
+            <div style="font-size: 12.5px; font-weight: 700;">Personalized News Update</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">New opportunities published in your tracked categories.</div>
             <div style="font-size: 9.5px; color: var(--text-sub); margin-top: 4px;">3h ago</div>
-          </div>
-        </div>
-
-        <div class="card" style="display: flex; gap: 12px; align-items: flex-start; padding: 12px; margin: 0;">
-          <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--emerald-bg); color: var(--emerald); display: flex; align-items: center; justify-content: center; shrink-0;">
-            <i data-lucide="sparkles" style="width: 15px; height: 15px;"></i>
-          </div>
-          <div>
-            <div style="font-size: 12.5px; font-weight: 700;">New opportunity discovered</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Smart India Hackathon matches your profile with 92% confidence.</div>
-            <div style="font-size: 9.5px; color: var(--text-sub); margin-top: 4px;">1d ago</div>
           </div>
         </div>
       </div>
@@ -1327,14 +1366,14 @@
       <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px;">
         <div>
           <span class="pill-badge upcoming" id="dtCategoryBadge" style="margin-bottom: 6px;">Exams</span>
-          <div class="font-display" style="font-size: 16px; font-weight: 700; color: var(--text-main);" id="dtTitle">GATE 2027 Application</div>
-          <div style="font-size: 11.5px; color: var(--text-muted);" id="dtOrg">IIT National Coordination Board</div>
+          <div class="font-display" style="font-size: 16px; font-weight: 700; color: var(--text-main);" id="dtTitle">Opportunity Title</div>
+          <div style="font-size: 11.5px; color: var(--text-muted);" id="dtOrg">Organization</div>
         </div>
         <button onclick="closeModal('oppDetailModal')" class="icon-btn"><i data-lucide="x" style="width: 14px; height: 14px;"></i></button>
       </div>
 
       <div style="display: flex; gap: 16px; font-size: 11px; color: var(--text-muted); margin-bottom: 16px;">
-        <span style="display: flex; align-items: center; gap: 4px;"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> <span id="dtDeadline">Sep 15, 2026</span></span>
+        <span style="display: flex; align-items: center; gap: 4px;"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> <span id="dtDeadline">Closing Soon</span></span>
         <span style="display: flex; align-items: center; gap: 4px;"><i data-lucide="shield-check" style="width: 12px; height: 12px; color: var(--pri);"></i> <span id="dtTrust">Official .gov.in</span></span>
       </div>
 
@@ -1346,26 +1385,14 @@
         </div>
 
         <div id="dtChecksList">
-          <div class="check-row">
-            <span style="color: var(--text-muted);">Skills &amp; Field Alignment</span>
-            <span style="color: var(--emerald); font-weight: 700;">✓ Verified Match</span>
-          </div>
-          <div class="check-row">
-            <span style="color: var(--text-muted);">Educational Level</span>
-            <span style="color: var(--emerald); font-weight: 700;">✓ Applicable</span>
-          </div>
-          <div class="check-row">
-            <span style="color: var(--text-muted);">Tracked Interest Match</span>
-            <span style="color: var(--emerald); font-weight: 700;">✓ Matched</span>
-          </div>
+          <!-- Checks rendered dynamically -->
         </div>
-        <div style="font-size: 11px; font-weight: 600; color: var(--pri); margin-top: 10px;">✓ Highly Recommended for you</div>
       </div>
 
-      <!-- Why am I seeing this card -->
+      <!-- Exact Provenance Sentence Evidence -->
       <div class="info-callout" style="margin: 0 0 18px;">
-        <div class="callout-title font-display">🧠 Why am I seeing this?</div>
-        <div class="callout-desc" id="dtReasonText">Matches your academic profile and selected focus topics.</div>
+        <div class="callout-title font-display">🔍 Exact Source Evidence</div>
+        <div class="callout-desc" id="dtReasonText" style="font-family: monospace; font-size: 11px;">“...”</div>
       </div>
 
       <!-- Action Buttons -->
@@ -1373,53 +1400,150 @@
         <a id="dtOfficialLink" href="#" target="_blank" class="btn-outline" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px;">
           Official Link <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
         </a>
-        <button id="dtSaveBtn" class="btn-outline" onclick="toggleCurrentOppSave()">Bookmark</button>
+        <button id="dtSaveBtn" class="btn-outline" onclick="toggleCurrentOppSave()">Mark Applied</button>
         <button id="dtReminderBtn" class="btn-pri" onclick="toggleCurrentOppReminder()">Set Reminder</button>
       </div>
     </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════
-       MODAL: EDIT PROFILE
+       MODAL: EDIT PROFILE & CRITERIA
   ══════════════════════════════════════════════════════════ -->
   <div class="sheet-overlay" id="profEditModal" onclick="closeModal('profEditModal')">
     <div class="sheet-modal" onclick="event.stopPropagation()">
       <div class="sheet-grip"></div>
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-        <span class="font-display" style="font-size: 15px; font-weight: 700;">Edit Profile Criteria</span>
+        <span class="font-display" style="font-size: 15px; font-weight: 700;">Edit Profile &amp; Criteria</span>
         <button onclick="closeModal('profEditModal')" class="icon-btn"><i data-lucide="x" style="width: 14px; height: 14px;"></i></button>
       </div>
 
       <form id="profileEditForm" onsubmit="saveProfileDetails(event)">
         <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Education Level</label>
-        <select class="input-field" id="editEduLevel">
-          <option value="10th">10th Standard</option>
+        <select class="input-field" id="editEduLevel" onchange="onEduLevelChange(this.value)">
+          <option value="10th">10th Standard / Matriculation</option>
           <option value="12th">12th / Intermediate</option>
           <option value="Diploma">Diploma / ITI</option>
-          <option value="Undergraduate" selected>Undergraduate (B.Tech, B.Sc, B.Com)</option>
-          <option value="Postgraduate">Postgraduate (M.Tech, MCA, MBA)</option>
-          <option value="Other">Other</option>
+          <option value="Undergraduate">Undergraduate (B.Tech, B.Sc, B.Com, Degree)</option>
+          <option value="Postgraduate">Postgraduate (M.Tech, MCA, MBA, M.Sc)</option>
+          <option value="PhD">Ph.D. / Research</option>
+          <option value="Other">Other / Open Explorer</option>
         </select>
 
-        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Qualification / Degree</label>
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);" id="lblQual">Qualification / Degree</label>
         <input class="input-field" id="editQual" type="text" placeholder="e.g. B.Tech, 10th Standard, MPC" />
 
-        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Branch / Stream</label>
-        <input class="input-field" id="editBranch" type="text" placeholder="e.g. Computer Science, Mechanical" />
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);" id="lblBranch">Branch / Focus Area</label>
+        <input class="input-field" id="editBranch" type="text" placeholder="e.g. Computer Science, Mechanical, Science" />
 
         <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">State / Location</label>
-        <input class="input-field" id="editLoc" type="text" placeholder="e.g. Andhra Pradesh, Delhi, India" />
+        <select class="input-field" id="editLoc">
+          <option value="">(None / Skip)</option>
+          <option value="Andhra Pradesh">Andhra Pradesh</option>
+          <option value="Telangana">Telangana</option>
+          <option value="Karnataka">Karnataka</option>
+          <option value="Tamil Nadu">Tamil Nadu</option>
+          <option value="Maharashtra">Maharashtra</option>
+          <option value="Delhi NCR">Delhi / NCR</option>
+          <option value="All India">All India</option>
+        </select>
 
-        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Career Goal</label>
-        <input class="input-field" id="editGoal" type="text" placeholder="e.g. Tech Job, Higher Studies, UPSC" />
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Career Goal / Target Role</label>
+        <input class="input-field" id="editGoal" type="text" placeholder="e.g. Software Engineer, UPSC, Scientist" />
 
-        <button type="submit" class="btn-pri" style="width: 100%; padding: 12px; margin-top: 10px;">Save Profile Criteria →</button>
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Custom Interests / Topics</label>
+        <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+          <input class="input-field" id="customIntInput" type="text" placeholder="Add custom topic (e.g. ISRO, GATE, AI)..." style="margin-bottom: 0;" />
+          <button type="button" class="btn-pri" style="flex: 0 0 70px; padding: 0;" onclick="addCustomInterest()">+ Add</button>
+        </div>
+        <div class="tag-container" id="editInterestsTagWrap" style="padding: 0; margin-bottom: 12px;"></div>
+
+        <button type="submit" class="btn-pri" style="width: 100%; padding: 12px; margin-top: 10px;">Save &amp; Recalculate Matches →</button>
       </form>
     </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════════
-       AUTH & ONBOARDING SCREENS (SPA OVERLAYS)
+       PROGRESSIVE ONBOARDING SETUP WIZARD
+  ══════════════════════════════════════════════════════════ -->
+  <div class="auth-page" id="onboardingScreen">
+    <div style="text-align: center; margin-bottom: 20px;">
+      <div class="brand-icon" style="margin: 0 auto 10px; width: 40px; height: 40px;">
+        <i data-lucide="sparkles" style="width: 20px; height: 20px;"></i>
+      </div>
+      <h2 class="font-display" style="font-size: 20px; font-weight: 700;">Personalize Your Intelligence</h2>
+      <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Choose what you share. All demographic details are 100% optional.</p>
+    </div>
+
+    <form id="onboardingForm" onsubmit="submitOnboarding(event)">
+      <!-- STEP 1: FOCUS & INTERESTS -->
+      <div class="wiz-card">
+        <div class="wiz-card-head">
+          <span class="wiz-card-title">1. What are you looking for? ⭐</span>
+          <span class="wiz-opt-tag" style="background: var(--pri-light); color: var(--pri);">Encouraged</span>
+        </div>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Select topics or type custom interests:</p>
+        
+        <div class="tag-container" id="obPresetsWrap" style="padding: 0; margin-bottom: 8px;">
+          <!-- Preset chips rendered dynamically -->
+        </div>
+
+        <div style="display: flex; gap: 6px;">
+          <input class="input-field" id="obCustomInput" type="text" placeholder="Type custom interest (e.g. UPSC, Robotics)..." style="margin-bottom: 0;" />
+          <button type="button" class="btn-pri" style="flex: 0 0 70px; padding: 0;" onclick="addObCustomTag()">+ Add</button>
+        </div>
+        <div class="tag-container" id="obCustomTagWrap" style="padding: 0; margin-top: 8px;"></div>
+      </div>
+
+      <!-- STEP 2: EDUCATION (INCLUSIVE 10TH TO PG) -->
+      <div class="wiz-card">
+        <div class="wiz-card-head">
+          <span class="wiz-card-title">2. Education Level</span>
+          <span class="wiz-opt-tag">Optional</span>
+        </div>
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Level</label>
+        <select class="input-field" id="obEduLevel" onchange="onObEduChange(this.value)">
+          <option value="10th">10th Standard / Matriculation</option>
+          <option value="12th">12th / Intermediate</option>
+          <option value="Diploma">Diploma / ITI</option>
+          <option value="Undergraduate" selected>Undergraduate (B.Tech, B.Sc, B.Com, Degree)</option>
+          <option value="Postgraduate">Postgraduate (M.Tech, MCA, MBA, M.Sc)</option>
+          <option value="Other">Other / Skip</option>
+        </select>
+
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);" id="obLblQual">Qualification / Course</label>
+        <input class="input-field" id="obQual" type="text" value="B.Tech" />
+
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);" id="obLblBranch">Branch / Subject Focus</label>
+        <input class="input-field" id="obBranch" type="text" value="Computer Science" />
+      </div>
+
+      <!-- STEP 3: LOCATION & SKILLS -->
+      <div class="wiz-card">
+        <div class="wiz-card-head">
+          <span class="wiz-card-title">3. State &amp; Skills</span>
+          <span class="wiz-opt-tag">Optional</span>
+        </div>
+        <label style="font-size: 11px; font-weight: 600; color: var(--text-muted);">State / Location</label>
+        <select class="input-field" id="obLoc">
+          <option value="">(Skip / All India)</option>
+          <option value="Andhra Pradesh">Andhra Pradesh</option>
+          <option value="Telangana">Telangana</option>
+          <option value="Karnataka">Karnataka</option>
+          <option value="Tamil Nadu">Tamil Nadu</option>
+          <option value="Delhi NCR">Delhi / NCR</option>
+          <option value="All India">All India</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-pri" style="width: 100%; padding: 13px; font-size: 13px;">Complete Setup &amp; Launch Dashboard ⚡</button>
+      <div style="text-align: center; margin-top: 12px;">
+        <a href="#" onclick="skipOnboarding()" style="font-size: 11.5px; color: var(--text-muted); text-decoration: underline;">Skip all &amp; explore general opportunities →</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       FULLSCREEN AUTH (LOGIN / SIGNUP)
   ══════════════════════════════════════════════════════════ -->
   <div class="auth-page" id="authScreen">
     <div style="text-align: center; margin-bottom: 28px;">
@@ -1427,7 +1551,7 @@
         <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
       </div>
       <h2 class="font-display" style="font-size: 22px; font-weight: 700;" id="authTitle">Welcome to Deadline Defenders</h2>
-      <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Never miss career, exam &amp; scholarship opportunities.</p>
+      <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Never miss career, exam &amp; scholarship deadlines.</p>
     </div>
 
     <!-- Login Form -->
@@ -1480,25 +1604,26 @@
 let currentUser = null;
 let currentTab = 'home';
 let isDark = false;
-let isEditingInterests = false;
 
 let opportunitiesList = [];
 let newsArticlesList = [];
 let savedOppIds = new Set();
 let reminderOppIds = new Set();
 let bookmarkedNewsIds = new Set();
-let activeInterests = new Set(["Artificial Intelligence", "Cybersecurity", "Web Development", "Hackathons", "Internships"]);
+let activeInterests = new Set();
+let obSelectedInterests = new Set(["AI & ML", "Internships", "Scholarships"]);
+let obCustomInterests = [];
 
 let selectedNewsFilter = 'All';
 let selectedDeadlineCat = 'All';
-let currentMonthIndex = 8; // September (0-indexed: 8 = Sep 2026)
+let currentMonthIndex = 8; // September (8 = Sep 2026)
 
 let activeDetailOpp = null;
 
-const ALL_INTEREST_OPTIONS = [
-  "Artificial Intelligence", "Cybersecurity", "Web Development",
-  "Competitive Programming", "Hackathons", "Internships", "Scholarships",
-  "Government Exams", "Higher Education", "Robotics", "Cloud Computing"
+const PRESET_INTERESTS = [
+  "🏛️ Govt Exams", "💼 Tech Jobs", "🎓 Internships", "💰 Scholarships",
+  "⚡ Hackathons", "🤖 AI & ML", "🌐 Web Dev", "🔒 Cybersecurity",
+  "☁️ Cloud", "💻 Competitive Coding", "📚 UPSC", "🔬 GATE"
 ];
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -1555,7 +1680,33 @@ function switchTab(tabId) {
 function openModal(id) {
   const el = document.getElementById(id);
   if (el) el.classList.add('open');
+  if (id === 'profEditModal') {
+    populateProfileEditModal();
+  }
   refreshIcons();
+}
+
+function populateProfileEditModal() {
+  if (!currentUser) return;
+  const p = currentUser.profile || {};
+  const edu = document.getElementById('editEduLevel');
+  if (edu) {
+    edu.value = p.education_level || 'Undergraduate';
+    onEduLevelChange(edu.value);
+  }
+  if (p.qualification && document.getElementById('editQual')) {
+    document.getElementById('editQual').value = p.qualification;
+  }
+  if (p.branch && document.getElementById('editBranch')) {
+    document.getElementById('editBranch').value = p.branch;
+  }
+  if (document.getElementById('editLoc')) {
+    document.getElementById('editLoc').value = p.state_location || '';
+  }
+  if (document.getElementById('editGoal')) {
+    document.getElementById('editGoal').value = p.career_goal || '';
+  }
+  renderEditInterestsTags();
 }
 
 function closeModal(id) {
@@ -1570,7 +1721,7 @@ function renderMatchRingSvg(value, size = 40) {
   const r = 16;
   const c = 2 * Math.PI * r;
   const offset = c - (value / 100) * c;
-  const color = value >= 90 ? "#4f46e5" : value >= 80 ? "#6366f1" : "#94a3b8";
+  const color = value >= 85 ? "#10b981" : value >= 65 ? "#f59e0b" : "#94a3b8";
 
   return `
     <div class="match-ring-box" style="width: ${size}px; height: ${size}px;">
@@ -1603,6 +1754,14 @@ async function loadAppData() {
     currentUser = await pRes.json();
     document.getElementById('authScreen').classList.remove('active');
 
+    if (currentUser.needsOnboarding) {
+      renderOnboardingPresets();
+      document.getElementById('onboardingScreen').classList.add('active');
+      return;
+    } else {
+      document.getElementById('onboardingScreen').classList.remove('active');
+    }
+
     const oData = await oRes.json();
     opportunitiesList = oData.opportunities || [];
 
@@ -1629,10 +1788,38 @@ async function loadAppData() {
 function renderDashboard() {
   if (!currentUser) return;
   document.getElementById('homeGreeting').textContent = `Good morning, ${currentUser.username || 'Student'} 👋`;
+  const p = currentUser.profile || {};
+  document.getElementById('homeSubtitle').textContent = `${p.qualification || 'Student'} · ${p.state_location || 'India'}`;
   document.getElementById('headerAvatarBtn').textContent = (currentUser.username || 'S')[0].toUpperCase();
   document.getElementById('profAvatarBig').textContent = (currentUser.username || 'S')[0].toUpperCase();
 
   document.getElementById('statOppsCount').textContent = opportunitiesList.length || 14;
+  document.getElementById('statNewsCount').textContent = newsArticlesList.length || 7;
+
+  // Render Completeness Bar & Badges
+  const comp = currentUser.completeness || 75;
+  document.getElementById('dMeterFill').style.width = `${comp}%`;
+
+  const confBadge = document.getElementById('dConfBadge');
+  const confMode = currentUser.matchingConfidence || 'FULL_MATCH';
+  if (confMode === 'FULL_MATCH') {
+    confBadge.textContent = '🟢 Full Match';
+    confBadge.className = 'conf-badge full';
+  } else if (confMode === 'PARTIAL_MATCH') {
+    confBadge.textContent = '🟡 Partial Match';
+    confBadge.className = 'conf-badge partial';
+  } else {
+    confBadge.textContent = '🔵 Interest Match';
+    confBadge.className = 'conf-badge discovery';
+  }
+
+  const chk = currentUser.checklist || {};
+  document.getElementById('chkInt').className = `chk-pill ${chk.interests ? 'active' : 'warning'}`;
+  document.getElementById('chkInt').textContent = chk.interests ? '✓ Interests' : '⚠️ No Interests';
+  document.getElementById('chkEdu').className = `chk-pill ${chk.education ? 'active' : 'warning'}`;
+  document.getElementById('chkEdu').textContent = chk.education ? '✓ Education' : '⚠️ Edu Skipped';
+  document.getElementById('chkLoc').className = `chk-pill ${chk.location ? 'active' : 'warning'}`;
+  document.getElementById('chkLoc').textContent = chk.location ? '✓ Location' : '⚠️ Loc Skipped';
 
   // Render Urgent Don't Miss These Carousel
   const urgentContainer = document.getElementById('urgentListContainer');
@@ -1652,9 +1839,9 @@ function renderDashboard() {
           </span>
         </div>
         <div class="urgent-title">${opp.title}</div>
-        <div class="urgent-org">${opp.organization || 'National Agency'}</div>
+        <div class="urgent-org">${opp.organization || 'Official Agency'}</div>
         <div style="display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
-          <i data-lucide="clock" style="width: 11px; height: 11px;"></i> ${opp.deadline || 'Upcoming'}
+          <i data-lucide="clock" style="width: 11px; height: 11px;"></i> Closing: ${opp.deadline || 'Upcoming'}
         </div>
         <div class="urgent-countdown font-display" style="color: ${badgeClass === 'urgent' ? 'var(--rose)' : 'var(--amber)'};">
           ${days} days remaining
@@ -1671,6 +1858,8 @@ function renderDashboard() {
   smartContainer.innerHTML = opportunitiesList.map(opp => {
     const matchVal = opp.matchScore || 88;
     const isRem = reminderOppIds.has(opp.id);
+    const verifiedTags = (opp.matchReasons || []).map(r => `<span class="opp-reason-pill verified">${r}</span>`).join('');
+    const unverifiedTags = (opp.unverifiedNotices || []).map(n => `<span class="opp-reason-pill unverified">${n}</span>`).join('');
 
     return `
       <div class="opp-item-card">
@@ -1679,17 +1868,14 @@ function renderDashboard() {
           <div class="opp-main-info">
             <div style="font-size: 13.5px; font-weight: 700; color: var(--text-main); line-height: 1.3;">${opp.title}</div>
             <div style="font-size: 11px; color: var(--text-muted); margin-top: 1px;">${opp.organization || 'Official Portal'} · ${opp.category || 'Career'}</div>
-            <div class="opp-tags">
-              <span class="opp-tag-pill">${opp.qualification_req || 'Open'}</span>
-              <span class="opp-tag-pill">${opp.category || 'Opportunity'}</span>
-            </div>
-            <div class="opp-reason-text">
-              ${opp.matchSummary || 'Verified match for your active preferences and academic profile.'}
+            <div class="opp-reasons-list">
+              ${verifiedTags}
+              ${unverifiedTags}
             </div>
           </div>
         </div>
         <div class="opp-card-actions">
-          <button class="btn-pri" onclick='openOppDetail(${JSON.stringify(opp).replace(/'/g,"&#39;")})'>View Opportunity</button>
+          <button class="btn-pri" onclick='openOppDetail(${JSON.stringify(opp).replace(/'/g,"&#39;")})'>🔍 Details &amp; Evidence</button>
           <button class="btn-outline ${isRem ? 'active' : ''}" onclick="toggleReminderItem(${opp.id})">
             ${isRem ? 'Reminder Set ✓' : 'Set Reminder'}
           </button>
@@ -1700,18 +1886,20 @@ function renderDashboard() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   RENDER NEWS
+   RENDER NEWS (PERSONALIZED TO USER)
 ═══════════════════════════════════════════════════════════════════ */
 function renderNews() {
-  // Render active interests badges in news banner
   const intContainer = document.getElementById('newsInterestsList');
-  intContainer.innerHTML = Array.from(activeInterests).map(i => `
-    <span style="font-size: 10px; font-weight: 600; background: var(--emerald-bg); color: var(--emerald-text); border-radius: var(--r-full); padding: 3px 8px; display: inline-flex; align-items: center; gap: 3px;">
-      ✓ ${i}
-    </span>
-  `).join('');
+  if (activeInterests.size === 0) {
+    intContainer.innerHTML = `<span style="font-size: 11px; color: var(--text-sub);">Exploring all news topics.</span>`;
+  } else {
+    intContainer.innerHTML = Array.from(activeInterests).map(i => `
+      <span style="font-size: 10px; font-weight: 600; background: var(--emerald-bg); color: var(--emerald-text); border-radius: var(--r-full); padding: 3px 8px; display: inline-flex; align-items: center; gap: 3px;">
+        ✓ ${i}
+      </span>
+    `).join('');
+  }
 
-  // Render news cards
   const container = document.getElementById('newsFeedContainer');
   const filtered = selectedNewsFilter === 'All' 
     ? newsArticlesList 
@@ -1749,7 +1937,7 @@ function setNewsFilter(chip, btn) {
 function toggleBookmarkNews(id) {
   if (bookmarkedNewsIds.has(id)) {
     bookmarkedNewsIds.delete(id);
-    showToast("Removed from bookmarks");
+    showToast("Removed from saved news");
   } else {
     bookmarkedNewsIds.add(id);
     showToast("Article bookmarked ✓");
@@ -1770,18 +1958,14 @@ function shiftMonth(delta) {
 
 function renderCalendar() {
   document.getElementById('calMonthLabel').textContent = `${MONTH_NAMES[currentMonthIndex]} 2026`;
-
   const container = document.getElementById('calGridContainer');
   const dayNames = ["M", "T", "W", "T", "F", "S", "S"];
-  
   let html = dayNames.map(d => `<div class="cal-day-label">${d}</div>`).join('');
 
   const leadBlanks = currentMonthIndex === 8 ? 1 : currentMonthIndex === 9 ? 3 : 2;
   const daysInMonth = currentMonthIndex === 8 ? 30 : 31;
 
-  for (let i = 0; i < leadBlanks; i++) {
-    html += `<div></div>`;
-  }
+  for (let i = 0; i < leadBlanks; i++) html += `<div></div>`;
 
   const markMap = currentMonthIndex === 8 ? { 15: "urgent", 18: "approaching", 22: "approaching" } : { 3: "upcoming", 7: "upcoming", 12: "upcoming", 20: "upcoming" };
 
@@ -1800,7 +1984,6 @@ function renderCalendar() {
 
   container.innerHTML = html;
 
-  // Render Upcoming Deadlines List
   const upListContainer = document.getElementById('upcomingDeadlinesList');
   const filteredOpps = selectedDeadlineCat === 'All'
     ? opportunitiesList
@@ -1840,67 +2023,73 @@ function renderProfile() {
   document.getElementById('profFullName').textContent = currentUser.username || 'Student User';
   document.getElementById('profSubtitle').textContent = `${p.qualification || 'Student'} · ${p.branch || 'General'} · Verified`;
 
-  document.getElementById('profDegree').textContent = p.qualification || p.education_level || 'Undergraduate';
-  document.getElementById('profBranch').textContent = p.branch || 'General';
+  document.getElementById('profEduLevel').textContent = p.education_level || 'Undergraduate';
+  document.getElementById('profDegree').textContent = p.qualification || 'Not provided';
+  document.getElementById('profBranch').textContent = p.branch || 'Not provided';
   document.getElementById('profLoc').textContent = p.state_location || p.city || 'India';
-  document.getElementById('profGoal').textContent = p.career_goal || 'Jobs & Internships';
 
-  // Render Interests
   const wrap = document.getElementById('profileInterestsWrap');
-  wrap.innerHTML = ALL_INTEREST_OPTIONS.map(i => {
-    const active = activeInterests.has(i);
-    return `
-      <button class="tag-chip ${active ? 'active' : ''}" onclick="toggleInterestTag('${i}')" ${isEditingInterests ? '' : 'style="cursor: default;"'}>
-        ${active ? '✓' : '+'} ${i}
-      </button>
-    `;
-  }).join('');
-}
-
-function toggleEditInterests() {
-  isEditingInterests = !isEditingInterests;
-  document.getElementById('editIntBtn').textContent = isEditingInterests ? "Done" : "Edit Interests";
-  renderProfile();
-}
-
-async function toggleInterestTag(topic) {
-  if (!isEditingInterests) return;
-  if (activeInterests.has(topic)) {
-    activeInterests.delete(topic);
+  if (activeInterests.size === 0) {
+    wrap.innerHTML = `<span style="font-size: 11px; color: var(--text-sub);">Exploring all topics.</span>`;
   } else {
-    activeInterests.add(topic);
+    wrap.innerHTML = Array.from(activeInterests).map(i => `
+      <span class="tag-chip active">⭐ ${i}</span>
+    `).join('');
   }
-  renderProfile();
-  // Auto-sync with backend
-  await fetch('/api/user/profile', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ interests: Array.from(activeInterests) })
-  });
-  showToast("Interests updated ✓");
+
+  const sWrap = document.getElementById('profileSkillsWrap');
+  let userSkills = [];
+  try {
+    userSkills = Array.isArray(p.skills) ? p.skills : JSON.parse(p.skills || '[]');
+  } catch(_) {}
+  if (!userSkills.length) {
+    sWrap.innerHTML = `<span style="font-size: 11px; color: var(--text-sub);">No specific skills added.</span>`;
+  } else {
+    sWrap.innerHTML = userSkills.map(s => `<span class="tag-chip active">✓ ${s}</span>`).join('');
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   OPPORTUNITY DETAIL MODAL
+   OPPORTUNITY DETAIL & EVIDENCE MODAL
 ═══════════════════════════════════════════════════════════════════ */
 function openOppDetail(opp) {
   activeDetailOpp = opp;
   document.getElementById('dtTitle').textContent = opp.title;
   document.getElementById('dtOrg').textContent = `${opp.organization || 'Verified Agency'} · ${opp.category || 'Career'}`;
-  document.getElementById('dtDeadline').textContent = opp.deadline || 'Closing Soon';
+  document.getElementById('dtDeadline').textContent = opp.deadline ? `Closing: ${opp.deadline}` : 'Upcoming';
   document.getElementById('dtTrust').textContent = opp.trust_level === 'OFFICIAL' ? 'Official .gov.in' : 'Verified Partner';
   document.getElementById('dtCategoryBadge').textContent = opp.category || 'Opportunity';
-  document.getElementById('dtReasonText').textContent = opp.matchSummary || opp.deadline_source_text || 'Strong academic and interest alignment with your tracked criteria.';
+  document.getElementById('dtReasonText').textContent = opp.deadline_source_text ? `“${opp.deadline_source_text}”` : (opp.raw_evidence || 'Official announcement verified.');
   document.getElementById('dtOfficialLink').href = opp.application_url || opp.source_url || '#';
 
   const matchVal = opp.matchScore || 90;
   document.getElementById('dtMatchRingWrap').innerHTML = renderMatchRingSvg(matchVal, 42);
 
-  const isSaved = savedOppIds.has(opp.id);
+  const checksContainer = document.getElementById('dtChecksList');
+  const reasons = opp.matchReasons || [];
+  const notices = opp.unverifiedNotices || [];
+
+  checksContainer.innerHTML = `
+    <div class="check-row">
+      <span style="color: var(--text-muted);">Academic Eligibility</span>
+      <span style="color: ${opp.isEligible ? 'var(--emerald)' : 'var(--amber)'}; font-weight: 700;">
+        ${opp.isEligible ? '✓ Eligible' : '⚠️ Details unverified'}
+      </span>
+    </div>
+    <div class="check-row">
+      <span style="color: var(--text-muted);">Criteria Match</span>
+      <span style="color: var(--emerald); font-weight: 700;">${reasons[0] || '✓ Open to students'}</span>
+    </div>
+    <div class="check-row">
+      <span style="color: var(--text-muted);">Source Reliability</span>
+      <span style="color: var(--emerald); font-weight: 700;">✓ Official Verified</span>
+    </div>
+  `;
+
+  const isSaved = opp.userStatus === 'applied' || opp.userStatus === 'completed';
   const isRem = reminderOppIds.has(opp.id);
 
-  document.getElementById('dtSaveBtn').textContent = isSaved ? 'Saved ✓' : 'Bookmark';
+  document.getElementById('dtSaveBtn').textContent = isSaved ? '✓ Applied' : 'Mark Applied';
   document.getElementById('dtSaveBtn').classList.toggle('active', isSaved);
 
   document.getElementById('dtReminderBtn').textContent = isRem ? 'Reminder Set ✓' : 'Set Reminder';
@@ -1909,17 +2098,18 @@ function openOppDetail(opp) {
   openModal('oppDetailModal');
 }
 
-function toggleCurrentOppSave() {
+async function toggleCurrentOppSave() {
   if (!activeDetailOpp) return;
-  const id = activeDetailOpp.id;
-  if (savedOppIds.has(id)) {
-    savedOppIds.delete(id);
-    showToast("Removed from saved list");
-  } else {
-    savedOppIds.add(id);
-    showToast("Saved to your list ✓");
-  }
+  await fetch('/api/opportunities/track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ opportunityId: activeDetailOpp.id, status: 'applied' })
+  });
+  activeDetailOpp.userStatus = 'applied';
+  showToast("Marked as Applied ✓");
   openOppDetail(activeDetailOpp);
+  await loadAppData();
 }
 
 function toggleCurrentOppReminder() {
@@ -1991,12 +2181,216 @@ function handleSearch(query) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
+   ONBOARDING WIZARD
+═══════════════════════════════════════════════════════════════════ */
+function renderOnboardingPresets() {
+  const container = document.getElementById('obPresetsWrap');
+  container.innerHTML = PRESET_INTERESTS.map(val => `
+    <button type="button" class="tag-chip ${obSelectedInterests.has(val) ? 'active' : ''}" onclick="toggleObPreset('${val}')">
+      ${val}
+    </button>
+  `).join('');
+}
+
+function toggleObPreset(val) {
+  if (obSelectedInterests.has(val)) {
+    obSelectedInterests.delete(val);
+  } else {
+    obSelectedInterests.add(val);
+  }
+  renderOnboardingPresets();
+}
+
+function addObCustomTag() {
+  const inp = document.getElementById('obCustomInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  if (!obCustomInterests.includes(val)) {
+    obCustomInterests.push(val);
+    renderObCustomTags();
+  }
+  inp.value = '';
+}
+
+function removeObCustomTag(val) {
+  obCustomInterests = obCustomInterests.filter(i => i !== val);
+  renderObCustomTags();
+}
+
+function renderObCustomTags() {
+  const c = document.getElementById('obCustomTagWrap');
+  c.innerHTML = obCustomInterests.map(val => `
+    <span class="tag-chip active" style="gap: 6px;">
+      ⭐ ${val} <span onclick="removeObCustomTag('${val.replace(/'/g,"\\'")}')" style="cursor:pointer">✕</span>
+    </span>
+  `).join('');
+}
+
+function onObEduChange(val) {
+  const q = document.getElementById('obQual');
+  const b = document.getElementById('obBranch');
+  const ql = document.getElementById('obLblQual');
+  const bl = document.getElementById('obLblBranch');
+
+  if (val === '10th') {
+    ql.textContent = 'Class / Standard';
+    q.value = '10th Standard';
+    bl.textContent = 'Focus (Science, Maths, Olympiads)';
+    b.value = 'Science & Technology';
+  } else if (val === '12th') {
+    ql.textContent = 'Intermediate Course';
+    q.value = '12th Standard';
+    bl.textContent = 'Stream (MPC, BiPC, CEC, Arts)';
+    b.value = 'MPC';
+  } else if (val === 'Diploma') {
+    ql.textContent = 'Course (Diploma / ITI)';
+    q.value = 'Diploma';
+    bl.textContent = 'Trade (Mechanical, Electrical, etc.)';
+    b.value = 'Mechanical';
+  } else if (val === 'Undergraduate') {
+    ql.textContent = 'Degree Name';
+    q.value = 'B.Tech';
+    bl.textContent = 'Branch / Major';
+    b.value = 'Computer Science';
+  } else if (val === 'Postgraduate') {
+    ql.textContent = 'Master\'s Degree';
+    q.value = 'M.Tech / MCA';
+    bl.textContent = 'Specialization';
+    b.value = 'Computer Science';
+  } else {
+    ql.textContent = 'Qualification';
+    q.value = val;
+    bl.textContent = 'Field / Area';
+    b.value = 'General';
+  }
+}
+
+async function submitOnboarding(e) {
+  if (e) e.preventDefault();
+  const allInterests = Array.from(new Set([...obSelectedInterests, ...obCustomInterests]));
+
+  const payload = {
+    education_level: document.getElementById('obEduLevel').value,
+    qualification: document.getElementById('obQual').value.trim() || null,
+    branch: document.getElementById('obBranch').value.trim() || null,
+    state_location: document.getElementById('obLoc').value || null,
+    interests: allInterests
+  };
+
+  await fetch('/api/user/onboarding', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(payload)
+  });
+
+  document.getElementById('onboardingScreen').classList.remove('active');
+  await loadAppData();
+  showToast("Welcome! Profile setup completed ⚡");
+}
+
+async function skipOnboarding() {
+  await fetch('/api/user/onboarding', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ interests: [] })
+  });
+  document.getElementById('onboardingScreen').classList.remove('active');
+  await loadAppData();
+  showToast("Exploring general opportunities ⚡");
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PROFILE EDIT MODAL
+═══════════════════════════════════════════════════════════════════ */
+function onEduLevelChange(val) {
+  const q = document.getElementById('editQual');
+  const b = document.getElementById('editBranch');
+  const ql = document.getElementById('lblQual');
+  const bl = document.getElementById('lblBranch');
+
+  if (val === '10th') {
+    ql.textContent = 'Class / Standard';
+    q.value = '10th Standard';
+    bl.textContent = 'Focus (Science, Maths, Olympiads)';
+    b.value = 'Science & Technology';
+  } else if (val === '12th') {
+    ql.textContent = 'Intermediate Course';
+    q.value = '12th Standard';
+    bl.textContent = 'Stream (MPC, BiPC, CEC, Arts)';
+    b.value = 'MPC';
+  } else if (val === 'Diploma') {
+    ql.textContent = 'Course (Diploma / ITI)';
+    q.value = 'Diploma';
+    bl.textContent = 'Trade (Mechanical, Electrical, etc.)';
+    b.value = 'Mechanical';
+  } else if (val === 'Undergraduate') {
+    ql.textContent = 'Degree Name';
+    q.value = 'B.Tech';
+    bl.textContent = 'Branch / Major';
+    b.value = 'Computer Science';
+  } else {
+    ql.textContent = 'Qualification';
+    q.value = val;
+    bl.textContent = 'Field / Area';
+    b.value = 'General';
+  }
+}
+
+function addCustomInterest() {
+  const inp = document.getElementById('customIntInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  activeInterests.add(val);
+  renderEditInterestsTags();
+  inp.value = '';
+}
+
+function removeCustomInterest(val) {
+  activeInterests.delete(val);
+  renderEditInterestsTags();
+}
+
+function renderEditInterestsTags() {
+  const c = document.getElementById('editInterestsTagWrap');
+  c.innerHTML = Array.from(activeInterests).map(val => `
+    <span class="tag-chip active" style="gap: 6px;">
+      ⭐ ${val} <span onclick="removeCustomInterest('${val.replace(/'/g,"\\'")}')" style="cursor:pointer">✕</span>
+    </span>
+  `).join('');
+}
+
+async function saveProfileDetails(e) {
+  e.preventDefault();
+  const payload = {
+    education_level: document.getElementById('editEduLevel').value,
+    qualification: document.getElementById('editQual').value.trim() || null,
+    branch: document.getElementById('editBranch').value.trim() || null,
+    state_location: document.getElementById('editLoc').value || null,
+    career_goal: document.getElementById('editGoal').value.trim() || null,
+    interests: Array.from(activeInterests)
+  };
+
+  await fetch('/api/user/profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(payload)
+  });
+
+  closeModal('profEditModal');
+  await loadAppData();
+  showToast("Profile & matches updated ✓");
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    AUTH & RESET SYSTEM
 ═══════════════════════════════════════════════════════════════════ */
 function showAuthMode(mode) {
   document.getElementById('loginForm').style.display = mode === 'login' ? 'block' : 'none';
   document.getElementById('signupForm').style.display = mode === 'signup' ? 'block' : 'none';
-  document.getElementById('authTitle').textContent = mode === 'login' ? 'Welcome Back' : 'Create an Account';
+  document.getElementById('authTitle').textContent = mode === 'login' ? 'Welcome to Deadline Defenders' : 'Create an Account';
 }
 
 async function handleLogin(e) {
@@ -2041,7 +2435,7 @@ async function handleSignup(e) {
     if (res.ok && data.success) {
       document.getElementById('authScreen').classList.remove('active');
       await loadAppData();
-      showToast("Account created successfully 🎉");
+      showToast("Account created! Let's tailor your profile 🎉");
     } else {
       alert(data.error || 'Signup failed');
     }
@@ -2066,29 +2460,6 @@ async function promptResetAllUsers() {
   } catch (err) {
     alert("Reset failed: " + err.message);
   }
-}
-
-async function saveProfileDetails(e) {
-  e.preventDefault();
-  const payload = {
-    education_level: document.getElementById('editEduLevel').value,
-    qualification: document.getElementById('editQual').value.trim(),
-    branch: document.getElementById('editBranch').value.trim(),
-    state_location: document.getElementById('editLoc').value.trim(),
-    career_goal: document.getElementById('editGoal').value.trim(),
-    interests: Array.from(activeInterests)
-  };
-
-  await fetch('/api/user/profile', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(payload)
-  });
-
-  closeModal('profEditModal');
-  await loadAppData();
-  showToast("Profile criteria saved ✓");
 }
 
 /* ═══════════════════════════════════════════════════════════════════
