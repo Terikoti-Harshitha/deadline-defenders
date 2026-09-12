@@ -1,6 +1,6 @@
-// server.js — Deadline Defenders (Cloud & Production Ready Server)
-// Features: Auth, Push Notifications, Auto-Refresh Reminders, Dynamic DB SSL,
-//           Auto Database Table Initialization, Auto-Sync on Interest Add, Key Rotation, IPv4 SMTP
+// server.js — Deadline Defenders (Academic & Production Cloud Server)
+// Architecture: Shared Intelligence, Incremental Discovery,
+// Provenance Tracking, Idempotent Reminders & Explainable Eligibility
 
 require('dotenv').config();
 
@@ -15,6 +15,9 @@ const webpush = require('web-push');
 const cron = require('node-cron');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+
+const OpportunityPipeline = require('./opportunity_pipeline');
+const ReminderReconciler = require('./reminder_reconciliation');
 const { fetchRemindersForInterest, isFutureReminder, deduplicateReminders } = require('./hybrid_fetcher');
 
 const app = express();
@@ -36,13 +39,8 @@ if (EMAIL_USER && EMAIL_PASS) {
     port: 587,
     secure: false,
     family: 4,
-    auth: {
-      user: EMAIL_USER,
-      pass: EMAIL_PASS
-    },
-    tls: {
-      rejectUnauthorized: false
-    }
+    auth: { user: EMAIL_USER, pass: EMAIL_PASS },
+    tls: { rejectUnauthorized: false }
   });
 }
 
@@ -131,6 +129,40 @@ function buildDbConfig() {
 const dbConfig = buildDbConfig();
 const pool = mysql.createPool(dbConfig);
 
+// ── PUSH HELPER ──────────────────────────────────────────────
+async function sendPushToUser(userId, title, body, data = {}) {
+  try {
+    const [rows] = await pool.query(
+      'SELECT subscription_json FROM push_subscriptions WHERE user_id = ?', [userId]
+    );
+    if (!rows.length) return false;
+
+    const subscription = JSON.parse(rows[0].subscription_json);
+    await webpush.sendNotification(subscription, JSON.stringify({
+      title,
+      body,
+      icon: 'https://cdn-icons-png.flaticon.com/512/1827/1827349.png',
+      badge: 'https://cdn-icons-png.flaticon.com/512/1827/1827349.png',
+      data: { url: '/mobile.html', ...data }
+    }));
+
+    await pool.query(
+      'INSERT INTO notification_logs (user_id, title, body) VALUES (?, ?, ?)',
+      [userId, title, body]
+    );
+    return true;
+  } catch (err) {
+    if (err.statusCode === 410 || err.statusCode === 404) {
+      await pool.query('DELETE FROM push_subscriptions WHERE user_id = ?', [userId]);
+    }
+    return false;
+  }
+}
+
+// ── INITIALIZE MASTER PIPELINE & REMINDER RECONCILER ─────────
+const pipeline = new OpportunityPipeline(pool, sendPushToUser);
+const reconciler = new ReminderReconciler(pool, sendPushToUser);
+
 // ── AUTO INITIALIZE ALL DATABASE TABLES ───────────────────────
 async function autoInitDatabaseTables() {
   const queries = [
@@ -147,6 +179,171 @@ async function autoInitDatabaseTables() {
       UNIQUE KEY idx_users_email (email)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 
+    `CREATE TABLE IF NOT EXISTS user_profiles (
+      user_id INT(11) NOT NULL,
+      qualification VARCHAR(100) NOT NULL DEFAULT 'B.Tech',
+      branch VARCHAR(100) NOT NULL DEFAULT 'Computer Science',
+      graduation_year INT(11) NOT NULL DEFAULT 2026,
+      state_location VARCHAR(100) NOT NULL DEFAULT 'Andhra Pradesh',
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (user_id),
+      CONSTRAINT fk_up_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS topic_registry (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      canonical_topic VARCHAR(100) NOT NULL,
+      aliases_json TEXT NOT NULL,
+      keywords_json TEXT NOT NULL,
+      last_discovered TIMESTAMP NULL DEFAULT NULL,
+      next_discovery TIMESTAMP NULL DEFAULT NULL,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_canonical_topic (canonical_topic)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS search_cache (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      query VARCHAR(255) NOT NULL,
+      normalized_query VARCHAR(255) NOT NULL,
+      source VARCHAR(50) NOT NULL DEFAULT 'serpapi',
+      results_json MEDIUMTEXT NOT NULL,
+      result_hash VARCHAR(64) NOT NULL,
+      expires_at TIMESTAMP NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_normalized_query (normalized_query),
+      KEY idx_expires_at (expires_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS sources (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      organization VARCHAR(100) NOT NULL,
+      source_url VARCHAR(500) NOT NULL,
+      category VARCHAR(50) NOT NULL DEFAULT 'Government Exam',
+      source_type VARCHAR(50) NOT NULL DEFAULT 'Official Government',
+      acquisition_method VARCHAR(50) NOT NULL DEFAULT 'Search Discovery',
+      trust_level ENUM('OFFICIAL', 'VERIFIED_SECONDARY', 'UNVERIFIED') NOT NULL DEFAULT 'OFFICIAL',
+      check_frequency VARCHAR(50) NOT NULL DEFAULT 'DAILY',
+      last_checked TIMESTAMP NULL DEFAULT NULL,
+      next_check TIMESTAMP NULL DEFAULT NULL,
+      enabled BOOLEAN NOT NULL DEFAULT TRUE,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_source_org_url (organization, source_url(200))
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS source_documents (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      source_id INT(11) DEFAULT NULL,
+      url VARCHAR(500) NOT NULL,
+      content_hash VARCHAR(64) NOT NULL,
+      etag VARCHAR(100) DEFAULT NULL,
+      last_modified VARCHAR(100) DEFAULT NULL,
+      raw_text MEDIUMTEXT DEFAULT NULL,
+      fetched_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_doc_url (url(255)),
+      KEY idx_doc_hash (content_hash),
+      CONSTRAINT fk_sd_source_id FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS opportunities (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      source_id INT(11) DEFAULT NULL,
+      title VARCHAR(255) NOT NULL,
+      organization VARCHAR(100) NOT NULL,
+      category VARCHAR(50) NOT NULL DEFAULT 'Government Exam',
+      application_start DATE DEFAULT NULL,
+      deadline DATE DEFAULT NULL,
+      event_date DATE DEFAULT NULL,
+      deadline_source_text TEXT DEFAULT NULL,
+      qualification_req VARCHAR(255) DEFAULT 'Any',
+      branch_req VARCHAR(255) DEFAULT 'Any',
+      graduation_year_req VARCHAR(100) DEFAULT 'Any',
+      location VARCHAR(255) DEFAULT 'India',
+      application_url VARCHAR(500) DEFAULT NULL,
+      source_url VARCHAR(500) NOT NULL,
+      trust_level ENUM('OFFICIAL', 'VERIFIED_SECONDARY', 'UNVERIFIED') NOT NULL DEFAULT 'OFFICIAL',
+      confidence ENUM('high', 'medium', 'low') NOT NULL DEFAULT 'medium',
+      raw_evidence TEXT DEFAULT NULL,
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_canonical_opp (organization, title(150), deadline),
+      KEY idx_opp_deadline (deadline),
+      KEY idx_opp_category (category),
+      KEY idx_opp_trust (trust_level),
+      CONSTRAINT fk_opp_source_id FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS opportunity_versions (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      opportunity_id INT(11) NOT NULL,
+      old_deadline DATE DEFAULT NULL,
+      new_deadline DATE DEFAULT NULL,
+      change_reason VARCHAR(255) DEFAULT NULL,
+      changed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      KEY idx_ov_opp_id (opportunity_id),
+      CONSTRAINT fk_ov_opp_id FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS user_opportunity_actions (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      user_id INT(11) NOT NULL,
+      opportunity_id INT(11) NOT NULL,
+      status ENUM('unseen', 'saved', 'applied', 'completed', 'dismissed') NOT NULL DEFAULT 'unseen',
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_user_opp_unique (user_id, opportunity_id),
+      KEY idx_uoa_status (user_id, status),
+      CONSTRAINT fk_uoa_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      CONSTRAINT fk_uoa_opp_id FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS user_reminders (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      user_id INT(11) NOT NULL,
+      opportunity_id INT(11) DEFAULT NULL,
+      interest VARCHAR(100) DEFAULT NULL,
+      type VARCHAR(50) NOT NULL DEFAULT 'Exam',
+      application_start DATE DEFAULT NULL,
+      application_end DATE DEFAULT NULL,
+      event_date DATE DEFAULT NULL,
+      location VARCHAR(255) DEFAULT 'India',
+      short_note VARCHAR(255) NOT NULL,
+      source VARCHAR(500) DEFAULT NULL,
+      confidence ENUM('high','medium','low') DEFAULT 'medium',
+      reminder_stage VARCHAR(20) DEFAULT 'STANDARD',
+      status ENUM('PENDING', 'SENT', 'ACKNOWLEDGED', 'CANCELLED', 'MISSED') NOT NULL DEFAULT 'PENDING',
+      scheduled_at DATE DEFAULT NULL,
+      sent_at TIMESTAMP NULL DEFAULT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_unique_user_reminder (user_id, interest, type, short_note),
+      KEY idx_ur_user_status (user_id, status),
+      KEY idx_ur_opp_id (opportunity_id),
+      CONSTRAINT fk_ur_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      CONSTRAINT fk_ur_opp_id FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS pipeline_runs (
+      id INT(11) NOT NULL AUTO_INCREMENT,
+      run_id VARCHAR(64) NOT NULL,
+      source_name VARCHAR(100) NOT NULL,
+      started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      completed_at TIMESTAMP NULL DEFAULT NULL,
+      items_found INT(11) DEFAULT 0,
+      items_new INT(11) DEFAULT 0,
+      items_updated INT(11) DEFAULT 0,
+      items_duplicate INT(11) DEFAULT 0,
+      api_calls INT(11) DEFAULT 0,
+      llm_calls INT(11) DEFAULT 0,
+      PRIMARY KEY (id),
+      KEY idx_pr_run_id (run_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
     `CREATE TABLE IF NOT EXISTS sessions (
       session_id VARCHAR(128) NOT NULL,
       expires INT(11) UNSIGNED NOT NULL,
@@ -161,55 +358,8 @@ async function autoInitDatabaseTables() {
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (id),
       UNIQUE KEY idx_user_interest_unique (user_id, interest),
-      KEY idx_user_interests_user (user_id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
-    `CREATE TABLE IF NOT EXISTS interests_reminders (
-      id INT(11) NOT NULL AUTO_INCREMENT,
-      interest VARCHAR(100) NOT NULL,
-      type VARCHAR(50) NOT NULL DEFAULT 'Exam',
-      application_start DATE DEFAULT NULL,
-      application_end DATE DEFAULT NULL,
-      event_date DATE DEFAULT NULL,
-      location VARCHAR(255) DEFAULT 'India',
-      short_note VARCHAR(255) NOT NULL,
-      source VARCHAR(500) DEFAULT NULL,
-      confidence ENUM('high','medium','low') DEFAULT 'medium',
-      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      PRIMARY KEY (id),
-      UNIQUE KEY idx_unique_cache_reminder (interest, type, short_note),
-      KEY idx_cache_interest (interest),
-      KEY idx_cache_event_date (event_date),
-      KEY idx_cache_app_end (application_end)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
-    `CREATE TABLE IF NOT EXISTS interests_cache_meta (
-      interest VARCHAR(100) NOT NULL,
-      last_fetched TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      reminder_count INT(11) DEFAULT 0,
-      fetch_status ENUM('success','failed','pending') DEFAULT 'pending',
-      error_message TEXT DEFAULT NULL,
-      PRIMARY KEY (interest)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
-
-    `CREATE TABLE IF NOT EXISTS user_reminders (
-      id INT(11) NOT NULL AUTO_INCREMENT,
-      user_id INT(11) NOT NULL,
-      interest VARCHAR(100) NOT NULL,
-      type VARCHAR(50) NOT NULL DEFAULT 'Exam',
-      application_start DATE DEFAULT NULL,
-      application_end DATE DEFAULT NULL,
-      event_date DATE DEFAULT NULL,
-      location VARCHAR(255) DEFAULT 'India',
-      short_note VARCHAR(255) NOT NULL,
-      source VARCHAR(500) DEFAULT NULL,
-      confidence ENUM('high','medium','low') DEFAULT 'medium',
-      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      PRIMARY KEY (id),
-      UNIQUE KEY idx_unique_user_reminder (user_id, interest, type, short_note),
-      KEY idx_ur_user_dates (user_id, application_end, event_date)
+      KEY idx_user_interests_user (user_id),
+      CONSTRAINT fk_ui_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 
     `CREATE TABLE IF NOT EXISTS push_subscriptions (
@@ -222,7 +372,8 @@ async function autoInitDatabaseTables() {
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (id),
-      UNIQUE KEY idx_unique_user_push (user_id)
+      UNIQUE KEY idx_unique_user_push (user_id),
+      CONSTRAINT fk_ps_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 
     `CREATE TABLE IF NOT EXISTS notification_logs (
@@ -233,7 +384,8 @@ async function autoInitDatabaseTables() {
       sent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (id),
       KEY idx_nl_user_sent (user_id, sent_at),
-      KEY idx_nl_sent_at (sent_at)
+      KEY idx_nl_sent_at (sent_at),
+      CONSTRAINT fk_nl_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
   ];
 
@@ -241,7 +393,9 @@ async function autoInitDatabaseTables() {
     for (const q of queries) {
       await pool.query(q);
     }
-    console.log('✅ All 8 database tables verified and auto-created successfully!');
+    console.log('✅ All 15 database tables verified and auto-created successfully!');
+    // Initialize pipeline seeds
+    await pipeline.initialize();
   } catch (err) {
     console.error('⚠️  Auto table creation notice:', err.message);
   }
@@ -301,251 +455,154 @@ function requireLogin(req, res, next) {
   next();
 }
 
-function calculateDaysUntil(dateStr) {
-  if (!dateStr) return null;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const target = new Date(dateStr); target.setHours(0, 0, 0, 0);
-  return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
-}
-
-function getClosestDate(reminder) {
-  const candidates = [
-    { date: reminder.application_end,   label: 'Application Deadline' },
-    { date: reminder.event_date,         label: 'Event Date' },
-    { date: reminder.application_start,  label: 'Application Opens' }
-  ].filter(d => d.date);
-  if (!candidates.length) return null;
-  candidates.sort((a, b) => new Date(a.date) - new Date(b.date));
-  return candidates[0];
-}
-
-// ── CORE REMINDER SYNC FUNCTION (Shared across auto-refresh, manual refresh & interest add) ──
-async function syncRemindersForUser(userId, customInterests = null) {
-  let interests = customInterests;
-  if (!interests) {
-    const [interestRows] = await pool.query(
-      'SELECT interest FROM user_interests WHERE user_id = ?', [userId]
-    );
-    interests = interestRows.map(r => r.interest);
-  }
-
-  if (!interests || interests.length === 0) {
-    await pool.query('DELETE FROM user_reminders WHERE user_id = ?', [userId]);
-    return { count: 0, reminders: [] };
-  }
-
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-    await connection.query('DELETE FROM user_reminders WHERE user_id = ?', [userId]);
-
-    let totalInserted = 0;
-    const newReminders = [];
-
-    for (const interest of interests) {
-      try {
-        // Check global cache first (valid for 6 hours)
-        const [cached] = await connection.query(
-          `SELECT ir.*
-           FROM interests_reminders ir
-           JOIN interests_cache_meta icm ON icm.interest = ir.interest
-           WHERE ir.interest = ?
-             AND icm.fetch_status = 'success'
-             AND icm.last_fetched > DATE_SUB(NOW(), INTERVAL 6 HOUR)`,
-          [interest]
-        );
-
-        let reminders = [];
-
-        if (cached.length > 0) {
-          reminders = cached;
-        } else {
-          const raw = await fetchRemindersForInterest(interest);
-          reminders = raw.filter(isFutureReminder);
-
-          if (reminders.length > 0) {
-            await connection.query('DELETE FROM interests_reminders WHERE interest = ?', [interest]);
-            const vals = reminders.map(r => [
-              interest,
-              r.type || 'Exam',
-              r.application_start || null,
-              r.application_end || null,
-              r.event_date || null,
-              r.location || 'India',
-              (r.short_note || '').substring(0, 255),
-              r.source || '',
-              r.confidence || 'medium'
-            ]);
-            await connection.query(
-              `INSERT IGNORE INTO interests_reminders
-               (interest, type, application_start, application_end, event_date, location, short_note, source, confidence)
-               VALUES ?`, [vals]
-            );
-            await connection.query(
-              `INSERT INTO interests_cache_meta (interest, last_fetched, reminder_count, fetch_status)
-               VALUES (?, NOW(), ?, 'success')
-               ON DUPLICATE KEY UPDATE last_fetched=NOW(), reminder_count=?, fetch_status='success', error_message=NULL`,
-              [interest, reminders.length, reminders.length]
-            );
-          }
-        }
-
-        for (const r of reminders) {
-          try {
-            const [ins] = await connection.query(
-              `INSERT IGNORE INTO user_reminders
-               (user_id, interest, type, application_start, application_end, event_date, location, short_note, source, confidence)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-              [
-                userId, interest,
-                r.type || 'Exam',
-                r.application_start || null,
-                r.application_end   || null,
-                r.event_date        || null,
-                r.location          || 'India',
-                (r.short_note || '').substring(0, 255),
-                r.source            || '',
-                r.confidence        || 'medium'
-              ]
-            );
-            if (ins.insertId) {
-              totalInserted++;
-              newReminders.push({ id: ins.insertId, ...r, interest });
-            }
-          } catch (_) {}
-        }
-      } catch (err) {
-        console.error(`Failed to fetch for "${interest}":`, err.message);
-      }
-    }
-
-    await connection.commit();
-    return { count: totalInserted, reminders: newReminders };
-  } catch (err) {
-    await connection.rollback();
-    throw err;
-  } finally {
-    connection.release();
-  }
-}
-
-// ── AUTO REMINDER REFRESH (3x / day: 6 AM, 2 PM, 10 PM) ──────
-async function autoRefreshAllUsersReminders() {
-  console.log('\n🔄 [AUTO-REFRESH] Starting automatic reminder refresh for all users...');
-  try {
-    const [users] = await pool.query('SELECT id, username FROM users');
-    console.log(`   Found ${users.length} users`);
-
-    for (const user of users) {
-      try {
-        const result = await syncRemindersForUser(user.id);
-        console.log(`   ✅ Synced ${result.count} reminders for ${user.username}`);
-      } catch (err) {
-        console.error(`   ❌ Failed to sync user ${user.username}:`, err.message);
-      }
-    }
-    console.log('✅ [AUTO-REFRESH] Finished successfully\n');
-  } catch (err) {
-    console.error('❌ [AUTO-REFRESH] Fatal error:', err.message);
-  }
-}
-
+// ── CRON SCHEDULER: Periodic Discovery & Idempotent Reminder Dispatch ──
 // Auto-refresh cron schedule: 6:00 AM, 2:00 PM, 10:00 PM
-cron.schedule('0 6 * * *',  () => { autoRefreshAllUsersReminders(); });
-cron.schedule('0 14 * * *', () => { autoRefreshAllUsersReminders(); });
-cron.schedule('0 22 * * *', () => { autoRefreshAllUsersReminders(); });
+cron.schedule('0 6 * * *', async () => {
+  console.log('⏰ [CRON] Running 6:00 AM Discovery & Reminder Dispatch...');
+  await reconciler.dispatchDueNotifications();
+});
 
-// ── PUSH NOTIFICATION DISPATCHER ─────────────────────────────
-async function sendPushToUser(userId, title, body, data = {}) {
+cron.schedule('0 14 * * *', async () => {
+  console.log('⏰ [CRON] Running 2:00 PM Discovery & Reminder Dispatch...');
+  await reconciler.dispatchDueNotifications();
+});
+
+cron.schedule('0 22 * * *', async () => {
+  console.log('⏰ [CRON] Running 10:00 PM Discovery & Reminder Dispatch...');
+  await reconciler.dispatchDueNotifications();
+});
+
+// Hourly check for any urgent due reminders
+cron.schedule('0 * * * *', async () => {
+  await reconciler.dispatchDueNotifications();
+});
+
+// ── ACADEMIC & RESEARCH OPPORTUNITY API ENDPOINTS ────────────
+
+// 1. Get Personalized Opportunities Feed (with Match Score & Explainability)
+app.get('/api/opportunities', requireLogin, async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      'SELECT subscription_json FROM push_subscriptions WHERE user_id = ?', [userId]
-    );
-    if (!rows.length) return false;
+    const category = req.query.category || 'all';
+    const feed = await pipeline.getPersonalizedFeed(req.session.userId, category);
+    res.json({ opportunities: feed });
+  } catch (err) {
+    console.error('API opportunities error:', err);
+    res.status(500).json({ error: 'Failed to fetch opportunities' });
+  }
+});
 
-    const subscription = JSON.parse(rows[0].subscription_json);
-    await webpush.sendNotification(subscription, JSON.stringify({
-      title,
-      body,
-      icon: 'https://cdn-icons-png.flaticon.com/512/1827/1827349.png',
-      badge: 'https://cdn-icons-png.flaticon.com/512/1827/1827349.png',
-      data: { url: '/mobile.html', ...data }
-    }));
+// 2. Track Opportunity Status (Saved / Applied / Completed / Dismissed)
+app.post('/api/opportunities/track', requireLogin, async (req, res) => {
+  const { opportunityId, status } = req.body;
+  if (!opportunityId || !status) {
+    return res.status(400).json({ error: 'Opportunity ID and status required' });
+  }
 
+  try {
     await pool.query(
-      'INSERT INTO notification_logs (user_id, title, body) VALUES (?, ?, ?)',
-      [userId, title, body]
+      `INSERT INTO user_opportunity_actions (user_id, opportunity_id, status)
+       VALUES (?, ?, ?)
+       ON DUPLICATE KEY UPDATE status = VALUES(status), updated_at = NOW()`,
+      [req.session.userId, opportunityId, status]
     );
-    return true;
-  } catch (err) {
-    if (err.statusCode === 410 || err.statusCode === 404) {
-      await pool.query('DELETE FROM push_subscriptions WHERE user_id = ?', [userId]);
-    }
-    return false;
-  }
-}
 
-async function checkAndSendNotifications() {
+    // Reconcile reminders immediately (silences alerts if applied or completed)
+    await reconciler.reconcileUserReminders(req.session.userId);
+
+    res.json({ success: true, message: `Opportunity marked as ${status}` });
+  } catch (err) {
+    console.error('Track opportunity error:', err);
+    res.status(500).json({ error: 'Failed to update status' });
+  }
+});
+
+// 3. User Academic Profile (Qualification, Branch, Batch, State)
+app.get('/api/user/profile', requireLogin, async (req, res) => {
   try {
-    const [users] = await pool.query(
-      `SELECT DISTINCT u.id, u.username FROM users u
-       INNER JOIN push_subscriptions ps ON u.id = ps.user_id`
+    const [profRows] = await pool.query('SELECT * FROM user_profiles WHERE user_id = ?', [req.session.userId]);
+    const [userRows] = await pool.query('SELECT id, username, email, created_at FROM users WHERE id = ?', [req.session.userId]);
+
+    const profile = profRows.length > 0 ? profRows[0] : {
+      qualification: 'B.Tech',
+      branch: 'Computer Science',
+      graduation_year: 2026,
+      state_location: 'Andhra Pradesh'
+    };
+
+    res.json({ ...userRows[0], profile });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
+
+app.post('/api/user/profile', requireLogin, async (req, res) => {
+  const { qualification, branch, graduation_year, state_location } = req.body;
+
+  try {
+    await pool.query(
+      `INSERT INTO user_profiles (user_id, qualification, branch, graduation_year, state_location)
+       VALUES (?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         qualification = VALUES(qualification),
+         branch = VALUES(branch),
+         graduation_year = VALUES(graduation_year),
+         state_location = VALUES(state_location)`,
+      [
+        req.session.userId,
+        qualification || 'B.Tech',
+        branch || 'Computer Science',
+        parseInt(graduation_year || 2026, 10),
+        state_location || 'Andhra Pradesh'
+      ]
     );
 
-    for (const user of users) {
-      const [reminders] = await pool.query(
-        `SELECT * FROM user_reminders
-         WHERE user_id = ?
-           AND (application_end IS NOT NULL OR event_date IS NOT NULL)`,
-        [user.id]
-      );
-
-      for (const reminder of reminders) {
-        const closest = getClosestDate(reminder);
-        if (!closest) continue;
-
-        const daysUntil = calculateDaysUntil(closest.date);
-        if (daysUntil === null || daysUntil < 0 || daysUntil > 30) continue;
-
-        const notifyThresholds = [30, 14, 7, 3, 1, 0];
-        if (!notifyThresholds.includes(daysUntil)) continue;
-
-        const [exists] = await pool.query(
-          `SELECT id FROM notification_logs
-           WHERE user_id = ? AND title LIKE ? AND sent_at > DATE_SUB(NOW(), INTERVAL 12 HOUR)`,
-          [user.id, `%${reminder.short_note.substring(0, 40)}%`]
-        );
-        if (exists.length > 0) continue;
-
-        let title, body;
-        if (daysUntil === 0) {
-          title = '🚨 DEADLINE TODAY!';
-          body  = `${reminder.short_note} — ${closest.label} is TODAY!`;
-        } else if (daysUntil === 1) {
-          title = '⚠️ Deadline Tomorrow!';
-          body  = `${reminder.short_note} — ${closest.label} is TOMORROW!`;
-        } else if (daysUntil <= 7) {
-          title = '⏰ Urgent Reminder';
-          body  = `${reminder.short_note} — ${closest.label} in ${daysUntil} days`;
-        } else {
-          title = '📅 Upcoming Deadline';
-          body  = `${reminder.short_note} — ${closest.label} in ${daysUntil} days`;
-        }
-
-        await sendPushToUser(user.id, title, body, {
-          reminderId: reminder.id, interest: reminder.interest, daysUntil
-        });
-      }
-    }
-
-    await pool.query('DELETE FROM notification_logs WHERE sent_at < DATE_SUB(NOW(), INTERVAL 30 DAY)');
+    res.json({ success: true, message: 'Academic profile updated successfully' });
   } catch (err) {
-    console.error('Notification checker error:', err.message);
+    console.error('Update profile error:', err);
+    res.status(500).json({ error: 'Failed to save profile' });
   }
-}
+});
 
-cron.schedule('0 * * * *', checkAndSendNotifications);
-setTimeout(() => { checkAndSendNotifications(); }, 30000);
+// 4. Source Registry
+app.get('/api/sources', requireLogin, async (req, res) => {
+  try {
+    const [sources] = await pool.query('SELECT * FROM sources WHERE enabled = 1 ORDER BY trust_level ASC, organization ASC');
+    res.json({ sources });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch sources' });
+  }
+});
+
+// 5. Trigger Pipeline Discovery Run
+app.post('/api/pipeline/run', requireLogin, async (req, res) => {
+  const { topic } = req.body;
+  if (!topic) return res.status(400).json({ error: 'Topic query required' });
+
+  try {
+    const result = await pipeline.runDiscovery(topic);
+    await reconciler.reconcileUserReminders(req.session.userId);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: 'Discovery run failed' });
+  }
+});
+
+// 6. Pipeline Performance Metrics (Evaluation)
+app.get('/api/pipeline/stats', requireLogin, async (req, res) => {
+  try {
+    const [runs] = await pool.query('SELECT * FROM pipeline_runs ORDER BY started_at DESC LIMIT 20');
+    const [oppCount] = await pool.query('SELECT COUNT(*) as total, category, trust_level FROM opportunities GROUP BY category, trust_level');
+    const [cacheCount] = await pool.query('SELECT COUNT(*) as cached_queries FROM search_cache');
+
+    res.json({
+      recentRuns: runs,
+      opportunityDistribution: oppCount,
+      totalCachedQueries: cacheCount[0]?.cached_queries || 0
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
 
 // ── PUSH ROUTES ──────────────────────────────────────────────
 app.get('/push/vapid-public-key', (req, res) => {
@@ -643,6 +700,13 @@ app.post('/auth/signup', async (req, res) => {
       [username.trim(), email.trim().toLowerCase(), hash]
     );
     req.session.userId = result.insertId;
+
+    // Create default profile
+    await pool.query(
+      'INSERT IGNORE INTO user_profiles (user_id, qualification, branch, graduation_year, state_location) VALUES (?, ?, ?, ?, ?)',
+      [result.insertId, 'B.Tech', 'Computer Science', 2026, 'Andhra Pradesh']
+    );
+
     res.json({ success: true, userId: result.insertId });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY')
@@ -749,7 +813,7 @@ app.post('/auth/reset-password', async (req, res) => {
   }
 });
 
-// ── USER PROFILE ROUTES ──────────────────────────────────────
+// ── USER PROFILE & INTERESTS COMPATIBILITY ROUTES ─────────────
 app.get('/user/profile', requireLogin, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -796,7 +860,6 @@ app.post('/user/update-profile', requireLogin, async (req, res) => {
   }
 });
 
-// ── INTERESTS ROUTES (Automatically fetches & updates reminders!) ──
 app.get('/user/interests', requireLogin, async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -829,18 +892,15 @@ app.post('/user/interests', requireLogin, async (req, res) => {
     conn.release();
   }
 
-  // Automatically fetch & update deadlines for the user immediately!
+  // Trigger global discovery for new interests in background
   try {
-    const syncResult = await syncRemindersForUser(req.session.userId, interests);
-    res.json({
-      success: true,
-      message: `Interests saved and ${syncResult.count} deadlines synced automatically!`,
-      count: syncResult.count,
-      reminders: syncResult.reminders
-    });
+    for (const i of interests) {
+      await pipeline.runDiscovery(i);
+    }
+    await reconciler.reconcileUserReminders(req.session.userId);
+    res.json({ success: true, message: 'Interests saved & opportunities discovered!' });
   } catch (syncErr) {
-    console.error('Auto sync after save error:', syncErr.message);
-    res.json({ success: true, message: 'Interests saved.', count: 0, reminders: [] });
+    res.json({ success: true, message: 'Interests saved.' });
   }
 });
 
@@ -849,41 +909,27 @@ app.get('/user/reminders', requireLogin, async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT * FROM user_reminders
-       WHERE user_id = ?
-       ORDER BY COALESCE(application_end, event_date, application_start) ASC`,
+       WHERE user_id = ? AND status != 'CANCELLED'
+       ORDER BY COALESCE(application_end, event_date, scheduled_at) ASC`,
       [req.session.userId]
     );
-    const deduped = deduplicateReminders(rows.filter(isFutureReminder));
-    res.json({ reminders: deduped });
+    res.json({ reminders: rows });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Manual refresh (when user clicks "Refresh Deadlines" button)
 app.post('/user/update-reminders', requireLogin, async (req, res) => {
   try {
-    const syncResult = await syncRemindersForUser(req.session.userId);
-    res.json({
-      success: true,
-      message: `Refreshed ${syncResult.count} deadlines.`,
-      count: syncResult.count,
-      reminders: syncResult.reminders
-    });
+    const [intRows] = await pool.query('SELECT interest FROM user_interests WHERE user_id = ?', [req.session.userId]);
+    const interests = intRows.map(r => r.interest);
+    for (const i of interests) {
+      await pipeline.runDiscovery(i);
+    }
+    await reconciler.reconcileUserReminders(req.session.userId);
+    res.json({ success: true, message: 'Deadlines refreshed and reconciled.' });
   } catch (err) {
-    console.error('Update reminders error:', err);
     res.status(500).json({ error: 'Failed to update reminders' });
-  }
-});
-
-app.post('/user/clear-reminders', requireLogin, async (req, res) => {
-  try {
-    const [result] = await pool.query(
-      'DELETE FROM user_reminders WHERE user_id = ?', [req.session.userId]
-    );
-    res.json({ success: true, deletedCount: result.affectedRows });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to clear reminders' });
   }
 });
 
@@ -892,7 +938,6 @@ app.get('/health', (req, res) => {
   res.json({ status: 'healthy', uptime: process.uptime(), timestamp: new Date().toISOString() });
 });
 
-// Serve main single-page web app at root
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'mobile.html'));
 });
@@ -912,7 +957,7 @@ app.use((req, res) => {
 // ── START SERVER ─────────────────────────────────────────────
 const server = app.listen(PORT, () => {
   console.log('='.repeat(60));
-  console.log('🎯 Deadline Defenders — Production Server');
+  console.log('🎯 Deadline Defenders — Academic & Production Cloud Server');
   console.log('='.repeat(60));
   console.log(`🚀 App URL: http://localhost:${PORT}`);
   console.log(`🔔 Web Push: Enabled`);
