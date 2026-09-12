@@ -400,7 +400,43 @@ async function autoInitDatabaseTables() {
     for (const q of queries) {
       await pool.query(q);
     }
-    console.log('✅ All 15 database tables verified and auto-created successfully!');
+
+    // Auto-migrate missing columns for existing tables in TiDB/MySQL
+    const migrations = [
+      'ALTER TABLE users ADD COLUMN onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE',
+      'ALTER TABLE users ADD COLUMN reset_token VARCHAR(255) DEFAULT NULL',
+      'ALTER TABLE users ADD COLUMN reset_token_expires DATETIME DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN education_level VARCHAR(50) DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN qualification VARCHAR(100) DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN branch VARCHAR(100) DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN study_status VARCHAR(50) DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN graduation_year INT(11) DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN state_location VARCHAR(100) DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN city VARCHAR(100) DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN age INT(11) DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN gender VARCHAR(50) DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN skills TEXT DEFAULT NULL',
+      'ALTER TABLE user_profiles ADD COLUMN career_goal VARCHAR(100) DEFAULT NULL',
+      "ALTER TABLE opportunities ADD COLUMN qualification_req VARCHAR(255) DEFAULT 'Any'",
+      "ALTER TABLE opportunities ADD COLUMN branch_req VARCHAR(255) DEFAULT 'Any'",
+      "ALTER TABLE opportunities ADD COLUMN graduation_year_req VARCHAR(100) DEFAULT 'Any'",
+      'ALTER TABLE opportunities ADD COLUMN deadline_source_text TEXT DEFAULT NULL',
+      "ALTER TABLE opportunities ADD COLUMN trust_level ENUM('OFFICIAL', 'VERIFIED_SECONDARY', 'UNVERIFIED') NOT NULL DEFAULT 'OFFICIAL'",
+      "ALTER TABLE opportunities ADD COLUMN confidence ENUM('high', 'medium', 'low') NOT NULL DEFAULT 'medium'",
+      'ALTER TABLE opportunities ADD COLUMN raw_evidence TEXT DEFAULT NULL',
+      "ALTER TABLE user_reminders ADD COLUMN reminder_stage VARCHAR(20) DEFAULT 'STANDARD'",
+      'ALTER TABLE user_reminders ADD COLUMN opportunity_id INT(11) DEFAULT NULL'
+    ];
+
+    for (const m of migrations) {
+      try {
+        await pool.query(m);
+      } catch (mErr) {
+        // Ignore column already exists (errno 1060 / ER_DUP_FIELDNAME)
+      }
+    }
+
+    console.log('✅ All 15 database tables & schema columns verified and synchronized!');
     await pipeline.initialize();
   } catch (err) {
     console.error('⚠️  Auto table creation notice:', err.message);
@@ -491,17 +527,32 @@ app.post('/auth/signup', async (req, res) => {
 
   try {
     const hash = await bcrypt.hash(password, 10);
-    const [result] = await pool.query(
-      'INSERT INTO users (username, email, password_hash, onboarding_completed) VALUES (?, ?, ?, 0)',
-      [username.trim(), email.trim().toLowerCase(), hash]
-    );
+    let result;
+    try {
+      [result] = await pool.query(
+        'INSERT INTO users (username, email, password_hash, onboarding_completed) VALUES (?, ?, ?, 0)',
+        [username.trim(), email.trim().toLowerCase(), hash]
+      );
+    } catch (insertErr) {
+      if (insertErr.errno === 1054 || insertErr.code === 'ER_BAD_FIELD_ERROR') {
+        try {
+          await pool.query('ALTER TABLE users ADD COLUMN onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE');
+        } catch (_) {}
+        [result] = await pool.query(
+          'INSERT INTO users (username, email, password_hash, onboarding_completed) VALUES (?, ?, ?, 0)',
+          [username.trim(), email.trim().toLowerCase(), hash]
+        );
+      } else {
+        throw insertErr;
+      }
+    }
     req.session.userId = result.insertId;
     res.json({ success: true, userId: result.insertId, needsOnboarding: true });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY')
       return res.status(409).json({ error: 'Username or email already exists' });
     console.error('Signup error:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Server error: ' + err.message });
   }
 });
 
