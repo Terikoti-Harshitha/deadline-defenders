@@ -989,12 +989,23 @@ app.post('/api/opportunities/track', requireLogin, async (req, res) => {
 // ── REMINDERS ROUTES ─────────────────────────────────────────
 app.get('/user/reminders', requireLogin, async (req, res) => {
   try {
-    const [rows] = await pool.query(
+    let [rows] = await pool.query(
       `SELECT * FROM user_reminders
        WHERE user_id = ? AND status != 'CANCELLED'
        ORDER BY COALESCE(application_end, event_date, scheduled_at) ASC`,
       [req.session.userId]
     );
+    // New users can reach this screen before the background task completes.
+    // Rebuild once when the list is empty so the UI is never stuck blank.
+    if (rows.length === 0) {
+      await reconciler.reconcileUserReminders(req.session.userId);
+      [rows] = await pool.query(
+        `SELECT * FROM user_reminders
+         WHERE user_id = ? AND status != 'CANCELLED'
+         ORDER BY scheduled_at ASC, COALESCE(application_end, event_date) ASC`,
+        [req.session.userId]
+      );
+    }
     res.json({ reminders: rows });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });

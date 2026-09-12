@@ -280,6 +280,23 @@ html,body{
 .rem-badge.urgent{background:rgba(232,96,28,0.15);color:var(--coral);border:1px solid rgba(232,96,28,0.3)}
 .rem-badge.norm{background:rgba(79,195,247,0.1);color:var(--ice);border:1px solid rgba(79,195,247,0.2)}
 
+/* CALENDAR */
+.calendar-shell{background:var(--well);border:1px solid var(--line);border-radius:var(--r2);padding:14px;margin-bottom:14px}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.calendar-title{font-family:var(--fd);font-size:16px;font-weight:700}
+.calendar-arrow{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--deep);color:var(--snow);font-size:18px;cursor:pointer}
+.calendar-week,.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.calendar-week{margin-bottom:7px}
+.calendar-week span{text-align:center;font-size:10px;font-weight:700;color:var(--fog);text-transform:uppercase}
+.calendar-day{min-height:42px;padding:5px 2px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--snow);font-family:var(--fb);font-size:12px;cursor:pointer;position:relative}
+.calendar-day:hover{background:rgba(255,255,255,0.06)}
+.calendar-day.empty{cursor:default}
+.calendar-day.today{border-color:rgba(245,166,35,0.55);color:var(--amber)}
+.calendar-day.has-reminder{background:rgba(0,196,140,0.13);color:var(--jade2)}
+.calendar-day.selected{background:var(--amber-g);color:var(--pit);font-weight:800}
+.calendar-count{display:block;width:5px;height:5px;margin:4px auto 0;border-radius:50%;background:currentColor}
+.calendar-agenda-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--fog);margin:2px 0 9px}
+
 /* ════ BOTTOM NAV ════ */
 nav#nav{
   position:absolute;bottom:0;left:0;right:0;height:70px;
@@ -773,8 +790,8 @@ nav#nav.on{display:flex}
 ══════════════════════════════════════════════════════════ -->
 <div class="page" id="calPage">
   <div class="scrl">
-    <div class="sec-hd" style="margin-top:0"><div class="sec-ht">Deadline Timeline</div></div>
-    <p style="font-size:12px;color:var(--ash);margin-bottom:16px">Chronological timeline of upcoming opportunity deadlines.</p>
+    <div class="sec-hd" style="margin-top:0"><div class="sec-ht">Reminder Calendar</div></div>
+    <p style="font-size:12px;color:var(--ash);margin-bottom:16px">Select a highlighted date to see every reminder scheduled for that day.</p>
     <div id="calList">
       <div class="st-load"><div class="spin"></div>Loading timeline…</div>
     </div>
@@ -842,7 +859,7 @@ nav#nav.on{display:flex}
     <button class="nb on" data-page="dashPage" onclick="navTo('dashPage')"><span class="nb-icon">⚡</span><span class="nb-lbl">Home</span></button>
     <button class="nb" data-page="oppPage" onclick="navTo('oppPage')"><span class="nb-icon">🎯</span><span class="nb-lbl">Opps</span></button>
     <button class="nb" data-page="remPage" onclick="navTo('remPage')"><span class="nb-icon">📋</span><span class="nb-lbl">Reminders</span></button>
-    <button class="nb" data-page="calPage" onclick="navTo('calPage')"><span class="nb-icon">📅</span><span class="nb-lbl">Timeline</span></button>
+    <button class="nb" data-page="calPage" onclick="navTo('calPage')"><span class="nb-icon">📅</span><span class="nb-lbl">Calendar</span></button>
     <button class="nb" data-page="profPage" onclick="navTo('profPage')"><span class="nb-icon">👤</span><span class="nb-lbl">Profile</span></button>
   </div>
 </nav>
@@ -1008,6 +1025,8 @@ nav#nav.on{display:flex}
 <script src="push-notification-client.js"></script>
 <script>
 let uData = null, allOpps = [], allRem = [], currentCat = 'all';
+let calendarCursor = new Date();
+let selectedCalendarDate = null;
 let obCustomInterests = [];
 let obSkillsList = [];
 let editCustomInterests = [];
@@ -1223,6 +1242,7 @@ async function loadState(){
     ]);
 
     if(!pRes.ok) throw new Error('unauthorized');
+    if(!oRes.ok || !rRes.ok) throw new Error('Unable to load opportunities or reminders');
     uData = await pRes.json();
 
     if(uData.needsOnboarding) {
@@ -1235,6 +1255,13 @@ async function loadState(){
 
     allOpps = oData.opportunities || [];
     allRem = rData.reminders || [];
+    const nextReminder = allRem
+      .filter(r => r.scheduled_at && r.status !== 'CANCELLED')
+      .sort((a, b) => String(a.scheduled_at).localeCompare(String(b.scheduled_at)))[0];
+    if (!selectedCalendarDate && nextReminder) {
+      selectedCalendarDate = String(nextReminder.scheduled_at).slice(0, 10);
+      calendarCursor = new Date(`${selectedCalendarDate}T00:00:00`);
+    }
 
     renderDashboard();
     renderOpportunities();
@@ -1387,7 +1414,87 @@ function renderReminders(){
 }
 
 /* ════ RENDER PROFILE ════ */
+function reminderDateKey(value){
+  return value ? String(value).slice(0, 10) : null;
+}
+
+function formatReminderDate(value){
+  const key = reminderDateKey(value);
+  if(!key) return 'Not set';
+  return new Date(`${key}T00:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function formatReminderStage(stage){
+  if(stage === 'DEADLINE_DAY') return 'Deadline day';
+  return stage ? stage.replace('_DAYS_BEFORE', ' days before').replace('_', ' ') : 'Scheduled alert';
+}
+
+function localDateKey(date){
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function changeCalendarMonth(offset){
+  calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + offset, 1);
+  renderCalendar(allRem.filter(r => r.status !== 'CANCELLED'));
+}
+
+function selectCalendarDate(dateKey){
+  selectedCalendarDate = dateKey;
+  renderCalendar(allRem.filter(r => r.status !== 'CANCELLED'));
+}
+
+function renderCalendar(reminders){
+  const calEl = document.getElementById('calList');
+  const scheduled = reminders.filter(r => reminderDateKey(r.scheduled_at));
+  if(!scheduled.length){
+    calEl.innerHTML = `<div class="st-load">Your reminder dates will appear here as soon as matching opportunities are available.</div>`;
+    return;
+  }
+
+  const grouped = scheduled.reduce((map, reminder) => {
+    const key = reminderDateKey(reminder.scheduled_at);
+    (map[key] ||= []).push(reminder);
+    return map;
+  }, {});
+  const year = calendarCursor.getFullYear();
+  const month = calendarCursor.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayKey = localDateKey(new Date());
+  const currentMonthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+  if(!selectedCalendarDate || !selectedCalendarDate.startsWith(currentMonthKey)) {
+    selectedCalendarDate = Object.keys(grouped).find(key => key.startsWith(currentMonthKey)) || `${currentMonthKey}-01`;
+  }
+
+  const emptyDays = Array.from({ length: firstDay }, () => '<div class="calendar-day empty" aria-hidden="true"></div>');
+  const dayButtons = Array.from({ length: daysInMonth }, (_, index) => {
+    const day = index + 1;
+    const key = `${currentMonthKey}-${String(day).padStart(2, '0')}`;
+    const count = grouped[key]?.length || 0;
+    const classes = ['calendar-day'];
+    if(key === todayKey) classes.push('today');
+    if(count) classes.push('has-reminder');
+    if(key === selectedCalendarDate) classes.push('selected');
+    return `<button type="button" class="${classes.join(' ')}" onclick="selectCalendarDate('${key}')" aria-label="${formatReminderDate(key)}${count ? `, ${count} reminder${count === 1 ? '' : 's'}` : ''}">${day}${count ? '<span class="calendar-count" aria-hidden="true"></span>' : ''}</button>`;
+  });
+  const agenda = grouped[selectedCalendarDate] || [];
+  calEl.innerHTML = `
+    <section class="calendar-shell" aria-label="Reminder calendar">
+      <div class="calendar-head">
+        <button type="button" class="calendar-arrow" onclick="changeCalendarMonth(-1)" aria-label="Previous month">‹</button>
+        <div class="calendar-title">${calendarCursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</div>
+        <button type="button" class="calendar-arrow" onclick="changeCalendarMonth(1)" aria-label="Next month">›</button>
+      </div>
+      <div class="calendar-week"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+      <div class="calendar-grid">${emptyDays.join('')}${dayButtons.join('')}</div>
+    </section>
+    <div class="calendar-agenda-title">${formatReminderDate(selectedCalendarDate)}</div>
+    ${agenda.length ? agenda.map(r => `<div class="rem-item"><div class="rem-main"><div class="rem-t">${r.short_note}</div><div class="rem-s">${formatReminderStage(r.reminder_stage)} · Deadline: ${formatReminderDate(r.application_end || r.event_date)}</div></div><span class="rem-badge ${r.reminder_stage === 'DEADLINE_DAY' ? 'urgent' : 'norm'}">${r.status || 'PENDING'}</span></div>`).join('') : '<div class="st-load">No reminder is scheduled for this date.</div>'}
+  `;
+}
+
 function renderProfile(){
+  renderCalendar(allRem.filter(r => r.status !== 'CANCELLED'));
   if(!uData) return;
   document.getElementById('puName').textContent = uData.username;
   document.getElementById('puEmail').textContent = uData.email;

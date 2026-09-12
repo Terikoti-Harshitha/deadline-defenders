@@ -2,10 +2,13 @@
 // Architecture: Staged Intervals (30d, 14d, 7d, 3d, 1d, 0d), Status Tracking & Cancellation
 // Inspired by: CASEO (Context-Aware Urgency & Prioritized Notification)
 
+const EligibilityMatcher = require('./eligibility_matcher');
+
 class ReminderReconciler {
   constructor(pool, sendPushNotificationFn) {
     this.pool = pool;
     this.sendPush = sendPushNotificationFn;
+    this.eligibilityMatcher = new EligibilityMatcher();
   }
 
   // Calculate days remaining until date
@@ -28,6 +31,11 @@ class ReminderReconciler {
         actionRows.filter(a => ['applied', 'completed', 'dismissed'].includes(a.status)).map(a => a.opportunity_id)
       );
 
+      const [profileRows] = await this.pool.query('SELECT * FROM user_profiles WHERE user_id = ?', [userId]);
+      const [interestRows] = await this.pool.query('SELECT interest FROM user_interests WHERE user_id = ?', [userId]);
+      const profile = profileRows[0] || {};
+      const interests = interestRows.map(row => row.interest);
+
       // 2. Cancel any pending reminders for stopped opportunities
       if (stoppedOppIds.size > 0) {
         await this.pool.query(
@@ -43,12 +51,31 @@ class ReminderReconciler {
         `SELECT o.* FROM opportunities o
          WHERE o.deadline IS NOT NULL AND o.deadline >= CURDATE() AND o.is_active = 1`
       );
+      const eligibleOpps = opps.filter(opp =>
+        this.eligibilityMatcher.evaluateEligibility(opp, profile, interests).isEligible && !stoppedOppIds.has(opp.id)
+      );
+      const eligibleIds = eligibleOpps.map(opp => opp.id);
+
+      // A profile change must immediately stop alerts for opportunities the user
+      // no longer qualifies for; otherwise outdated reminders linger forever.
+      if (eligibleIds.length > 0) {
+        await this.pool.query(
+          `UPDATE user_reminders SET status = 'CANCELLED'
+           WHERE user_id = ? AND status = 'PENDING' AND opportunity_id NOT IN (?)`,
+          [userId, eligibleIds]
+        );
+      } else {
+        await this.pool.query(
+          `UPDATE user_reminders SET status = 'CANCELLED'
+           WHERE user_id = ? AND status = 'PENDING'`,
+          [userId]
+        );
+      }
 
       const stagedIntervals = [30, 14, 7, 3, 1, 0];
       let newScheduledCount = 0;
 
-      for (const opp of opps) {
-        if (stoppedOppIds.has(opp.id)) continue;
+      for (const opp of eligibleOpps) {
 
         const days = this.daysUntil(opp.deadline);
         if (days === null || days < 0) continue;
