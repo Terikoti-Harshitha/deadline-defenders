@@ -109,7 +109,8 @@ function buildDbConfig() {
     queueLimit: 0,
     connectTimeout: 20000,
     enableKeepAlive: true,
-    keepAliveInitialDelay: 0
+    keepAliveInitialDelay: 0,
+    dateStrings: true
   };
 
   const useSsl = process.env.DB_SSL === 'true' ||
@@ -816,17 +817,22 @@ app.get('/api/user/profile', requireLogin, async (req, res) => {
     if (hasEdu && hasCity && hasInterests) confidence = 'high';
     else if (hasInterests && (hasEdu || hasCity)) confidence = 'partial';
 
+    const user = userRows[0];
     res.json({
-      ...userRows[0],
+      user,
+      ...user,
       profile,
+      education_level: profile.education_level || '',
+      qualification: profile.qualification || '',
+      branch: profile.branch || '',
+      city: profile.city || profile.state_location || '',
       interests,
       oppTypes,
       education: profile.education_level || profile.qualification || '',
-      city: profile.city || profile.state_location || '',
       completeness,
       confidence,
       reminderPrefs,
-      needsOnboarding: !Boolean(userRows[0].onboarding_completed)
+      needsOnboarding: !Boolean(user.onboarding_completed)
     });
   } catch (err) {
     console.error('Fetch profile error:', err);
@@ -854,8 +860,10 @@ app.post('/api/user/profile', requireLogin, async (req, res) => {
     reminder_prefs
   } = req.body;
 
-  const eduVal = education || education_level || null;
-  const cityVal = city || state_location || null;
+  const eduVal = education_level !== undefined ? education_level : (education || null);
+  const qualVal = qualification !== undefined ? qualification : (eduVal || null);
+  const branchVal = branch !== undefined ? branch : null;
+  const cityVal = city !== undefined ? city : (state_location || null);
   const typesVal = oppTypes ? (Array.isArray(oppTypes) ? JSON.stringify(oppTypes) : String(oppTypes))
     : opp_types ? (Array.isArray(opp_types) ? JSON.stringify(opp_types) : String(opp_types)) : null;
 
@@ -868,13 +876,13 @@ app.post('/api/user/profile', requireLogin, async (req, res) => {
        (user_id, education_level, qualification, branch, study_status, graduation_year, state_location, city, age, gender, skills, career_goal, opp_types, reminder_prefs)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
-         education_level = COALESCE(VALUES(education_level), education_level),
-         qualification = COALESCE(VALUES(qualification), qualification),
-         branch = COALESCE(VALUES(branch), branch),
+         education_level = VALUES(education_level),
+         qualification = VALUES(qualification),
+         branch = VALUES(branch),
          study_status = COALESCE(VALUES(study_status), study_status),
          graduation_year = COALESCE(VALUES(graduation_year), graduation_year),
-         state_location = COALESCE(VALUES(state_location), state_location),
-         city = COALESCE(VALUES(city), city),
+         state_location = VALUES(state_location),
+         city = VALUES(city),
          age = COALESCE(VALUES(age), age),
          gender = COALESCE(VALUES(gender), gender),
          skills = COALESCE(VALUES(skills), skills),
@@ -884,8 +892,8 @@ app.post('/api/user/profile', requireLogin, async (req, res) => {
       [
         req.session.userId,
         eduVal,
-        qualification || eduVal,
-        branch || null,
+        qualVal,
+        branchVal,
         study_status || null,
         graduation_year ? parseInt(graduation_year, 10) : null,
         cityVal,
@@ -898,6 +906,8 @@ app.post('/api/user/profile', requireLogin, async (req, res) => {
         reminder_prefs ? JSON.stringify(reminder_prefs) : null
       ]
     );
+
+    await conn.query('UPDATE users SET onboarding_completed = 1 WHERE id = ?', [req.session.userId]);
 
     if (Array.isArray(interests)) {
       await conn.query('DELETE FROM user_interests WHERE user_id = ?', [req.session.userId]);
@@ -1292,6 +1302,10 @@ app.post('/push/test', requireLogin, async (req, res) => {
 // ── HEALTH & ROOT ROUTES ─────────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', uptime: process.uptime(), timestamp: new Date().toISOString() });
+});
+
+app.get('/dashboard.html', (req, res) => {
+  res.redirect('/');
 });
 
 app.get('/', (req, res) => {

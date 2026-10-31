@@ -138,10 +138,25 @@ class OpportunityPipeline {
   // Seed verified multi-tier opportunities (10th, 12th, Diploma, UG, PG, Scholarships, Hackathons)
   async seedInitialOpportunitiesIfEmpty() {
     try {
+      // Mark past expired opportunities as inactive
+      await this.pool.query('UPDATE opportunities SET is_active = 0 WHERE deadline < CURDATE()');
+
       const [rows] = await this.pool.query(
         'SELECT COUNT(*) as cnt FROM opportunities WHERE is_active = 1 AND deadline >= CURDATE()'
       );
-      if (rows[0].cnt >= 8) return;
+      if (rows[0].cnt >= 10) return;
+
+      const getFutureDate = (days) => {
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        return d.toISOString().split('T')[0];
+      };
+
+      const getFutureDateLabel = (days) => {
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      };
 
       const now = new Date();
       const year = now.getFullYear();
@@ -150,11 +165,10 @@ class OpportunityPipeline {
       const seedOpps = [
         // 10th Level
         {
-          title: `National Talent Search & Science Olympiad (SOF) ${year}`,
+          title: `National Talent Search & Science Olympiad (SOF)`,
           organization: 'Science Olympiad Foundation',
           category: 'Scholarship',
-          deadline: `${year}-11-30`,
-          deadline_source_text: `Registration closes on 30 November ${year} for class 10 students across India.`,
+          days: 20,
           qualification_req: '10th Standard',
           branch_req: 'Science & Technology',
           graduation_year_req: 'Any',
@@ -166,11 +180,10 @@ class OpportunityPipeline {
           raw_evidence: 'Official SOF announcement for secondary school students.'
         },
         {
-          title: `Indian Navy / Coast Guard Matric Recruit (MR) ${year}`,
+          title: `Indian Navy Matric Recruit (MR) Apprenticeship`,
           organization: 'Indian Navy',
           category: 'Government Exam',
-          deadline: `${year}-10-25`,
-          deadline_source_text: `Application submission last date is 25 October ${year}. Required qualification: 10th Pass.`,
+          days: 28,
           qualification_req: '10th Standard',
           branch_req: 'General',
           graduation_year_req: 'Any',
@@ -183,11 +196,10 @@ class OpportunityPipeline {
         },
         // 12th Level
         {
-          title: `UPSC National Defence Academy (NDA & NA) Examination ${year}`,
+          title: `UPSC National Defence Academy (NDA & NA) Examination`,
           organization: 'UPSC',
           category: 'Government Exam',
-          deadline: `${year}-10-15`,
-          deadline_source_text: `Online applications can be filled up to 15th October ${year} till 6.00 PM.`,
+          days: 7, // Urgent closing soon
           qualification_req: '12th / Intermediate',
           branch_req: 'MPC / Any Stream',
           graduation_year_req: 'Any',
@@ -199,11 +211,10 @@ class OpportunityPipeline {
           raw_evidence: 'Union Public Service Commission official notification.'
         },
         {
-          title: `SSC Combined Higher Secondary Level (CHSL) ${year}`,
+          title: `SSC Combined Higher Secondary Level (CHSL) Examination`,
           organization: 'SSC',
           category: 'Government Exam',
-          deadline: `${year}-11-10`,
-          deadline_source_text: `Last date and time for receipt of online applications is 10-11-${year}.`,
+          days: 35,
           qualification_req: '12th / Intermediate',
           branch_req: 'Any Stream',
           graduation_year_req: 'Any',
@@ -216,11 +227,10 @@ class OpportunityPipeline {
         },
         // Diploma / ITI Level
         {
-          title: `RRB Assistant Loco Pilot & Technician Recruitment ${year}`,
+          title: `RRB Assistant Loco Pilot & Technician Recruitment`,
           organization: 'Railway Recruitment Boards (RRB)',
           category: 'Government Job',
-          deadline: `${year}-10-31`,
-          deadline_source_text: `Closing date for submission of application is 31.10.${year}. Qualification: Matric + ITI or Diploma.`,
+          days: 10,
           qualification_req: 'Diploma / ITI',
           branch_req: 'Mechanical, Electrical, Electronics',
           graduation_year_req: 'Any',
@@ -233,11 +243,10 @@ class OpportunityPipeline {
         },
         // Undergraduate & Graduate Level
         {
-          title: `AI Research Internship ${year}`,
+          title: `AI & Robotics Research Internship Program`,
           organization: 'National Innovation Lab',
           category: 'Internship',
-          deadline: `${year}-09-25`,
-          deadline_source_text: `Applications must be submitted on or before 25 September ${year} through the official portal.`,
+          days: 4, // Urgent closing soon
           qualification_req: 'Undergraduate / B.Tech',
           branch_req: 'AI, Data Science, CSE',
           graduation_year_req: 'Any',
@@ -249,11 +258,10 @@ class OpportunityPipeline {
           raw_evidence: 'National Innovation Lab official research internship portal.'
         },
         {
-          title: `SSC CGL — Combined Graduate Level ${year}`,
+          title: `SSC CGL — Combined Graduate Level Examination`,
           organization: 'Staff Selection Commission',
           category: 'Government Exam',
-          deadline: `${year}-09-14`,
-          deadline_source_text: `Online applications will be closed on 14.09.${year}, no request for extension will be entertained.`,
+          days: 16,
           qualification_req: 'Any Graduate',
           branch_req: 'Any Stream',
           graduation_year_req: 'Any',
@@ -265,11 +273,10 @@ class OpportunityPipeline {
           raw_evidence: 'Staff Selection Commission official notification.'
         },
         {
-          title: `Smart India Hackathon (SIH) ${year} — Grand Finale Challenge`,
+          title: `Smart India Hackathon (SIH) Grand Finale Challenge`,
           organization: 'Ministry of Education (AICTE)',
           category: 'Hackathon',
-          deadline: `${year}-10-18`,
-          deadline_source_text: `Idea submissions and team registrations open till 18 October ${year}.`,
+          days: 18,
           qualification_req: 'Any Student',
           branch_req: 'Open to All Streams',
           graduation_year_req: 'Any',
@@ -281,11 +288,10 @@ class OpportunityPipeline {
           raw_evidence: 'AICTE Innovation Cell SIH official portal announcement.'
         },
         {
-          title: `Prime Minister's National Internship Scheme ${year}`,
+          title: `Prime Minister's National Internship Scheme`,
           organization: 'Ministry of Corporate Affairs',
           category: 'Internship',
-          deadline: `${year}-11-15`,
-          deadline_source_text: `Portal registration closes on 15 November ${year} for internships in top 500 companies.`,
+          days: 24,
           qualification_req: 'Any Graduate / Diploma',
           branch_req: 'Any Branch',
           graduation_year_req: 'Any',
@@ -297,11 +303,10 @@ class OpportunityPipeline {
           raw_evidence: 'MCA official portal guidelines for PM Internship Scheme.'
         },
         {
-          title: `Google Cloud Study Jams & Certification ${year}`,
+          title: `Google Cloud Study Jams & Skill Badge Certification`,
           organization: 'Google Developer Groups',
           category: 'Certification',
-          deadline: `${year}-11-05`,
-          deadline_source_text: `All facilitator-led labs must be finished before 5 November ${year} to earn the badge.`,
+          days: 45,
           qualification_req: 'Open to all',
           branch_req: 'Any Stream',
           graduation_year_req: 'Any',
@@ -313,11 +318,10 @@ class OpportunityPipeline {
           raw_evidence: 'Google Developers community portal.'
         },
         {
-          title: `DST Inspire Fellowship ${year}`,
+          title: `DST Inspire Fellowship for Higher Research`,
           organization: 'Department of Science & Technology',
           category: 'Fellowship',
-          deadline: `${year}-10-01`,
-          deadline_source_text: `Fellowship applications for the ${year} cycle must be received on or before 1st October ${year}.`,
+          days: 52,
           qualification_req: 'Postgraduate / Ph.D.',
           branch_req: 'Basic & Applied Sciences',
           graduation_year_req: 'Any',
@@ -329,11 +333,10 @@ class OpportunityPipeline {
           raw_evidence: 'Department of Science and Technology portal.'
         },
         {
-          title: `National Scholarship Portal (NSP) Higher Education Merit Scheme`,
+          title: `National Scholarship Portal (NSP) Higher Education Scheme`,
           organization: 'Ministry of Education',
           category: 'Scholarship',
-          deadline: `${year}-12-15`,
-          deadline_source_text: `Applications for Central Sector Scheme of Scholarship open until 15 December ${year}.`,
+          days: 60,
           qualification_req: 'Open to All Students',
           branch_req: 'Any Stream',
           graduation_year_req: 'Any',
@@ -346,11 +349,10 @@ class OpportunityPipeline {
         },
         // Postgraduate Level
         {
-          title: `GATE ${nextYear} Graduate Aptitude Test in Engineering`,
+          title: `GATE Graduate Aptitude Test in Engineering ${nextYear}`,
           organization: 'GATE Committee (IIT)',
           category: 'Government Exam',
-          deadline: `${year}-10-12`,
-          deadline_source_text: `Closing date of extended online registration is 12 October ${year}.`,
+          days: 12,
           qualification_req: 'B.Tech / M.Tech / M.Sc / MCA',
           branch_req: 'Engineering & Sciences',
           graduation_year_req: 'Any',
@@ -364,23 +366,42 @@ class OpportunityPipeline {
       ];
 
       for (const opp of seedOpps) {
-        await this.pool.query(
-          `INSERT INTO opportunities
-           (title, organization, category, deadline, deadline_source_text, qualification_req, branch_req, graduation_year_req, location, application_url, source_url, trust_level, confidence, raw_evidence)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-           ON DUPLICATE KEY UPDATE
-             deadline = VALUES(deadline),
-             deadline_source_text = VALUES(deadline_source_text),
-             qualification_req = VALUES(qualification_req),
-             branch_req = VALUES(branch_req)`,
-          [
-            opp.title, opp.organization, opp.category, opp.deadline, opp.deadline_source_text,
-            opp.qualification_req, opp.branch_req, opp.graduation_year_req, opp.location,
-            opp.application_url, opp.source_url, opp.trust_level, opp.confidence, opp.raw_evidence
-          ]
+        const deadline = getFutureDate(opp.days);
+        const deadlineLabel = getFutureDateLabel(opp.days);
+        const deadlineSourceText = `Online application closing date is officially scheduled for ${deadlineLabel}.`;
+
+        const [existing] = await this.pool.query(
+          'SELECT id FROM opportunities WHERE organization = ? AND title = ? LIMIT 1',
+          [opp.organization, opp.title]
         );
+
+        if (existing.length > 0) {
+          await this.pool.query(
+            `UPDATE opportunities
+             SET deadline = ?, deadline_source_text = ?, qualification_req = ?, branch_req = ?,
+                 graduation_year_req = ?, location = ?, application_url = ?, source_url = ?,
+                 trust_level = ?, confidence = ?, raw_evidence = ?, is_active = 1
+             WHERE id = ?`,
+            [
+              deadline, deadlineSourceText, opp.qualification_req, opp.branch_req,
+              opp.graduation_year_req, opp.location, opp.application_url, opp.source_url,
+              opp.trust_level, opp.confidence, opp.raw_evidence, existing[0].id
+            ]
+          );
+        } else {
+          await this.pool.query(
+            `INSERT INTO opportunities
+             (title, organization, category, deadline, deadline_source_text, qualification_req, branch_req, graduation_year_req, location, application_url, source_url, trust_level, confidence, raw_evidence, is_active)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+            [
+              opp.title, opp.organization, opp.category, deadline, deadlineSourceText,
+              opp.qualification_req, opp.branch_req, opp.graduation_year_req, opp.location,
+              opp.application_url, opp.source_url, opp.trust_level, opp.confidence, opp.raw_evidence
+            ]
+          );
+        }
       }
-      console.log(`✅ Seeded ${seedOpps.length} diverse, multi-tier opportunities across all educational levels.`);
+      console.log(`✅ Seeded ${seedOpps.length} verified, multi-tier opportunities with active upcoming deadlines.`);
     } catch (err) {
       console.warn('⚠️  Opportunity seed warning:', err.message);
     }
@@ -481,7 +502,8 @@ class OpportunityPipeline {
         saved: isSaved,
         applied: isApplied,
         sourceUrl: opp.application_url || opp.source_url || '#',
-        userStatus: actionMap[opp.id] || 'unseen'
+        userStatus: actionMap[opp.id] || 'unseen',
+        reasons: opp.reasons || opp.matchReasons || []
       };
     });
   }

@@ -39,9 +39,27 @@ class Extractor {
     for (const pattern of deadlinePatterns) {
       const match = text.match(pattern);
       if (match) {
-        const rawDateStr = match[1];
-        // Parse with chrono-node
-        const parsed = chrono.parseDate(rawDateStr);
+        const rawDateStr = match[1].trim();
+        let parsed = null;
+
+        // Fast explicit DD/MM/YYYY or DD-MM-YYYY parsing (India standard)
+        const dmyMatch = rawDateStr.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
+        if (dmyMatch) {
+          const day = parseInt(dmyMatch[1], 10);
+          const month = parseInt(dmyMatch[2], 10) - 1;
+          let year = parseInt(dmyMatch[3], 10);
+          if (year < 100) year += 2000;
+          const candidate = new Date(year, month, day);
+          if (!isNaN(candidate.getTime()) && candidate.getDate() === day && candidate.getMonth() === month) {
+            parsed = candidate;
+          }
+        }
+
+        // Fallback to Chrono-Node
+        if (!parsed) {
+          parsed = chrono.parseDate(rawDateStr, new Date(), { forwardDate: true });
+        }
+
         if (parsed) {
           // Extract sentence as provenance evidence
           const matchIndex = text.indexOf(match[0]);

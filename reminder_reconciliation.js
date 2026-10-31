@@ -22,6 +22,14 @@ class ReminderReconciler {
   // Reconcile reminders for a user against active opportunities (Idempotent)
   async reconcileUserReminders(userId) {
     try {
+      // 0. Automatically mark overdue pending reminders as MISSED so old past deadlines do not linger
+      await this.pool.query(
+        `UPDATE user_reminders
+         SET status = 'MISSED'
+         WHERE user_id = ? AND status = 'PENDING' AND application_end < CURDATE()`,
+        [userId]
+      );
+
       // 1. Get dismissed, applied, or completed opportunity IDs
       const [actionRows] = await this.pool.query(
         'SELECT opportunity_id, status FROM user_opportunity_actions WHERE user_id = ?',
@@ -46,7 +54,7 @@ class ReminderReconciler {
         );
       }
 
-      // 3. Fetch active user opportunities
+      // 3. Fetch active future opportunities
       const [opps] = await this.pool.query(
         `SELECT o.* FROM opportunities o
          WHERE o.deadline IS NOT NULL AND o.deadline >= CURDATE() AND o.is_active = 1`
@@ -72,15 +80,25 @@ class ReminderReconciler {
         );
       }
 
+      // Read user reminder stage preferences (defaults: 14d, 7d, 3d, 1d, 0d)
+      let prefs = { 30: false, 14: true, 7: true, 3: true, 1: true, 0: true };
+      if (profile && profile.reminder_prefs) {
+        try {
+          prefs = typeof profile.reminder_prefs === 'string' ? JSON.parse(profile.reminder_prefs) : profile.reminder_prefs;
+        } catch (_) {}
+      }
+
       const stagedIntervals = [30, 14, 7, 3, 1, 0];
       let newScheduledCount = 0;
 
       for (const opp of eligibleOpps) {
-
         const days = this.daysUntil(opp.deadline);
         if (days === null || days < 0) continue;
 
         for (const interval of stagedIntervals) {
+          // Only schedule if user preference has this interval enabled
+          if (prefs[interval] === false) continue;
+
           if (days >= interval) {
             const scheduledDate = new Date(new Date(opp.deadline).getTime() - interval * 24 * 60 * 60 * 1000)
               .toISOString().split('T')[0];
@@ -89,17 +107,27 @@ class ReminderReconciler {
             const shortNote = `${opp.organization}: ${opp.title} (${interval === 0 ? 'Closes Today' : `${interval} days left`})`;
 
             try {
-              const [ins] = await this.pool.query(
-                `INSERT IGNORE INTO user_reminders
-                 (user_id, opportunity_id, interest, type, application_end, event_date, location, short_note, source, confidence, reminder_stage, status, scheduled_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?)`,
-                [
-                  userId, opp.id, opp.category, opp.category, opp.deadline, opp.event_date,
-                  opp.location || 'India', shortNote.substring(0, 255), opp.source_url, opp.confidence,
-                  reminderStage, scheduledDate
-                ]
+              // Deduplicate: check if this user already has an alert for this opportunity & stage
+              const [exists] = await this.pool.query(
+                `SELECT id FROM user_reminders
+                 WHERE user_id = ? AND opportunity_id = ? AND reminder_stage = ?
+                 LIMIT 1`,
+                [userId, opp.id, reminderStage]
               );
-              if (ins.affectedRows > 0) newScheduledCount++;
+
+              if (exists.length === 0) {
+                const [ins] = await this.pool.query(
+                  `INSERT INTO user_reminders
+                   (user_id, opportunity_id, interest, type, application_end, event_date, location, short_note, source, confidence, reminder_stage, status, scheduled_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?)`,
+                  [
+                    userId, opp.id, opp.category, opp.category, opp.deadline, opp.event_date,
+                    opp.location || 'India', shortNote.substring(0, 255), opp.source_url, opp.confidence,
+                    reminderStage, scheduledDate
+                  ]
+                );
+                if (ins.affectedRows > 0) newScheduledCount++;
+              }
             } catch (_) {}
           }
         }

@@ -1252,6 +1252,11 @@
         <button class="btn-main" onclick="submitOnboarding()" style="margin-top:18px;">
           Continue to Radar →
         </button>
+        <div style="text-align:center;margin-top:12px;">
+          <a href="javascript:void(0)" onclick="skipOnboarding()" style="color:var(--ash);font-size:12px;text-decoration:underline;">
+            Skip for now (I will fill this later)
+          </a>
+        </div>
       </div>
     </div>
 
@@ -1365,22 +1370,22 @@
         }
         const data = await res.json();
         userState = {
-          username: data.user?.username || 'Student',
-          email: data.user?.email || '',
-          education_level: data.user?.education_level || 'Undergraduate',
-          qualification: data.user?.qualification || '',
-          branch: data.user?.branch || '',
-          city: data.user?.city || '',
+          username: data.user?.username || data.username || 'Student',
+          email: data.user?.email || data.email || '',
+          education_level: data.profile?.education_level || data.education_level || data.education || 'Undergraduate',
+          qualification: data.profile?.qualification || data.qualification || '',
+          branch: data.profile?.branch || data.branch || '',
+          city: data.profile?.city || data.city || '',
           interests: data.interests || []
         };
 
+        renderUserProfile();
+        await loadOpportunities();
+        await loadNews();
+        renderCalendar();
+
         if (data.needsOnboarding) {
           openOnboardingModal();
-        } else {
-          renderUserProfile();
-          await loadOpportunities();
-          await loadNews();
-          renderCalendar();
         }
       } catch (err) {
         console.error('Initialization error:', err);
@@ -1448,7 +1453,7 @@
       }
 
       container.innerHTML = urgent.map(o => `
-        <div class="urgent-card" onclick="openEvidenceModal(${o.id})">
+        <div class="urgent-card" onclick="openEvidenceModal('${o.id}')">
           <div class="urg-badge">
             <i data-lucide="clock" style="width:12px;height:12px;"></i>
             ${o.daysLeft === 0 ? 'CLOSING TODAY' : o.daysLeft + ' DAYS LEFT'}
@@ -1464,8 +1469,9 @@
       lucide.createIcons();
     }
 
-    function renderOpportunitiesFeed(list) {
-      const container = document.getElementById('homeOppList');
+    function renderOpportunitiesFeed(list, containerId = 'homeOppList') {
+      const container = document.getElementById(containerId);
+      if (!container) return;
       if (!list.length) {
         container.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px 0;">No opportunities found for your criteria. Try adding more interests in Profile.</div>';
         return;
@@ -1484,7 +1490,7 @@
         else if (cat.includes('hack')) tagClass = 'tag tag-hack';
 
         return `
-          <div class="opp-card" onclick="openEvidenceModal(${o.id})">
+          <div class="opp-card" onclick="openEvidenceModal('${o.id}')">
             <div class="opp-header">
               <div class="opp-main-info">
                 <div class="opp-tags">
@@ -1519,11 +1525,11 @@
                 ${o.daysLeft !== undefined ? (o.daysLeft === 0 ? 'Today' : o.daysLeft + ' days left') : o.deadline}
               </div>
               <div class="opp-actions">
-                <button class="btn-act ${o.applied ? 'applied' : ''}" onclick="toggleApply(${o.id}, this)">
+                <button class="btn-act ${o.applied ? 'applied' : ''}" onclick="toggleApply('${o.id}', this)">
                   <i data-lucide="${o.applied ? 'check-circle-2' : 'send'}" style="width:12px;height:12px;"></i>
                   ${o.applied ? 'Applied' : 'Mark Applied'}
                 </button>
-                <button class="btn-act ${o.saved ? 'applied' : ''}" onclick="toggleSave(${o.id}, this)">
+                <button class="btn-act ${o.saved ? 'applied' : ''}" onclick="toggleSave('${o.id}', this)">
                   <i data-lucide="bookmark" style="width:12px;height:12px;"></i>
                   ${o.saved ? 'Saved' : 'Save'}
                 </button>
@@ -1601,10 +1607,15 @@
       const today = new Date();
       for (let d = 1; d <= daysInMonth; d++) {
         const isToday = (today.getFullYear() === year && today.getMonth() === month && today.getDate() === d);
-        // Check if deadline exists on this day
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const hasOpp = opportunitiesList.some(o => o.deadline === dateStr);
-        const isUrgent = opportunitiesList.some(o => o.deadline === dateStr && o.daysLeft <= 3);
+        const hasOpp = opportunitiesList.some(o => {
+          if (!o.deadline) return false;
+          return String(o.deadline).split('T')[0] === dateStr;
+        });
+        const isUrgent = opportunitiesList.some(o => {
+          if (!o.deadline) return false;
+          return String(o.deadline).split('T')[0] === dateStr && o.daysLeft <= 3;
+        });
 
         let cls = 'cal-date';
         if (isToday) cls += ' today';
@@ -1625,9 +1636,8 @@
     }
 
     function renderCalendarDeadlines() {
-      const container = document.getElementById('calendarDeadlinesList');
       const sorted = [...opportunitiesList].sort((a,b) => (a.daysLeft || 999) - (b.daysLeft || 999));
-      renderOpportunitiesFeed(sorted);
+      renderOpportunitiesFeed(sorted, 'calendarDeadlinesList');
     }
 
     // ── PROFILE & SETTINGS ───────────────────────────────────────────
@@ -1647,10 +1657,10 @@
 
     function renderProfileInterests() {
       const container = document.getElementById('profileInterestsList');
-      container.innerHTML = userState.interests.map(i => `
+      container.innerHTML = userState.interests.map((i, idx) => `
         <div class="tag-chip active">
           ${escapeHtml(i)}
-          <span class="tag-remove" onclick="removeInterest('${escapeHtml(i)}')">×</span>
+          <span class="tag-remove" onclick="removeInterest(${idx})">×</span>
         </div>
       `).join('');
     }
@@ -1665,8 +1675,12 @@
       }
     }
 
-    function removeInterest(item) {
-      userState.interests = userState.interests.filter(i => i !== item);
+    function removeInterest(target) {
+      if (typeof target === 'number') {
+        userState.interests.splice(target, 1);
+      } else {
+        userState.interests = userState.interests.filter(i => i !== target);
+      }
       renderProfileInterests();
     }
 
@@ -1755,8 +1769,26 @@
       }
     }
 
+    async function skipOnboarding() {
+      closeModal('onboardingModal');
+      try {
+        await fetch('/api/user/onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ interests: ['AI & Robotics', 'Government Exams', 'Scholarships'], education_level: '', city: '' })
+        });
+      } catch (_) {}
+      userState.interests = userState.interests.length ? userState.interests : ['AI & Robotics', 'Government Exams', 'Scholarships'];
+      renderUserProfile();
+      await loadOpportunities();
+      await loadNews();
+      renderCalendar();
+      showToast('Welcome to Deadline Defender! 🚀');
+    }
+
     function openEvidenceModal(oppId) {
-      const opp = opportunitiesList.find(o => o.id === oppId);
+      const opp = opportunitiesList.find(o => String(o.id) === String(oppId));
       if (!opp) return;
 
       document.getElementById('evTitle').textContent = opp.title;
@@ -1791,7 +1823,7 @@
         container.innerHTML = '<div style="color:var(--ash);text-align:center;padding:20px;">No matches found.</div>';
         return;
       }
-      renderOpportunitiesFeed(matches);
+      renderOpportunitiesFeed(matches, 'searchResultsList');
     }
 
     async function openNotificationsModal() {
